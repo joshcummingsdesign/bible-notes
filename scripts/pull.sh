@@ -21,12 +21,12 @@ printf "\nSuccess: Moved code.\n\n"
 cd ../
 
 printf "==> Pulling database...\n\n"
+rm -rf db.sql
 lando pull-db
 printf "Success: Pulled database.\n\n"
 
 printf "==> Importing database...\n\n"
 lando wp db import db.sql
-rm -rf db.sql
 
 printf "\n==> Running search replace...\n\n"
 lando wp search-replace $PROD_URL $LOCAL_URL --all-tables
