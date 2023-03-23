@@ -1,0 +1,24 @@
+name: bible-notes
+recipe: wordpress
+config:
+    php: '7.4'
+    via: apache:2.4
+    webroot: .
+services:
+    database:
+        type: mariadb:10.4
+        portforward: true
+        creds:
+            user: wordpress
+            password: wordpress
+            database: wordpress
+    mailhog:
+        type: mailhog
+        portforward: true
+        hogfrom:
+            - appserver
+tooling:
+    pull-db:
+        service: appserver
+        description: Export database from remote.
+        cmd: ./scripts/pull-db.sh

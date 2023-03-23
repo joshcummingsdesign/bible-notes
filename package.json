@@ -1,0 +1,11 @@
+{
+    "name": "bible-notes",
+    "private": true,
+    "scripts": {
+        "pull": "scripty",
+        "push": "scripty"
+    },
+    "devDependencies": {
+        "scripty": "^2.0.0"
+    }
+}
