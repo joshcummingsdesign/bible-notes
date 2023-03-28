@@ -4,7 +4,7 @@
 
 | Dependency                    | Version |
 |-------------------------------|---------|
-| [Node.js](https://nodejs.org) | ^19.4.0 |
+| [Node.js](https://nodejs.org) | ^17.9.1 |
 | [Lando](https://lando.dev/)   | ^3.6.0  |
 
 ## Getting Started
