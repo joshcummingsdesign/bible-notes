@@ -10,7 +10,10 @@ import FontPairModal from './font-pair';
 import map from 'lodash/map';
 import { __ } from '@wordpress/i18n';
 import { ButtonGroup, Popover, Dashicon, Toolbar, Tooltip, Button, TextControl, TabPanel, RangeControl, SelectControl } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
+/**
+ * WordPress dependencies
+ */
+import { createRef, Component, Fragment } from '@wordpress/element';
 class TypographyComponent extends Component {
 	constructor() {
 		super( ...arguments );
@@ -149,6 +152,7 @@ class TypographyComponent extends Component {
 			customFontVars: ( kadenceCustomizerControlsData.cfontvars ? kadenceCustomizerControlsData.cfontvars : [] ),
 		};
 		this.linkRemoteUpdate();
+		this.anchorNodeRef = createRef();
 	}
 	componentDidMount() {
 		let base_font;
@@ -713,7 +717,7 @@ class TypographyComponent extends Component {
 			events: false,
 		};
 		return (
-			<div className="kadence-control-field kadence-typography-control-wrap">
+			<div ref={ this.anchorNodeRef } className="kadence-control-field kadence-typography-control-wrap">
 				<div className="kadence-typography-control">
 					{ controlLabel }
 					<div className="kadence-typography-controls">
@@ -772,6 +776,7 @@ class TypographyComponent extends Component {
 								usePalette={ true }
 								onChangeComplete={ ( color, isPalette ) => this.onColorChange( color, isPalette ) }
 								customizer={ this.props.customizer }
+								controlRef={ this.anchorNodeRef }
 							/>
 						) }
 						{ ( 'all' === this.controlParams.options || 'family' === this.controlParams.options || 'no-color' === this.controlParams.options ) && (

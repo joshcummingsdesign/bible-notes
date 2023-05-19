@@ -1,6 +1,8 @@
 <?php
 /**
  * Load scripts for the admin area.
+ *
+ * @package WPCode
  */
 
 add_action( 'admin_enqueue_scripts', 'wpcode_admin_scripts' );
@@ -52,6 +54,8 @@ function wpcode_admin_scripts() {
 
 /**
  * Scripts needed outside the WPCode admin area (e.g. metabox).
+ *
+ * @param string $version The version of the scripts to load. Default is 'lite'.
  *
  * @return void
  */

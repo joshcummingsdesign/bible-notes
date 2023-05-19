@@ -81,6 +81,20 @@ class WPCode_Library {
 	protected $snippets_count;
 
 	/**
+	 * Snippets grouped by library username.
+	 *
+	 * @var array
+	 */
+	protected $snippets_by_username = array();
+
+	/**
+	 * Array of library usernames.
+	 *
+	 * @var array
+	 */
+	protected $library_usernames = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -179,6 +193,8 @@ class WPCode_Library {
 			$this->data = $this->get_from_server();
 		}
 
+		$this->maybe_add_usernames_data();
+
 		return $this->data;
 	}
 
@@ -211,7 +227,7 @@ class WPCode_Library {
 	 */
 	public function make_request( $endpoint = '', $method = 'GET', $data = array() ) {
 		$args = array(
-			'method'    => $method,
+			'method' => $method,
 		);
 		if ( wpcode()->library_auth->has_auth() ) {
 			$args['headers'] = $this->get_authenticated_headers();
@@ -346,6 +362,8 @@ class WPCode_Library {
 			return false;
 		}
 
+		$snippet_data = apply_filters( 'wpcode_library_import_snippet_data', $snippet_data );
+
 		$snippet = new WPCode_Snippet( $snippet_data );
 
 		$snippet->save();
@@ -441,9 +459,9 @@ class WPCode_Library {
 	/**
 	 * Clear used snippets also when a snippet is un-trashed.
 	 *
-	 * @param string  $new_status
-	 * @param string  $old_status
-	 * @param WP_Post $post
+	 * @param string  $new_status The new post status.
+	 * @param string  $old_status The old post status.
+	 * @param WP_Post $post The post object.
 	 *
 	 * @return void
 	 */
@@ -480,9 +498,13 @@ class WPCode_Library {
 		$transient_key = 'wpcode_public_snippet_' . $hash . '_' . $auth;
 		$snippet_data  = get_transient( $transient_key );
 		if ( false === $snippet_data ) {
-			$snippet_request = $this->make_request( 'public/' . $hash, 'POST', array(
-				'auth' => $auth,
-			) );
+			$snippet_request = $this->make_request(
+				'public/' . $hash,
+				'POST',
+				array(
+					'auth' => $auth,
+				)
+			);
 			$snippet_data    = json_decode( $snippet_request, true );
 			// Transient for 1 minute if error otherwise 30 minutes.
 			$timeout = ! isset( $snippet_data['status'] ) || 'error' === $snippet_data['status'] ? 60 : 30 * 60;
@@ -490,5 +512,199 @@ class WPCode_Library {
 		}
 
 		return $snippet_data;
+	}
+
+	/**
+	 * Get snippets by username.
+	 *
+	 * @param string $username The username to grab data for.
+	 * @param string $version The version of the library to grab data for.
+	 *
+	 * @return array
+	 */
+	public function get_snippets_by_username( $username, $version = '' ) {
+
+		$username = sanitize_key( $username );
+
+		if ( empty( $version ) ) {
+			// Let's grab the version from the registered username if no version is explicitly passed.
+			$version = $this->get_version_by_username( $username );
+		}
+
+		if ( ! isset( $this->snippets_by_username[ $username ] ) ) {
+			$this->load_snippets_by_username( $username, $version );
+		}
+
+		return $this->snippets_by_username[ $username ];
+	}
+
+	/**
+	 * Grab the version from the registered username array.
+	 *
+	 * @param string $username The username to grab version for.
+	 *
+	 * @return string
+	 */
+	public function get_version_by_username( $username ) {
+		return isset( $this->library_usernames[ $username ] ) ? $this->library_usernames[ $username ]['version'] : '';
+	}
+
+	/**
+	 * Load snippets in the current instance, either from cache or from the server.
+	 *
+	 * @param string $username The username to grab data for.
+	 * @param string $version The version of the plugin/theme to grab data for.
+	 *
+	 * @return array
+	 */
+	private function load_snippets_by_username( $username, $version ) {
+
+		$this->snippets_by_username[ $username ] = $this->get_from_cache( 'profile_' . $username );
+
+		if ( false === $this->snippets_by_username[ $username ] ) {
+			$this->snippets_by_username[ $username ] = $this->get_from_server_by_username( $username );
+		}
+
+		// Let's filter the loaded data to make sure no snippets aimed at older versions are loaded.
+		$this->snippets_by_username[ $username ] = $this->filter_snippets_by_version( $this->snippets_by_username[ $username ], $version );
+
+		return $this->data;
+	}
+
+	/**
+	 * Go through all the snippets and if they have a maximum version set, remove them if the current version is higher.
+	 *
+	 * @param array  $profile_data The snippets to filter.
+	 * @param string $version The version to filter by.
+	 *
+	 * @return array
+	 */
+	public function filter_snippets_by_version( $profile_data, $version ) {
+		// If we have no version, we can't filter anything.
+		if ( empty( $version ) || empty( $profile_data['snippets'] ) ) {
+			return $profile_data;
+		}
+
+		$filtered_snippets = array();
+		foreach ( $profile_data['snippets'] as $snippet ) {
+			if ( empty( $snippet['max_version'] ) || version_compare( $version, $snippet['max_version'], '<=' ) ) {
+				$filtered_snippets[] = $snippet;
+			}
+		}
+
+		$profile_data['snippets'] = $filtered_snippets;
+
+		return $profile_data;
+	}
+
+	/**
+	 * Grab data from the WPCode library by username.
+	 *
+	 * @param string $username The username to grab data for.
+	 *
+	 * @return array|array[]
+	 */
+	private function get_from_server_by_username( $username ) {
+		$data = $this->process_response( $this->make_request( 'profile/' . $username ) );
+
+		if ( empty( $data['snippets'] ) ) {
+			return $this->save_temporary_response_fail( 'profile_' . $username );
+		}
+
+		$this->save_to_cache( 'profile_' . $username, $data );
+
+		return $data;
+	}
+
+	/**
+	 * Get a list of usernames that we should attempt to load data from the library for.
+	 *
+	 * @return array
+	 */
+	public function get_library_usernames() {
+		return $this->library_usernames;
+	}
+
+	/**
+	 * Add a method to allow other plugins to register usernames to load data for.
+	 *
+	 * @param string $username The public username on the WPCode Library.
+	 * @param string $label The label to display in the WPCode library view.
+	 * @param string $max_version The plugin/theme version, used for excluding snippets aimed at older plugin/theme versions.
+	 *
+	 * @return void
+	 */
+	public function register_library_username( $username, $label = '', $max_version = '' ) {
+		$username = sanitize_key( $username );
+		if ( empty( $label ) ) {
+			$label = $username;
+		}
+
+		$this->library_usernames[ $username ] = array(
+			'label'   => $label,
+			'version' => $max_version,
+		);
+	}
+
+	/**
+	 * If there are usernames to load data for, add them to the data array.
+	 *
+	 * @return void
+	 */
+	public function maybe_add_usernames_data() {
+		$usernames = $this->get_library_usernames();
+		if ( empty( $usernames ) ) {
+			return;
+		}
+
+		foreach ( $usernames as $username => $data ) {
+			$snippets = $this->get_snippets_by_username( $username, $data['version'] );
+			if ( ! empty( $snippets['snippets'] ) ) {
+				$this->data['categories'][] = array(
+					'slug'  => $username,
+					'name'  => $data['label'],
+					'count' => count( $snippets['snippets'] ),
+				);
+				// Append snippets to the $this->data['snippets'] array.
+				$this->data['snippets'] = array_merge( $this->data['snippets'], $snippets['snippets'] );
+			}
+		}
+	}
+
+	/**
+	 * Get the URL to edit a snippet.
+	 *
+	 * @param int $snippet_id The snippet id.
+	 *
+	 * @return string
+	 */
+	public function get_edit_snippet_url( $snippet_id ) {
+		return add_query_arg(
+			array(
+				'page'       => 'wpcode-snippet-manager',
+				'snippet_id' => absint( $snippet_id ),
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/**
+	 * Get a direct link to install a snippet by its library URL.
+	 *
+	 * @param int $snippet_library_id The snippet ID on the WPCode library.
+	 *
+	 * @return string
+	 */
+	public function get_install_snippet_url( $snippet_library_id ) {
+		return wp_nonce_url(
+			add_query_arg(
+				array(
+					'snippet_library_id' => absint( $snippet_library_id ),
+					'page'               => 'wpcode-library',
+				),
+				admin_url( 'admin.php' )
+			),
+			'wpcode_add_from_library'
+		);
 	}
 }

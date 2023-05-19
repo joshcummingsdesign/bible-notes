@@ -192,6 +192,14 @@ class WPCode_Snippet {
 	public $schedule;
 
 	/**
+	 * Location extra parameters.
+	 * This is used to store extra parameters for the location.
+	 *
+	 * @var array
+	 */
+	public $location_extra;
+
+	/**
 	 * Constructor. If the post passed is not the correct post type
 	 * the object will clear itself.
 	 *
@@ -435,6 +443,8 @@ class WPCode_Snippet {
 			$post_args['post_status'] = $this->active ? 'publish' : 'draft';
 		}
 
+		do_action( 'wpcode_before_snippet_save', $this );
+
 		if ( isset( $post_args['ID'] ) ) {
 			$insert_result = wp_update_post( $post_args );
 		} else {
@@ -448,6 +458,9 @@ class WPCode_Snippet {
 			return false;
 		}
 		$this->id = $insert_result;
+
+		// Remove recently deactivated snippet meta.
+		$this->reset_recently_deactivated();
 
 		if ( isset( $this->code_type ) ) {
 			wp_set_post_terms( $this->id, $this->code_type, $this->code_type_taxonomy );
@@ -491,6 +504,9 @@ class WPCode_Snippet {
 		}
 		if ( isset( $this->generator_data ) ) {
 			update_post_meta( $this->id, '_wpcode_generator_data', $this->generator_data );
+		}
+		if ( isset( $this->location_extra ) ) {
+			update_post_meta( $this->id, '_wpcode_location_extra', $this->location_extra );
 		}
 		if ( isset( $this->cloud_id ) ) {
 			$auth_username = wpcode()->library_auth->get_auth_username();
@@ -627,6 +643,73 @@ class WPCode_Snippet {
 	}
 
 	/**
+	 * This deactivates the snippet without regardless of user permissions.
+	 * Should only be used for unattended auto-deactivation when a snippet throws a potentially blocking error.
+	 *
+	 * @return void
+	 */
+	public function force_deactivate() {
+		global $wpdb;
+
+		// We need to make a direct call as using wp_update_post will load the post content and if the current user
+		// doesn't have the unfiltered_html capability, the code will be changed unexpectedly.
+		$update = $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->posts,
+			array(
+				'post_status' => 'draft',
+			),
+			array(
+				'ID' => $this->get_id(),
+			)
+		);
+
+		if ( $update ) {
+			wpcode()->error->add_error(
+				array(
+					'message' => sprintf(
+					/* translators: %s: Snippet title and ID used in the error log for clarity. */
+						esc_html__( 'Snippet %s was automatically deactivated due to a fatal error.', 'insert-headers-and-footers' ),
+						sprintf( '"%s" (#%d)', $this->get_title(), $this->get_id() )
+					),
+				)
+			);
+
+			// Rebuild cache to avoid the snippet being loaded again.
+			wpcode()->cache->cache_all_loaded_snippets();
+
+			// Finally, if all went well, let's mark the snippet as recently deactivated and keep a log of the time when this happened.
+			$this->set_recently_deactivated();
+		}
+	}
+
+	/**
+	 * Add a meta to mark the snippet as recently deactivated + keep a timestamp of when the snippet was deactivated.
+	 *
+	 * @return void
+	 */
+	public function set_recently_deactivated() {
+		update_post_meta( $this->get_id(), '_wpcode_recently_deactivated', time() );
+	}
+
+	/**
+	 * Remove the meta that marks the snippet as recently deactivated.
+	 *
+	 * @return void
+	 */
+	public function reset_recently_deactivated() {
+		delete_post_meta( $this->get_id(), '_wpcode_recently_deactivated' );
+	}
+
+	/**
+	 * Remove the meta that marks the snippet as recently deactivated.
+	 *
+	 * @return mixed
+	 */
+	public function get_recently_deactivated_time() {
+		return get_post_meta( $this->get_id(), '_wpcode_recently_deactivated', time() );
+	}
+
+	/**
 	 * Get the auto insert number.
 	 *
 	 * @return int
@@ -760,16 +843,17 @@ class WPCode_Snippet {
 	 */
 	public function get_data_for_caching() {
 		return array(
-			'id'            => $this->get_id(),
-			'title'         => $this->get_title(),
-			'code'          => $this->get_code(),
-			'code_type'     => $this->get_code_type(),
-			'location'      => $this->get_location(),
-			'auto_insert'   => $this->get_auto_insert(),
-			'insert_number' => $this->get_auto_insert_number(),
-			'use_rules'     => $this->conditional_rules_enabled(),
-			'rules'         => $this->get_conditional_rules(),
-			'priority'      => $this->get_priority(),
+			'id'             => $this->get_id(),
+			'title'          => $this->get_title(),
+			'code'           => $this->get_code(),
+			'code_type'      => $this->get_code_type(),
+			'location'       => $this->get_location(),
+			'auto_insert'    => $this->get_auto_insert(),
+			'insert_number'  => $this->get_auto_insert_number(),
+			'use_rules'      => $this->conditional_rules_enabled(),
+			'rules'          => $this->get_conditional_rules(),
+			'priority'       => $this->get_priority(),
+			'location_extra' => $this->get_location_extra(),
 		);
 	}
 
@@ -900,5 +984,18 @@ class WPCode_Snippet {
 		$schedule = $this->get_schedule();
 
 		return ! empty( $schedule['start'] ) || ! empty( $schedule['end'] );
+	}
+
+	/**
+	 * Extra data for the selected auto-insert location.
+	 *
+	 * @return array
+	 */
+	public function get_location_extra() {
+		if ( ! isset( $this->location_extra ) ) {
+			$this->location_extra = get_post_meta( $this->get_id(), '_wpcode_location_extra', true );
+		}
+
+		return $this->location_extra;
 	}
 }

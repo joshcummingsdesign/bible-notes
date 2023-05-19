@@ -36,6 +36,15 @@ abstract class WPCode_Conditional_Type {
 	 */
 	public function __construct() {
 		$this->register_type();
+		$this->hooks();
+	}
+
+	/**
+	 * Register conditional-logic hooks specific to each type (e.g. ajax callbacks).
+	 *
+	 * @return void
+	 */
+	public function hooks() {
 	}
 
 	/**

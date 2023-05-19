@@ -1,5 +1,13 @@
 <?php
+/**
+ * The Conversion Pixels page.
+ *
+ * @package WPCode
+ */
 
+/**
+ * Class WPCode_Admin_Page_Pixel.
+ */
 class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 
 	/**
@@ -46,7 +54,7 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 	public function get_pixel_overlay() {
 
 		$text = sprintf(
-				// translators: %1$s and %2$s are <u> tags.
+		// translators: %1$s and %2$s are <u> tags.
 			'<p>' . __( 'While you can always add pixels manually using code snippets, our Conversion Pixels addon helps you %1$ssave time%2$s while %1$sreducing errors%2$s. It lets you properly implement Facebook, Google, Pinterest, and TikTok ads tracking with deep integrations for eCommerce events, interaction measurement, and more. This addon is available on WPCode Plus plan or higher.', 'insert-headers-and-footers' ) . '</p>',
 			'<u>',
 			'</u>'
@@ -61,7 +69,7 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 			),
 			array(),
 			array(
-				__( 'Seamless integration with WooCommerce and Easy Digital Downloads', 'insert-headers-and-footers' ),
+				__( 'Seamless integration with WooCommerce, Easy Digital Downloads and MemberPress', 'insert-headers-and-footers' ),
 				__( 'Works with Facebook, Google Ads, Pinterest, and TikTok', 'insert-headers-and-footers' ),
 				__( 'No coding required', 'insert-headers-and-footers' ),
 				__( '1-click setup for conversion tracking', 'insert-headers-and-footers' ),
@@ -364,24 +372,28 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 				'name'        => 'view_content',
 				'description' => __( 'Turn on the "ViewContent" event to track views of product pages on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'view-content',
 			),
 			array(
 				'label'       => __( 'AddtoCart Event', 'insert-headers-and-footers' ),
 				'name'        => 'add_to_cart',
 				'description' => __( 'Turn on the "AddToCart" event to track when items are added to a shopping cart on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'add-to-cart',
 			),
 			array(
 				'label'       => __( 'InitiateCheckout Event', 'insert-headers-and-footers' ),
 				'name'        => 'begin_checkout',
 				'description' => __( 'Turn on the "InitiateCheckout" event to track when a user reaches the checkout page on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'begin-checkout',
 			),
 			array(
 				'label'       => __( 'Purchase Event', 'insert-headers-and-footers' ),
 				'name'        => 'purchase',
 				'description' => __( 'Turn on the "Purchase" event to track successful purchases on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'purchase',
 			),
 		);
 	}
@@ -398,30 +410,35 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 				'name'        => 'view_item',
 				'description' => __( 'Send the View Item event to track views of product pages on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'view-content',
 			),
 			array(
 				'label'       => __( 'Add to Cart Event', 'insert-headers-and-footers' ),
 				'name'        => 'add_to_cart',
 				'description' => __( 'Send the Add to Cart event when a product is added to the cart.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'add-to-cart',
 			),
 			array(
 				'label'       => __( 'Begin Checkout Event', 'insert-headers-and-footers' ),
 				'name'        => 'begin_checkout',
 				'description' => __( 'Send the Begin Checkout event when the user sees the checkout page.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'begin-checkout',
 			),
 			array(
 				'label'       => __( 'Purchase Event', 'insert-headers-and-footers' ),
 				'name'        => 'purchase',
 				'description' => __( 'Send the Purchase event when the user completes a purchase.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'purchase',
 			),
 			array(
 				'label'       => __( 'Conversion Event', 'insert-headers-and-footers' ),
 				'name'        => 'conversion',
 				'description' => __( 'Send the conversion event with the Google Ads label set above on a successful purchase.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'conversion',
 			),
 		);
 	}
@@ -438,24 +455,28 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 				'name'        => 'pagevisit_product',
 				'description' => __( 'Turn on the "PageVisit" event to track views of product pages on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'view-content ',
 			),
 			array(
 				'label'       => __( 'Add to Cart Event', 'insert-headers-and-footers' ),
 				'name'        => 'add_to_cart',
 				'description' => __( 'Turn on the Add to Cart event to track when items are added to a shopping cart on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'add-to-cart',
 			),
 			array(
 				'label'       => __( 'Checkout PageVisit Event', 'insert-headers-and-footers' ),
 				'name'        => 'begin_checkout',
 				'description' => __( 'Enable the Checkout PageVisit event to track when a user reaches the checkout page on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'begin-checkout',
 			),
 			array(
 				'label'       => __( 'Checkout Event', 'insert-headers-and-footers' ),
 				'name'        => 'purchase',
 				'description' => __( 'Turn on the "Checkout" event to track successful purchases on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'purchase',
 			),
 		);
 	}
@@ -472,24 +493,28 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 				'name'        => 'view_content',
 				'description' => __( 'Turn on the "ViewContent" event to track views of product pages on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'view-content',
 			),
 			array(
 				'label'       => __( 'Add to Cart Event', 'insert-headers-and-footers' ),
 				'name'        => 'add_to_cart',
 				'description' => __( 'Turn on the "AddToCart" event to track when items are added to a shopping cart on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'add-to-cart',
 			),
 			array(
 				'label'       => __( 'InitiateCheckout Event', 'insert-headers-and-footers' ),
 				'name'        => 'begin_checkout',
 				'description' => __( 'Turn on the "InitiateCheckout" event to track when a user reaches the checkout page on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'begin-checkout',
 			),
 			array(
 				'label'       => __( 'PlaceAnOrder Event', 'insert-headers-and-footers' ),
 				'name'        => 'purchase',
 				'description' => __( 'Turn on the "PlaceAnOrder" event to track successful purchases on your website.', 'insert-headers-and-footers' ),
 				'ecommerce'   => true,
+				'css_class'   => 'purchase',
 			),
 		);
 	}
@@ -512,11 +537,11 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 		$ecommerce_vendors = $this->ecommerce_available();
 
 		foreach ( $inputs as $input ) {
-			$row_class  = '';
+			$row_class  = isset( $input['css_class'] ) ? $input['css_class'] : '';
 			$input_name = $name . '[' . $input['name'] . ']';
 			$checked    = ! empty( $pixel_options[ $input['name'] ] );
 			if ( $input['ecommerce'] && empty( $ecommerce_vendors ) ) {
-				$row_class = 'wpcode-checkbox-row-disabled';
+				$row_class = ' wpcode-checkbox-row-disabled';
 			}
 			$markup .= '<div class="wpcode-checkbox-row ' . $row_class . '">';
 			$markup .= $this->get_checkbox_toggle(
@@ -595,8 +620,8 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 		}
 		$markup .= '<p>';
 		$markup .= sprintf(
-				// translators: %s a html break.
-			__( 'Advanced eCommerce tracking is available for WooCommerce and Easy Digital Downloads. %s These plugins are detected automatically and when available you can toggle individual events using the options below.' ),
+		// translators: %s a html break.
+			__( 'Advanced eCommerce tracking is available for WooCommerce, Easy Digital Downloads and MemberPress. %s These plugins are detected automatically and when available you can toggle individual events using the options below.' ),
 			'</br>'
 		);
 		$markup .= '</p>';

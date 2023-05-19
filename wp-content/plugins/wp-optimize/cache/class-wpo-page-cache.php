@@ -96,7 +96,7 @@ class WPO_Page_Cache {
 	 */
 	public function __construct() {
 		$this->config = WPO_Cache_Config::instance();
-		$this->rules  = WPO_Cache_Rules::instance();
+		WPO_Cache_Rules::instance();
 		$this->logger = new Updraft_PHP_Logger();
 
 		add_action('activated_plugin', array($this, 'activate_deactivate_plugin'));
@@ -675,7 +675,12 @@ if (empty(\$GLOBALS['wpo_cache_config'])) {
 	include_once(WPO_CACHE_CONFIG_DIR . '/$config_file_basename');
 }
 
-if (empty(\$GLOBALS['wpo_cache_config']) || empty(\$GLOBALS['wpo_cache_config']['enable_page_caching'])) { return; }
+if (empty(\$GLOBALS['wpo_cache_config'])) {
+	error_log('WP-Optimize: Caching failed because the configuration data could not be loaded from the config file.');
+	return;
+}
+
+if (empty(\$GLOBALS['wpo_cache_config']['enable_page_caching'])) { return; }
 
 if (false !== \$plugin_location) { include_once(\$plugin_location.'/file-based-page-cache.php'); }
 

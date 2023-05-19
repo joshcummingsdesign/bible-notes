@@ -63,7 +63,21 @@ class WPCode_Conditional_Logic {
 			);
 		}
 
-		return $options;
+		// Sort options so the unavailable ones are at the end.
+		$available_options   = array();
+		$unavailable_options = array();
+		foreach ( $options as $key => $option ) {
+			if ( empty( $option['options'] ) ) {
+				continue;
+			}
+			$first_option = reset( $option['options'] );
+			if ( ! empty( $first_option['upgrade'] ) ) {
+				$unavailable_options[ $key ] = $option;
+			} else {
+				$available_options[ $key ] = $option;
+			}
+		}
+		return array_merge( $available_options, $unavailable_options );
 	}
 
 	/**
@@ -145,7 +159,7 @@ class WPCode_Conditional_Logic {
 	 */
 	public function are_group_rules_met( $rule_group ) {
 		foreach ( $rule_group as $rule_row ) {
-			if ( ! isset( $rule_row['type'] ) ) {
+			if ( ! isset( $rule_row['type'] ) || ! isset( $this->types[ $rule_row['type'] ] ) ) {
 				continue;
 			}
 			$rule_type = $this->types[ $rule_row['type'] ];

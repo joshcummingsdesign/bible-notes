@@ -8,7 +8,18 @@ $color-gray-700: #4A5568;
 $color-gray-800: #2D3748;
 .kadence-site-header-left {display: flex;align-items: center;}
 .kadence-site-grid-wrap .kadence-site-header {display: flex;justify-content: space-between;align-items: center;}
-.kadence-site-header-left .filter-title {margin-right: 10px;font-weight: bold;}
+.kadence-site-header-left .filter-title { margin-left: 10px; margin-right: 10px;font-weight: bold;}
+.kadence-site-header-left .components-search-control .components-base-control__field {
+    margin-bottom: 0;
+}
+.kadence-site-header-left  .components-search-control input[type=search].components-search-control__input {
+    padding: 8px 38px 8px 8px;
+    background: white;
+    height: 36px;
+}
+.kadence-site-header-left  .components-search-control .components-search-control__icon {
+    right:6px;
+}
 .kadence-site-grid-header-right {
 	text-align: right;
 }

@@ -28,3 +28,10 @@ if ( class_exists( 'WPCode_Capabilities' ) ) {
 if ( class_exists( 'WPCode_Notifications' ) ) {
 	WPCode_Notifications::delete_notifications_data();
 }
+
+if ( function_exists( 'wp_unschedule_hook' ) ) {
+	wp_unschedule_hook( 'wpcode_usage_tracking_cron' );
+}
+
+delete_option( 'wpcode_send_usage_last_run' );
+delete_option( 'wpcode_usage_tracking_config' );

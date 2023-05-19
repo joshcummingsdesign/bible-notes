@@ -182,7 +182,7 @@ class Importer {
 		} else {
 			add_filter( 'wxr_importer.pre_process.post_meta', array( $this, 'process_elementor_images' ), 10, 2 );
 			//add_filter( 'wxr_importer.pre_process.post', array( $this, 'process_stop_woo_pages' ), 9, 4 );
-			add_filter( 'wxr_importer.pre_process.post', array( $this, 'process_kadence_block_css' ), 10, 4 );
+			// add_filter( 'wxr_importer.pre_process.post', array( $this, 'process_kadence_block_css' ), 10, 4 );
 				//add_filter( 'wp_import_post_data_processed', array( $this, 'process_kadence_block_css_post' ), 10, 2 );
 			add_filter( 'wxr_importer.pre_process.post', array( $this, 'process_internal_links' ), 11, 4 );
 				//add_action( 'wxr_importer.processed.post', array( $this, 'process_internal_links' ), 10, 5 );

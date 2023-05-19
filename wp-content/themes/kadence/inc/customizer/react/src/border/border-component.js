@@ -9,8 +9,10 @@ import Icons from '../common/icons.js';
 import { __ } from '@wordpress/i18n';
 
 const { ButtonGroup, Dashicon, Toolbar, ToolbarGroup, Tooltip, Button } = wp.components;
-
-const { Component, Fragment } = wp.element;
+/**
+ * WordPress dependencies
+ */
+import { createRef, Component, Fragment } from '@wordpress/element';
 class BorderComponent extends Component {
 	constructor() {
 		super( ...arguments );
@@ -83,6 +85,7 @@ class BorderComponent extends Component {
 			currentDevice: 'desktop',
 			value: value,
 		};
+		this.anchorNodeRef = createRef();
 	}
 	handleResponsiveChangeComplete( color, isPalette, device ) {
 		let value = this.state.value;
@@ -238,7 +241,7 @@ class BorderComponent extends Component {
 		);
 		//console.log( this.state.colorPalette )
 		return (
-			<div className="kadence-control-field kadence-border-control">
+			<div ref={ this.anchorNodeRef } className="kadence-control-field kadence-border-control">
 				{ this.controlParams.responsive && (
 					<ResponsiveControl
 						onChange={ ( currentDevice) => this.setState( { currentDevice } ) }
@@ -254,6 +257,7 @@ class BorderComponent extends Component {
 										tooltip={ __( 'Border Color' ) }
 										onChangeComplete={ ( color, isPalette ) => this.handleResponsiveChangeComplete( color, isPalette, this.state.currentDevice ) }
 										customizer={ this.props.customizer }
+										controlRef={ this.anchorNodeRef }
 									/>
 								) }
 								<input
@@ -295,6 +299,7 @@ class BorderComponent extends Component {
 											tooltip={ __( 'Border Color' ) }
 											onChangeComplete={ ( color, isPalette ) => this.handleChangeComplete( color, isPalette ) }
 											customizer={ this.props.customizer }
+											controlRef={ this.anchorNodeRef }
 										/>
 									) }
 									<input

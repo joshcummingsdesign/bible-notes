@@ -4,9 +4,9 @@ Donate link: https://yoa.st/1up
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: SEO, XML sitemap, Content analysis, Readability, Schema
-Tested up to: 6.1
-Stable tag: 20.3
-Requires PHP: 5.6.20
+Tested up to: 6.2
+Stable tag: 20.7
+Requires PHP: 7.2.5
 
 Improve your WordPress SEO: Write better content and have a fully optimized WordPress site using the Yoast SEO plugin.
 
@@ -36,8 +36,8 @@ Yoast SEO is packed full of features, designed to help visitors and search engin
 * **Faster loading times** for your whole website, due to an innovative way of managing data in WordPress.
 * **[Premium]** E-mail support for our [Yoast SEO Premium](https://yoa.st/1v8) users.
 * **[Premium]** The possibility to expand Yoast SEO with the [News SEO](https://yoa.st/1uv), [Video SEO](https://yoa.st/1uw), [Local SEO](https://yoa.st/1uu) and [WooCommerce SEO](https://yoa.st/3rh) extensions.
-* **[Premium]** **New!** Yoast SEO Premium comes with wide-ranging crawl settings that help you improve how search engines crawl your site.
 * **[Premium]** **New!** Yoast SEO Premium comes with an IndexNow integration to ping search engines like Microsoft Bing whenever you publish or update content.
+* **New!** Yoast SEO comes with wide-ranging crawl settings that help you improve how search engines crawl your site, lowering its carbon footprint.
 
 #### WRITE KILLER CONTENT WITH YOAST SEO
 We know content is king, that's why Yoast SEO is famous for its **state-of-the-art content and SEO analysis**. Yoast SEO gives you:
@@ -112,7 +112,6 @@ Yoast SEO integrates seamlessly into a range of themes and plugins. We work part
 * Google’s [Web Stories](https://wordpress.org/plugins/web-stories/) plugin, which helps you to create ‘[web stories](https://amp.dev/about/stories/)’.
 * The [Advanced Custom Fields](https://wordpress.org/plugins/advanced-custom-fields/) plugin, when you also activate the [ACF Content Analysis for Yoast SEO](https://wordpress.org/plugins/acf-content-analysis-for-yoast-seo/) plugin.
 * The [Elementor](https://wordpress.org/plugins/elementor/) website builder.
-* [Zapier](https://zapier.com/apps/yoast-seo/integrations), which helps you automate your publishing flow.
 * [Algolia](https://wordpress.org/plugins/wp-search-with-algolia/) integration to improve the quality of your site search.
 * [WordProof](https://wordproof.com/), which helps you prove ownership by adding timestamps.
 
@@ -228,7 +227,7 @@ The plugins you buy at Yoast are called ‘premium plugins’ (even if Premium i
 
 = What happens to my data if I enable usage tracking? =
 
-[This page on yoast.com explains what data we collect to improve Yoast SEO](https://yoa.st/4w7). We only collect data when you explicitly opt in. Read more about how we handle your data in [our Privacy Policy](https://yoa.st/4w8). 
+[This page on yoast.com explains what data we collect to improve Yoast SEO](https://yoa.st/4w7). We only collect data when you explicitly opt in. Read more about how we handle your data in [our Privacy Policy](https://yoa.st/4w8).
 
 = I have a different question than listed here =
 
@@ -247,70 +246,39 @@ Your question has most likely been answered on our help center: [yoast.com/help/
 
 == Changelog ==
 
-= 20.3 =
+= 20.7 =
 
-Release date: 2023-03-14
+Release date: 2023-05-09
 
-Yoast SEO 20.3 is out and comes with several enhancements, fixes, and improvements. With an improved highlighting feature and enhanced support for the Portuguese language, Yoast SEO 20.3 helps you find where you need to make SEO edits quickly and easily. Upgrade now and take your website's SEO to the next level! Find out more about what's new in Yoast SEO 20.3 in [our release post](https://yoa.st/release-14-3-23)!
-
-#### Enhancements
-
-* Allows the highlighting feature to highlight content in captions of _Audio_, _Embed_, _Gallery_, _Image_, _Table_, and _Video_ blocks in the Block editor.
-* Allows the highlighting feature to highlight content in _FAQ_ and _How-to_ blocks in the Block editor.
-* Improves the detection of participles in the _passive voice_ assessment for Portuguese.
-* Improves the _transition words_ assessment for Portuguese by adding new transition words. Props to [mathiasribeiro](https://github.com/mathiasribeiro).
-
-#### Bugfixes
-
-* Fixes a bug where a fatal error would appear in oEmbed pages for media pages when those were disabled from Yoast settings.
-* Fixes a bug where editing text in Classic editor while the highlighting feature is enabled would make the text unfocused and the cursor jump to the beginning of the text.
-* Fixes a bug where self-closing break tags (`</br>`) would not be removed when analyzing content.
-* Fixes a bug where shortcodes in the Block editor would be treated as words when analyzing content.
-* Fixes a bug where the color and line height in the _Google preview_ modal would be shown incorrectly when editing in Elementor.
-* Fixes a bug where the `fetchpriority` attribute of the rating stars image was mistyped. Props to [fellyph](https://github.com/fellyph).
-* Fixes a bug where the `get_head` REST endpoint would return wrong values for some meta tags when called with the homepage URL as an argument.
-* Fixes a bug where the query parameters would be added in the middle of canonical and previous and next links in paginated pages. Props to [andreas-pa](https://github.com/andreas-pa).
-
-#### Other
-
-* Avoids issuing a PHP warning because of a wrong variable type.
-* Removes the beta badge for the _inclusive language_ assessment.
-
-= 20.2.1 =
-
-Release date: 2023-03-02
-
-#### Bugfixes
-
-* Fixes a security issue in the post editor.
-
-= 20.2 =
-
-Release date: 2023-02-28
-
-In Yoast SEO 20.2, we've improved our innovative indexables technology. We've developed a faster and more reliable way of indexing your site's data. In turn, we make better use of this data to improve your site's SEO. Find out more about what's new in Yoast SEO 20.2 in [our release post](https://yoa.st/release-28-2-23)!
+Yoast SEO 20.7 is out now! With this release, our team has rolled out essential fixes and improvements to help you improve your SEO work. Upgrade today to benefit from the latest and greatest! Find out more about what's new in Yoast SEO 20.7 in [our release post](https://yoa.st/release-9-5-23)!
 
 #### Enhancements
 
-* Stops creating indexables for attachments when attachment pages are disabled, thus decreasing the size of the database.
-* Improves the indexables creation mechanism by avoiding duplicate `unindexed` entries when multiple invalid posts and terms are being used.
-* Changes replacement variable name from `Page number` to `Page` in the `Settings` page.
-* Changes the copy for notices in social profiles for person.
-* Improves accessibility for the extra other profiles in the Settings' Site representation when Organization is selected.
-* Improves the performance of image schema creation for really large images.
-* Improves the Settings' search modal accessibility.
-* Removes person's social profiles form from first time configuration.
+* Adds a link to a taxonomy edit page in its settings section when the taxonomy has no public post types associated.
+* Adds an academy page in the Yoast menu for easy access to all of Yoast’s e-learning modules.
+* Ensures compatibility with upcoming Elementor accessibility improvements.
 
 #### Bugfixes
 
-* Fixes a bug where a fatal error would be thrown when building a hierarchy indexable when the parent indexable did not exists.
-* Fixes a bug where a fatal error would be thrown when the post type `posts` was excluded and the post overview was visited.
-* Fixes a bug where the settings page of a post type would not load when a special character like ט was added as permalink.
+* Fixes a bug where a fatal error would be thrown when visiting Yoast SEO admin pages while Yoast SEO for WooCommerce is active but never executed.
 
 #### Other
 
-* Adds a `wpseo_indexable_forced_included_post_types` filter to force creation of indexables for post types.
-* Hides \"Enable SEO controls and assessments\" option from taxonomies that has no standard WP UI.
+* Removes the introductory modal for the settings page.
+* Removes the Zapier integration card.
+* Removes the Zapier post-publish slot and network admin integration toggle.
+* Sets the minimum supported WooCommerce version to 7.1.
+* Sets the minimum supported WordPress version to 6.1
+
+= 20.6 =
+
+Release date: 2023-04-26
+
+Today's release of Yoast SEO 20.6 has enhancements and fixes to improve your SEO work. The update features a new readability analysis — a helpful addition alerting you whenever you use too much center-aligned text. Check out more details now! Find out more about what's new in Yoast SEO 20.6 in [our release post](https://yoa.st/release-26-4-23)!
+
+#### Enhancements
+
+* Improves performance when the SEO data optimization has not been completed. Props to @PypWalters.
 
 = Earlier versions =
 For the changelog of earlier versions, please refer to [the changelog on yoast.com](https://yoa.st/yoast-seo-changelog).

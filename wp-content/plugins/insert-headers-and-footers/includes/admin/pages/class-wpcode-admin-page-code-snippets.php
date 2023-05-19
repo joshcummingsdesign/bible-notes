@@ -44,6 +44,7 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 		add_action( 'admin_init', array( $this, 'maybe_capture_filter' ) );
 		add_action( 'load-toplevel_page_wpcode', array( $this, 'maybe_process_bulk_action' ) );
 		add_filter( 'screen_options_show_screen', '__return_false' );
+		add_action( 'wpcode_admin_notices', array( $this, 'maybe_show_deactivated_notice' ) );
 	}
 
 	/**
@@ -260,10 +261,12 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 			}
 			if ( isset( $_GET['error'] ) ) {
 				$error_count = absint( $_GET['error'] );
-				$notice      .= ' ' . sprintf( /* translators: %d - Failed to activate snippets count. */
-						_n( '%d snippet was not activated due to an error.', '%d snippets were not activated due to errors.', $error_count, 'insert-headers-and-footers' ),
-						$error_count
-					);
+
+				$notice .= ' ';
+				$notice .= sprintf( /* translators: %d - Failed to activate snippets count. */
+					_n( '%d snippet was not activated due to an error.', '%d snippets were not activated due to errors.', $error_count, 'insert-headers-and-footers' ),
+					$error_count
+				);
 			}
 		}
 
@@ -281,5 +284,49 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 		} elseif ( isset( $notice ) ) {
 			$this->set_success_message( $notice );
 		}
+	}
+
+	/**
+	 * On the deactivated snippets view, show a notice explaining that this view shows the snippets that have been
+	 * automatically disabled due to throwing an error and highlight the error logging option, if disabled.
+	 *
+	 * @return void
+	 */
+	public function maybe_show_deactivated_notice() {
+		if ( ! isset( $_GET['view'] ) || 'deactivated' !== $_GET['view'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return;
+		}
+		// Let's see if error logging is enabled.
+		$logging_enabled = wpcode()->settings->get_option( 'error_logging' );
+		$button_text = esc_html__( 'Enable Error Logging', 'insert-headers-and-footers' );
+		$button_url  = add_query_arg(
+			array(
+				'page' => 'wpcode-settings',
+			),
+			admin_url( 'admin.php' )
+		);
+
+		?>
+		<div class="info fade notice">
+			<p>
+				<?php esc_html_e( 'This view lists your snippets that have been automatically disabled due to throwing an error.', 'insert-headers-and-footers' ); ?>
+				<a href="<?php echo esc_url( wpcode_utm_url( 'https://wpcode.com/docs/php-error-handling-safe-mode/', 'snippet-deactivated-notice', 'deactivated-list' ) ); ?>" target="_blank" rel="noopener noreferrer">
+					<?php esc_html_e( 'Learn More', 'insert-headers-and-footers' ); ?>
+				</a>
+			</p>
+			<?php
+			if ( ! $logging_enabled ) {
+				?>
+				<p>
+					<?php esc_html_e( 'In order to get more info about the errors that caused the snippets to be disabled please consider enabling error logging.', 'insert-headers-and-footers' ); ?>
+				</p>
+				<p>
+					<a href="<?php echo esc_url( $button_url ); ?>" class="button button-primary">
+						<?php echo esc_html( $button_text ); ?>
+					</a>
+				</p>
+			<?php } ?>
+		</div>
+		<?php
 	}
 }

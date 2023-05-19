@@ -82,6 +82,11 @@ class WPCode_Snippet_Execute {
 				'class' => 'WPCode_Snippet_Execute_Text',
 				'label' => __( 'Text Snippet', 'insert-headers-and-footers' ),
 			),
+			'blocks'    => array(
+				'class'  => 'WPCode_Snippet_Execute_Blocks',
+				'label'  => __( 'Blocks Snippet (PRO)', 'insert-headers-and-footers' ),
+				'is_pro' => true,
+			),
 			'js'        => array(
 				'class' => 'WPCode_Snippet_Execute_JS',
 				'label' => __( 'JavaScript Snippet', 'insert-headers-and-footers' ),
@@ -299,7 +304,7 @@ class WPCode_Snippet_Execute {
 			)
 		);
 		if ( isset( $this->snippet_executed ) && in_array( $this->snippet_executed->get_location(), $locations_to_auto_disable, true ) ) {
-			$this->snippet_executed->deactivate();
+			$this->snippet_executed->force_deactivate();
 		}
 	}
 
@@ -461,6 +466,23 @@ class WPCode_Snippet_Execute {
 	 */
 	public function log_activation_errors() {
 		if ( $this->is_doing_activation() && apply_filters( 'wpcode_log_activation_errors', false ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if a code type is marked as pro.
+	 *
+	 * @param string $key The key of the type to check.
+	 *
+	 * @return bool
+	 */
+	public function is_type_pro( $key ) {
+		// Find type by key in the list of types.
+		$pro_types = wp_list_filter( $this->types, array( 'is_pro' => true ) );
+		if ( isset( $pro_types[ $key ] ) ) {
 			return true;
 		}
 

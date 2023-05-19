@@ -665,6 +665,12 @@
 .single-product .kadence-breadcrumbs {
     margin-top: -1rem;
 }
+.single-product .extra-title+.kadence-breadcrumbs {
+    margin-top: 1em;
+}
+.single-product .entry-taxonomies+.kadence-breadcrumbs {
+    margin-top: 1em;
+}
 .single-product.content-vertical-padding-hide .kadence-breadcrumbs, .single-product.content-vertical-padding-bottom .kadence-breadcrumbs {
     margin-top: 0.5em;
     margin-bottom: 0.5em;

@@ -91,7 +91,7 @@ class WPCode_Admin_Page_Click extends WPCode_Admin_Page {
 			<?php
 			$snippet_hash = get_transient( 'wpcode_deploy_snippet_id' );
 			// Let's see if we're in the middle of a fresh installation from the library.
-			if ( isset( $_GET['message'] ) && 'wpcode-deploy' === $_GET['message'] ) {
+			if ( isset( $_GET['message'] ) && 'wpcode-deploy' === $_GET['message'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				if ( ! wpcode()->library_auth->has_auth() ) {
 					?>
 					<h3><?php esc_html_e( 'Connect your site to the WPCode Library', 'insert-headers-and-footer' ); ?></h3>
@@ -120,7 +120,7 @@ class WPCode_Admin_Page_Click extends WPCode_Admin_Page {
 					</div>
 					<?php
 				}
-			} elseif ( false !== $snippet_hash && wpcode()->library_auth->has_auth() && ! isset( $_GET['snippet'] ) ) {
+			} elseif ( false !== $snippet_hash && wpcode()->library_auth->has_auth() && ! isset( $_GET['snippet'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				// We have a snippet hash so let's continue the snippet install process.
 				$snippet_url = wpcode()->library_auth->library_url . '/snippet/' . $snippet_hash . '/?deploy=1';
 				?>
@@ -133,8 +133,7 @@ class WPCode_Admin_Page_Click extends WPCode_Admin_Page {
 				</div>
 				<?php
 				delete_transient( 'wpcode_deploy_snippet_id' );
-			}// Let's make sure the site is authenticated with the library.
-			elseif ( ! wpcode()->library_auth->has_auth() ) {
+			} elseif ( ! wpcode()->library_auth->has_auth() ) { // Let's make sure the site is authenticated with the library.
 				?>
 				<h3><?php esc_html_e( 'Your site is not connected to the WPCode library.', 'insert-headers-and-footers' ); ?></h3>
 				<p><?php esc_html_e( 'Connect now to enable installing public snippets from the WPCode library with 1-click and also get access to tens of expert-curated snippets that you can install from inside the plugin.', 'insert-headers-and-footers' ); ?></p>
@@ -144,13 +143,15 @@ class WPCode_Admin_Page_Click extends WPCode_Admin_Page {
 					</button>
 				</div>
 				<?php
-			} elseif ( empty( $_GET['snippet'] ) ) { // Let's check that we have a snippet hash to load.
+				// Let's check that we have a snippet hash to load.
+			} elseif ( empty( $_GET['snippet'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				?>
 				<div class="notice notice-error">
 					<p><?php esc_html_e( 'No snippet provided.', 'insert-headers-and-footers' ); ?></p>
 				</div>
 				<?php
-			} elseif ( empty( $_GET['auth'] ) ) {// Let's check that the site is authenticated.
+				// Let's check that the site is authenticated.
+			} elseif ( empty( $_GET['auth'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				?>
 				<div class="notice notice-error">
 					<p><?php esc_html_e( 'Missing authentication token, please click the link in the WPCode Library again.', 'insert-headers-and-footers' ); ?></p>
@@ -160,8 +161,8 @@ class WPCode_Admin_Page_Click extends WPCode_Admin_Page {
 				// Let's make sure they don't get redirect again if they reached this point.
 				delete_transient( 'wpcode_deploy_snippet_id' );
 				// Let's attempt to load the snippet data from the library.
-				$auth            = sanitize_key( $_GET['auth'] );
-				$snippet_hash    = sanitize_key( $_GET['snippet'] );
+				$auth            = sanitize_key( $_GET['auth'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$snippet_hash    = sanitize_key( $_GET['snippet'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$snippet_request = wpcode()->library->get_public_snippet( $snippet_hash, $auth );
 
 				if ( ! isset( $snippet_request['status'] ) || 'success' !== $snippet_request['status'] ) {
@@ -221,7 +222,7 @@ class WPCode_Admin_Page_Click extends WPCode_Admin_Page {
 								</div>
 							</div>
 						</div>
-						<textarea id="wpcode-code-preview"><?php echo $snippet['code']; ?></textarea>
+						<textarea id="wpcode-code-preview"><?php echo esc_textarea( $snippet['code'] ); ?></textarea>
 					</div>
 					<div class="wpcode-buttons-row">
 						<input type="hidden" name="snippet" value="<?php echo esc_attr( $snippet['cloud_id'] ); ?>">

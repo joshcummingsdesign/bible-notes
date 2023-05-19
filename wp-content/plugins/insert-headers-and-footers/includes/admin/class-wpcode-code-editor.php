@@ -60,6 +60,9 @@ class WPCode_Code_Editor {
 			$editor_args['codemirror']['readOnly'] = true;
 		}
 
+		// Allow filtering of the editor args.
+		$editor_args = apply_filters( 'wpcode_editor_config', $editor_args );
+
 		// Enqueue code editor and settings for manipulating HTML.
 		$this->settings = wp_enqueue_code_editor( $editor_args );
 

@@ -368,8 +368,16 @@ class WPCode_File_Logger {
 		if ( ! preg_match( '/\.log$/', $name ) ) {
 			$name .= '.log';
 		}
+
+		$real_file_path = realpath( self::get_log_dir() . $name );
+		$real_base_path = realpath( self::get_log_dir() ) . DIRECTORY_SEPARATOR;
+		if ( false === $real_file_path || strpos( $real_file_path, $real_base_path ) !== 0 ) {
+			// Traversal attempt.
+			return;
+		}
+
 		// Delete the file from the server.
-		@unlink( self::get_log_dir() . $name ); // @codingStandardsIgnoreLine.
+		@unlink( $real_file_path ); // @codingStandardsIgnoreLine.
 	}
 
 }

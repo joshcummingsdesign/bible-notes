@@ -701,26 +701,11 @@ abstract class WPCode_Admin_Page {
 			);
 			if ( 0 !== $snippet['library_id'] ) {
 				if ( ! empty( $used_library_snippets[ $snippet['library_id'] ] ) ) {
-					$url         = add_query_arg(
-						array(
-							'page'       => 'wpcode-snippet-manager',
-							'snippet_id' => absint( $used_library_snippets[ $snippet['library_id'] ] ),
-						),
-						admin_url( 'admin.php' )
-					);
+					$url         = wpcode()->library->get_edit_snippet_url( $used_library_snippets[ $snippet['library_id'] ] );
 					$button_text = __( 'Edit snippet', 'insert-headers-and-footers' );
 					$pill_text   = __( 'Used', 'insert-headers-and-footers' );
 				} else {
-					$url = wp_nonce_url(
-						add_query_arg(
-							array(
-								'snippet_library_id' => absint( $snippet['library_id'] ),
-								'page'               => 'wpcode-library',
-							),
-							admin_url( 'admin.php' )
-						),
-						'wpcode_add_from_library'
-					);
+					$url = wpcode()->library->get_install_snippet_url( $snippet['library_id'] );
 				}
 			}
 			$title       = $snippet['title'];
@@ -1033,14 +1018,16 @@ abstract class WPCode_Admin_Page {
 				</div>
 			<?php } ?>
 			<ul class="wpcode-items-categories-list wpcode-items-filters">
-				<li>
-					<button type="button" data-category="*" class="<?php echo empty( $selected_category ) ? 'wpcode-active' : ''; ?>">
-						<?php echo esc_html( $all_text ); ?>
-						<?php if ( $all_count ) { ?>
-							<span class="wpcode-items-count"><?php echo esc_html( $all_count ); ?></span>
-						<?php } ?>
-					</button>
-				</li>
+				<?php if ( ! empty( $all_text ) ) { ?>
+					<li>
+						<button type="button" data-category="*" class="<?php echo empty( $selected_category ) ? 'wpcode-active' : ''; ?>">
+							<?php echo esc_html( $all_text ); ?>
+							<?php if ( $all_count ) { ?>
+								<span class="wpcode-items-count"><?php echo esc_html( $all_count ); ?></span>
+							<?php } ?>
+						</button>
+					</li>
+				<?php } ?>
 				<?php
 				foreach ( $categories as $category ) {
 					// Mark the first category as active.

@@ -56,10 +56,16 @@ class WPCode_Admin_Page_Headers_Footers extends WPCode_Admin_Page {
 	 */
 	public function add_page() {
 		if ( $this->settings_submenu ) {
-			add_options_page( $this->menu_title, $this->page_title, 'wpcode_edit_snippets', $this->page_slug, array(
-				wpcode()->admin_page_loader,
-				'admin_menu_page'
-			) );
+			add_options_page(
+				$this->menu_title,
+				$this->page_title,
+				'wpcode_edit_snippets',
+				$this->page_slug,
+				array(
+					wpcode()->admin_page_loader,
+					'admin_menu_page',
+				)
+			);
 
 			return;
 		}
@@ -137,7 +143,7 @@ class WPCode_Admin_Page_Headers_Footers extends WPCode_Admin_Page {
 			esc_html__( 'These scripts will be printed in the %s section.', 'insert-headers-and-footers' ),
 			'<code>&lt;head&gt;</code>'
 		);
-		$body_desc   = sprintf(
+		$body_desc = sprintf(
 		/* translators: %s: The `<head>` tag */
 			esc_html__( 'These scripts will be printed just below the opening %s tag.', 'insert-headers-and-footers' ),
 			'<code>&lt;body&gt;</code>'

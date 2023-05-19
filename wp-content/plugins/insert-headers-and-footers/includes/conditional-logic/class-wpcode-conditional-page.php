@@ -231,7 +231,7 @@ class WPCode_Conditional_Page extends WPCode_Conditional_Type {
 		if ( is_tax() ) {
 			$queried_object = get_queried_object();
 
-			return isset( $queried_object->queried_object_id ) ? array( $queried_object->queried_object_id ) : array();
+			return isset( $queried_object->term_id ) ? array( $queried_object->term_id ) : array();
 		}
 		if ( is_singular() ) {
 			return get_terms(

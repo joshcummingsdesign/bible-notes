@@ -282,6 +282,10 @@
       "type": "number",
       "default": ""
     },
+    "topSepHeightUnit": {
+      "type": "string",
+      "default": "px"
+    },
     "bottomSep": {
       "type": "string",
       "default": "none"
@@ -309,6 +313,10 @@
     "bottomSepWidthMobile": {
       "type": "number",
       "default": ""
+    },
+    "bottomSepHeightUnit": {
+      "type": "string",
+      "default": "px"
     },
     "bottomSepHeightTab": {
       "type": "number",

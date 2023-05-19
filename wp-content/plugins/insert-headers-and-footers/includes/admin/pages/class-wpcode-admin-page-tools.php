@@ -564,7 +564,8 @@ class WPCode_Admin_Page_Tools extends WPCode_Admin_Page {
 			$snippet_data['note']             = $snippet->get_note();
 			$snippet_data['cloud_id']         = $snippet->get_cloud_id();
 			$snippet_data['custom_shortcode'] = $snippet->get_custom_shortcode();
-			$export[]                         = $snippet_data;
+
+			$export[] = apply_filters( 'wpcode_export_snippet_data', $snippet_data, $snippet );
 		}
 
 		$export = array_reverse( $export );
@@ -625,9 +626,12 @@ class WPCode_Admin_Page_Tools extends WPCode_Admin_Page {
 				// We don't want to update existing snippets/posts.
 				unset( $snippet['id'] );
 			}
-			$snippet['code'] = wp_slash( $snippet['code'] );
+
+			$snippet         = apply_filters( 'wpcode_import_snippet_data', $snippet );
+			$snippet['code'] = isset( $snippet['code'] ) ? wp_slash( $snippet['code'] ) : '';
 			$new_snippet     = new WPCode_Snippet( $snippet );
 			$new_snippet->save();
+
 		}
 
 		wp_safe_redirect(
@@ -1035,12 +1039,13 @@ class WPCode_Admin_Page_Tools extends WPCode_Admin_Page {
 	 */
 	public function maybe_delete_log() {
 
-		// Check nonce.
-		if ( isset( $_GET['wpcode_action'] ) && isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'wpcode_delete_log' ) ) {
-			wp_die( esc_html__( 'Link expired. Please refresh the page and retry.', 'insert-headers-and-footers' ) );
-		}
 		if ( ! isset( $_GET['wpcode_action'] ) || 'delete_log' !== $_GET['wpcode_action'] || ! isset( $_GET['log'] ) ) {
 			return;
+		}
+
+		// Check nonce.
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['_wpnonce'] ), 'wpcode_delete_log' ) ) {
+			wp_die( esc_html__( 'Link expired. Please refresh the page and retry.', 'insert-headers-and-footers' ) );
 		}
 
 		if ( ! current_user_can( 'wpcode_activate_snippets' ) ) {
@@ -1049,7 +1054,7 @@ class WPCode_Admin_Page_Tools extends WPCode_Admin_Page {
 			return;
 		}
 
-		wpcode()->logger->delete_log( sanitize_text_field( wp_unslash( $_GET['log'] ) ) );
+		wpcode()->logger->delete_log( sanitize_key( wp_unslash( $_GET['log'] ) ) );
 
 		wp_safe_redirect( $this->get_page_action_url() );
 		exit;

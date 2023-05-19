@@ -33,7 +33,7 @@ function wpcode_shortcode_handler( $args ) {
 	}
 
 	// Let's check that conditional logic rules are met.
-	if ( ! wpcode()->conditional_logic->are_snippet_rules_met( $snippet ) && apply_filters( 'wpcode_shortcode_use_conditional_logic', true ) ) {
+	if ( $snippet->conditional_rules_enabled() && ! wpcode()->conditional_logic->are_snippet_rules_met( $snippet ) && apply_filters( 'wpcode_shortcode_use_conditional_logic', true ) ) {
 		return '';
 	}
 

@@ -196,7 +196,7 @@ class Starter_Templates {
 			define( 'KADENCE_STARTER_TEMPLATES_URL', trailingslashit( plugin_dir_url( __FILE__ ) ) );
 		}
 		if ( ! defined( 'KADENCE_STARTER_TEMPLATES_VERSION' ) ) {
-			define( 'KADENCE_STARTER_TEMPLATES_VERSION', '1.2.19' );
+			define( 'KADENCE_STARTER_TEMPLATES_VERSION', '1.2.20' );
 		}
 	}
 
@@ -1517,7 +1517,7 @@ class Starter_Templates {
 
 							$installed = $upgrader->install( $api->download_link );
 							if ( $installed ) {
-								$silent = ( 'give' === $base || 'elementor' === $base ? false : true );
+								$silent = ( 'give' === $base || 'elementor' === $base || 'restrict-content' === $base ? false : true );
 								if ( 'give' === $base ) {
 									add_option( 'give_install_pages_created', 1, '', false );
 								}
@@ -1545,6 +1545,7 @@ class Starter_Templates {
 							update_option( 'give_install_pages_created', 1, '', false );
 						}
 						if ( 'restrict-content' === $base ) {
+							$silent = true;
 							update_option( 'rcp_install_pages_created', current_time( 'mysql' ) );
 						}
 						$activate = activate_plugin( $path, '', false, $silent );

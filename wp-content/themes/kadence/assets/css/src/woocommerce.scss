@@ -19,6 +19,7 @@
  @import "woo/_blocks.scss";
  @font-face {
 	font-family: 'star';
+    font-display: block;
 	src:
 	  url('../fonts/star.woff2?gmcsp2') format('woff2'),
 	  url('../fonts/star.ttf?gmcsp2') format('truetype'),
@@ -87,6 +88,16 @@
 #cart-drawer.popup-drawer .drawer-content {
     padding-top: 1em;
 }
+.admin-bar #cart-drawer.popup-drawer .drawer-content ul.product_list_widget{
+    max-height: calc( 100vh - ( 1.5em + 1em + 1.2em + 24px + 55px + 105px + 32px ) );
+}
+#cart-drawer.popup-drawer .drawer-content ul.product_list_widget{
+    max-height: calc( 100vh - ( 1.5em + 1em + 1.2em + 24px + 55px + 105px) );
+    overflow: auto;
+}
+#cart-drawer.popup-drawer .drawer-content .woocommerce-mini-cart__buttons.buttons {
+    margin-bottom: 0;
+}
 .site-header-section-left .kadence-header-cart.header-navigation ul ul.sub-menu {
     left: 0;
     right:auto;
@@ -113,8 +124,11 @@
         padding: 1em;
         color: var(--global-palette4);
         font-size: 90%;
-        max-height: 90vh;
+        max-height: 80vh;
         overflow: auto;
+        ul.cart_list {
+            max-height: calc( 75vh - ( 55px + 105px  + 2em ) );
+        }
     }
     ul {
         p.woocommerce-mini-cart__empty-message {
@@ -885,7 +899,7 @@
              }
          }
      }
-    ul.cart_list li.mini_cart_item dl dt {
+    ul.cart_list li.mini_cart_item dl dt:first-child {
         clear:none;
     }
  

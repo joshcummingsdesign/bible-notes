@@ -40,10 +40,6 @@
     "uniqueID": {
       "type": "string",
       "default": ""
-    },
-    "faqSchema": {
-      "type": "boolean",
-      "default": false
     }
   },
   "supports": {

@@ -76,14 +76,15 @@ class WP_Optimize_Minify_Functions {
 	/**
 	 * Functions, get hurl info
 	 *
-	 * @param string $src
+	 * @param mixed $src
+	 *
 	 * @return string
 	 */
 	public static function get_hurl($src) {
 		$wp_home = site_url();
 		$wp_domain = trim(str_ireplace(array('http://', 'https://'), '', trim($wp_home, '/')));
 		// preserve empty source handles
-		$hurl = trim($src);
+		$hurl = null === $src ? '' : trim($src);
 		if (empty($hurl)) {
 			return $hurl;
 		}
@@ -140,10 +141,10 @@ class WP_Optimize_Minify_Functions {
 
 		// no query strings
 		if (stripos($hurl, '.js?v') !== false) {
-			$hurl = stristr($hurl, '.js?v', true).'.js'; // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.stristr_before_needleFound
+			$hurl = stristr($hurl, '.js?v', true).'.js';
 		}//end if
 		if (stripos($hurl, '.css?v') !== false) {
-			$hurl = stristr($hurl, '.css?v', true).'.css'; // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.stristr_before_needleFound
+			$hurl = stristr($hurl, '.css?v', true).'.css';
 		}//end if
 
 		return $hurl;
@@ -248,7 +249,7 @@ class WP_Optimize_Minify_Functions {
 	 */
 	public static function minify_css_string($css) {
 		$css = apply_filters('wpo_minify_css_string', $css);
-		$minifier = new Minify\CSS($css); // phpcs:ignore PHPCompatibility.LanguageConstructs.NewLanguageConstructs.t_ns_separatorFound
+		$minifier = new Minify\CSS($css);
 		$minifier->setMaxImportSize(15); // [css only] embed assets up to 15 Kb (default 5Kb) - processes gif, png, jpg, jpeg, svg & woff
 		$min = $minifier->minify();
 		if (false !== $min) {
@@ -322,7 +323,7 @@ class WP_Optimize_Minify_Functions {
 	public static function minify_js_string($js) {
 		$js = apply_filters('wpo_minify_js_string', $js);
 		// PHP Minify from https://github.com/matthiasmullie/minify
-		$minifier = new Minify\JS($js); // phpcs:ignore PHPCompatibility.LanguageConstructs.NewLanguageConstructs.t_ns_separatorFound
+		$minifier = new Minify\JS($js);
 		$min = $minifier->minify();
 		if (false !== $min && (strlen(trim($js)) == strlen(trim($min)) || strlen(trim($min)) > 0)) {
 			return self::compat_urls($min);
@@ -492,7 +493,7 @@ class WP_Optimize_Minify_Functions {
 	public static function replace_css_import($css, $file_url) {
 		$remove_print_mediatypes = wp_optimize_minify_config()->get('remove_print_mediatypes');
 		$debug = wp_optimize_minify_config()->get('debug');
-		return preg_replace_callback('/(?:@import)\s(?:url\()?\s?["\'](.*?)["\']\s?\)?(?:[^;]*);?/im', function($matches) use ($file_url, $remove_print_mediatypes, $debug) { // phpcs:ignore PHPCompatibility.FunctionDeclarations.NewClosure.Found
+		return preg_replace_callback('/(?:@import)\s(?:url\()?\s?["\'](.*?)["\']\s?\)?(?:[^;]*);?/im', function($matches) use ($file_url, $remove_print_mediatypes, $debug) {
 			// @import contains url()
 			if (preg_match('/url\s*\((.[^\)]*)[\)*?](.*);/', $matches[0], $url_matches)) {
 				$url = trim(str_replace(array('"', "'"), '', $url_matches[1]));

@@ -2,14 +2,14 @@
 Contributors: britner, oakesjosh, woodardmc
 Tags: gutenberg, blocks, page builder, google fonts, dual buttons, svg icons, editor width,
 Donate link: https://www.kadencewp.com/about-us/
-Requires at least: 6.0
+Requires at least: 6.1
 Tested up to: 6.2
-Stable tag: 3.0.27
+Stable tag: 3.0.38
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Custom Blocks for for Gutenberg to help extend the editing capabilities.
+Custom Blocks for Gutenberg to help extend the editing capabilities.
 
 == Description ==
 
@@ -77,8 +77,89 @@ Install the plugin into the `/wp-content/plugins/` folder, and activate it.
 
 == Changelog ==
 
+= 3.0.38 =
+Release Date: May 16th, 2023
+* Add: Ratio option to lottie block.
+* Update: Deprecated toolbar controls.
+* Fix: Issue with tabs and mega menu.
+* Fix: Possible issue with scheduling monthly library cleanup.
+
+= 3.0.37 =
+Release Date: May 2nd, 2023
+* Fix: Issue with icon list mobile column setting.
+* Fix: Issue with pasting styles changing icon in infobox.
+
+= 3.0.36 =
+Release Date: April 28th, 2023
+* Fix: Typo in image css.
+* Fix: Issue with icon list editor preview.
+* Fix: Issue with fullwidth button and aos.
+
+= 3.0.35 =
+Release Date: April 27th, 2023
+* Add: Option to set the gallery slider to slide transition.
+* Update: Icon list grid styles.
+* Fix: Outline button styles to maintain same size.
+* Fix: Issue with editor timeout on some servers with some plugin combinations.
+* Fix: Issue with fullwidth image.
+* Fix: Small issue with design library shadow dom styles.
+* Fix: Tweak the way highlight css is applied for better compatibility.
+
+= 3.0.34 =
+Release Date: April 24th, 2023
+* Update: Design library to use shadow dom. 
+* Update: Filter for custom palette.
+* Fix: Issue with image crop.
+* Fix: Issue with testimonial media border radius in admin.
+* Fix: Accordion output styles.
+* Fix: Possible max width issue with sections.
+* Fix: Issue with typed text script. 
+* Fix: Issue with row background override in editor on mobile.
+* Fix: Issue with some columns in gallery when using individual settings.
+
+= 3.0.33 =
+Release Date: April 12, 2023
+* Add: Option to set design library to use images instead of iframes.
+* Fix: Issue with typed text popover not showing correctly.
+* Fix: Aria label for mute button in row layout video background.
+* Fix: Possible issue with the info box when title and text are paragraph tags.
+* Fix: "Hide" button visibility setting on Show More block.
+* Fix: Lottie block max-width being applied as width.
+* Fix: Icon list gap on rtl sites
+* Fix: Issue with row padding in content only mode.
+* Fix: Issue with WPML and testimonials.
+* Fix: Fix AOS animation breaking hover transition on advanced button block.
+* Fix: Accordion FAQ Schema not always updating.
+
+= 3.0.32 =
+Release Date: April 6, 2023
+* Fix: Custom CSS class not applying to Advanced heading in some situations.
+* Fix: Issue accordion css specificity.
+* Fix: Issue with pattern library views on smaller screens.
+* Fix: Possible issue with design library when accessing through row layout.
+* Fix: Issue with advanced gallery sliding when it should fade.
+
+= 3.0.31 =
+Release Date: April 4, 2023
+* Fix: Issue design library if using 6.1
+
+= 3.0.30 =
+Release Date: April 4, 2023
+* Add: New Design library.
+* Add: Additional unit choices to top and bottom row dividers.
+* Fix: Border radius on row layout video backgrounds in Safari.
+* Fix: Testimonial icon colors not working when using color palette.
+* Fix: Testimonial icon display when using outline icons.
+* Fix: Typed text throwing error when previewing mobile & tablet.
+* Fix: Info box media background hover not showing in editor.
+* Fix: Fluid carousel galleries inside accordions not initializing.
+* Fix: Row Layout slider background "slide" transition style.
+* Fix: Prevent clones in fluid carousel when only one image.
+* Fix: Testimonial max-width not applying for basic layout.
+* Fix: Issue with gallery lightbox sometimes not initializing for carousels.
+
 = 3.0.27 =
-Release Date: March 22, 2023
+Release Date: March 23, 2023
 * Add: Title to iframe in Google Maps block.
 * Add: Option to skip lazy load for advanced image block.
 * Update: Row layout to allow 5 column to collapse into 2 and 3.

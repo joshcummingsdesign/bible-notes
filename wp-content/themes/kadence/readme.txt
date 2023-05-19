@@ -4,7 +4,7 @@ Tags: translation-ready, two-columns, right-sidebar, left-sidebar, footer-widget
 Requires at least: 5.4
 Tested up to: 6.2
 Requires PHP: 7.2
-Stable tag: 1.1.34
+Stable tag: 1.1.39
 License: GNU General Public License v3.0 (or later)
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -19,11 +19,35 @@ Kadence is released under GNU General Public License v3.0 (or later)
 
 = Changelog =
 
-== 1.1.34 | 22nd March 2022 == 
+== 1.1.39 | 16th May 2023 ==
+* Fix: Possible issue with footer widgets spacing.
+* Fix: Issue with product buttons style.
+
+== 1.1.38 | 15th May 2023 ==
+* Fix: Update not showing.
+
+== 1.1.37 | 8th May 2023 ==
+* Update: Animate body for mobile navigation setting default.
+* Fix: Color picker in border controls.
+* Fix: Pallet Color picker offscreen.
+* Fix: Issue with warning when invalid link on page.
+* Fix: CSS specificity with woocommerce styles.
+* Fix: CSS specificity with comment styles.
+* Fix: CSS specificity with social.
+* Fix: Issue with quantity spinner.
+
+== 1.1.36 | 27th March 2023 == 
+* Fix: Issue with woocommerce dropdown scroll bars.
+
+== 1.1.35 | 27th March 2023 == 
+* Update: 6.2 css issue with editor title.
+* Update: Editor style tweak.
+
+== 1.1.34 | 22nd March 2023 == 
 * Update: Splide JS to prevent conflicts.
 * Fix: Issue with posts block.
 
-== 1.1.33 | 20th March 2022 == 
+== 1.1.33 | 20th March 2023 == 
 * Update: Editor styling of form.
 * Update: Support for thirdpary woo plugins and ajax cart.
 * Update: Improve accessibility of tabing through dropdown navigation.
@@ -43,7 +67,7 @@ Kadence is released under GNU General Public License v3.0 (or later)
 * Fix: Mobile empty cart class.
 * Fix: Role Landmark issue when using above content title.
 
-== 1.1.32 | 31st January 2022 == 
+== 1.1.32 | 31st January 2023 == 
 * Update: CSS styling of some buttons.
 * Update: Dropdown aria label for accessibility.
 * Update: Mobile close js to ignore tabs.

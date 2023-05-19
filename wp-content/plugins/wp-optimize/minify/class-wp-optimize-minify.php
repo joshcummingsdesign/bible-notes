@@ -6,6 +6,19 @@ define('WP_OPTIMIZE_MINIFY_DIR', dirname(__FILE__));
 if (!defined('WP_OPTIMIZE_SHOW_MINIFY_ADVANCED')) define('WP_OPTIMIZE_SHOW_MINIFY_ADVANCED', false);
 
 class WP_Optimize_Minify {
+
+	/**
+	 * Minify commands object
+	 *
+	 * @var WP_Optimize_Minify_Commands
+	 */
+	public $minify_commands;
+
+	/**
+	 * @var bool
+	 */
+	private $enabled;
+
 	/**
 	 * Constructor - Initialize actions and filters
 	 *
@@ -160,7 +173,7 @@ class WP_Optimize_Minify {
 	 * @return void
 	 */
 	private function load_premium() {
-		$this->premium = new WP_Optimize_Minify_Premium();
+		new WP_Optimize_Minify_Premium();
 	}
 
 	/**

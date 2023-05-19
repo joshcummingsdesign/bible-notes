@@ -122,6 +122,9 @@ $settings = array(
 		'transport'    => 'refresh',
 		'default'      => kadence()->default( 'enable_popup_body_animate' ),
 		'label'        => esc_html__( 'Move Body with toggle?', 'kadence' ),
+		'input_attrs'  => array(
+			'help' => esc_html__( 'This can require a lot of memory to render the animation in mobile browsers, use with caution if you have graphically heavy pages.', 'kadence' ),
+		),
 		'context'      => array(
 			array(
 				'setting'    => 'header_popup_layout',

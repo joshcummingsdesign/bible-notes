@@ -35,7 +35,7 @@ function wpcode_listen_for_deploy_message() {
 		'plugins',
 		'plugin-install',
 	);
-	if ( ! isset( $screen->id ) || ! in_array( $screen->id, $screens ) ) {
+	if ( ! isset( $screen->id ) || ! in_array( $screen->id, $screens, true ) ) {
 		return;
 	}
 	$click_page = add_query_arg(
