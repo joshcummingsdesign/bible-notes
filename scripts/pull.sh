@@ -13,6 +13,9 @@ git pull
 printf "\nSuccess: Pulled code.\n\n"
 
 printf "==> Moving code...\n\n"
+rm -rf wp-config-original.php
+git checkout master wp-config.php
+mv wp-config.php wp-config-original.php
 rsync -aziP --delete wp-content/plugins/ ../wp-content/plugins/
 rsync -aziP --delete wp-content/themes/ ../wp-content/themes/
 printf "\nSuccess: Moved code.\n\n"
@@ -29,5 +32,6 @@ lando wp db import db.sql
 
 printf "\n==> Running search replace...\n\n"
 lando wp search-replace $PROD_URL $LOCAL_URL --all-tables
+mv wp/wp-config-original.php wp/wp-config.php
 
 printf "\nSuccessfully pulled site!\n\n"
