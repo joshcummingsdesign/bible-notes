@@ -5,6 +5,10 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_action( 'admin_enqueue_scripts', 'wpcode_admin_scripts_global_lite' );
 add_action( 'admin_head', 'wpcode_listen_for_deploy_message' );
 

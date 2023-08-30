@@ -55,16 +55,18 @@ jQuery( function( $ ) {
 		if ( typeof ezTOC.visibility_hide_by_default != 'undefined' ) {
 
 			// Get all toggles that have not been loaded.
-			var toggles = $( 'a.ez-toc-toggle:not(.ez-toc-loaded),a.ez-toc-widget-sticky-toggle:not(.ez-toc-loaded)' ); 
-//			var toc = $( 'ul.ez-toc-list' );
+			var toggles = $( '.ez-toc-toggle:not(.ez-toc-loaded),.ez-toc-widget-sticky-toggle:not(.ez-toc-loaded)' ); 
+
 			var invert = ezTOC.visibility_hide_by_default;
-//                        toggles.css( 'display', 'flex' );
+
                         $.each(toggles, function(i, obj) {
                             
                             var toggle = $(this);
                             $(toggle).addClass('ez-toc-loaded'); // Attach loaded class.
                             var toc = $( toggle ).parents('#ez-toc-container,#ez-toc-widget-container,#ez-toc-widget-sticky-container').find( 'ul.ez-toc-list,ul.ez-toc-widget-sticky-list' );
-                            
+                            if($(toc).hasClass('eztoc-toggle-hide-by-default')){
+                                var invert = 1;
+                            }                                
                             if ( Cookies ) {
 
                                     Cookies.get( 'ezTOC_hidetoc-' + i ) == 1 ? $(toggle).data( 'visible', false ) : $(toggle).data( 'visible', true );
@@ -235,20 +237,16 @@ jQuery( function( $ ) {
             var listItem = $( '#ez-toc-height-test' );
             var height = listItem.height();
 	        listItem.remove();
-            return height - $listElement.children( 'ul' ).first().height();
+            return height - ($listElement.children( 'ul' ).first().height() || 0);
         }
 
         function addListElementBackgroundColorHeightStyleToHead( listElementHeight ) {
             // Remove existing
-            $( '#ez-toc-active-height' ).remove();
+            //$( '#ez-toc-active-height' ).remove();
             // jQuery(..).css(..) doesn't work, because ::before is a pseudo element and not part of the DOM
             // Workaround is to add it to head
-            $( '<style id="ez-toc-active-height">' +
-                '.ez-toc-widget-container ul.ez-toc-list li.active {' +
-                // 'line-heigh:' + listElementHeight + 'px; ' +
-                'height:' + listElementHeight + 'px;' +
-                '} </style>' )
-                .appendTo( 'head' );
+           // $( '<style id="ez-toc-active-height">.ez-toc-widget-container ul.ez-toc-list li.active {height:' + listElementHeight + 'px;' + '} </style>' ).appendTo( 'head' );
+		   $( '.ez-toc-widget-container ul.ez-toc-list li.active' ).css( 'height',listElementHeight + 'px' );
         }
 
         function setStyleForActiveListElementElement( activeListElementLink ) {

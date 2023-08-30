@@ -76,7 +76,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	 * @return void
 	 */
 	public function page_hooks() {
-		$this->can_edit = current_user_can( 'wpcode_edit_snippets' ) && current_user_can( 'unfiltered_html' );
+		$this->can_edit = current_user_can( 'wpcode_edit_snippets' );
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['snippet_id'] ) ) {
 			$snippet_post = get_post( absint( $_GET['snippet_id'] ) );
@@ -107,6 +107,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		add_filter( 'wpcode_admin_js_data', array( $this, 'add_conditional_rules_to_script' ) );
 		add_filter( 'admin_body_class', array( $this, 'body_class_code_type' ) );
 		add_filter( 'admin_body_class', array( $this, 'maybe_editor_height_auto' ) );
+		add_filter( 'admin_body_class', array( $this, 'maybe_syntax_highlighting_disabled' ) );
 		add_filter( 'admin_head', array( $this, 'maybe_editor_height' ) );
 		add_action( 'wpcode_admin_notices', array( $this, 'maybe_show_deactivated_notice' ) );
 	}
@@ -134,7 +135,8 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	public function process_message() {
 		// phpcs:disable WordPress.Security.NonceVerification
 		if ( ! isset( $_GET['message'] ) ) {
-			if ( ! current_user_can( 'unfiltered_html' ) ) {
+			$snippet_types = array_keys( wpcode()->execute->get_options() );
+			if ( in_array( 'html', $snippet_types, true ) && ! current_user_can( 'unfiltered_html', 'wpcode-editor' ) ) {
 				$this->set_error_message( __( 'Sorry, you only have read-only access to this page. Ask your administrator for assistance editing.', 'insert-headers-and-footers' ) );
 			}
 
@@ -175,6 +177,31 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			$this->set_success_message( $messages[ $message ] );
 		}
 
+		if ( in_array( $message, array( 1, 2 ), true ) ) {
+			// The first time the user saves a snippet, if they did not activate it, highlight that and save a user meta to avoid the message from being displayed again.
+			add_action( 'wpcode_admin_notices', array( $this, 'maybe_show_saved_without_activation_notice' ), 5 );
+		}
+
+	}
+
+	/**
+	 * The first time a snippet is saved without being activated, show a notice to the user.
+	 *
+	 * @return void
+	 */
+	public function maybe_show_saved_without_activation_notice() {
+		if ( ! isset( $this->snippet ) ) {
+			return;
+		}
+		$snippet = $this->snippet;
+		if ( ! $snippet->is_active() && ! get_user_meta( get_current_user_id(), 'wpcode_snippet_activate_notice_shown', true ) ) {
+			update_user_meta( get_current_user_id(), 'wpcode_snippet_activate_notice_shown', true );
+			?>
+			<div class="notice-warning fade notice is-dismissible">
+				<p><?php esc_html_e( 'Don\'t forget to activate your snippet using the toggle next to the "Update" button when you are ready to start using it.', 'insert-headers-and-footers' ); ?></p>
+			</div>
+			<?php
+		}
 	}
 
 	/**
@@ -321,10 +348,11 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 					</h2>
 				</div>
 				<div class="wpcode-column">
+					<?php wpcode()->smart_tags->smart_tags_picker( 'wpcode_snippet_code' ); ?>
 					<?php $this->field_code_type(); ?>
 				</div>
 			</div>
-			<textarea name="wpcode_snippet_code" id="wpcode_snippet_code" class="widefat" rows="8" <?php disabled( ! current_user_can( 'unfiltered_html' ) ); ?> style="display:none;"><?php echo esc_textarea( $value ); ?></textarea>
+			<textarea name="wpcode_snippet_code" id="wpcode_snippet_code" class="widefat" rows="8"><?php echo esc_textarea( $value ); ?></textarea>
 			<?php
 			wp_editor(
 				$value,
@@ -389,6 +417,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 				<?php
 				$this->metabox_row( __( 'Shortcode', 'insert-headers-and-footers' ), $shortcode_field, 'wpcode_shortcode' );
 				$this->get_input_row_custom_shortcode();
+				$this->get_input_row_shortcode_attributes();
 				?>
 			</div>
 		</div>
@@ -683,7 +712,12 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	public function get_input_shortcode() {
 		$shortcode = __( 'Please save the snippet first', 'insert-headers-and-footers' );
 		if ( isset( $this->snippet_id ) ) {
-			$shortcode = sprintf( '[wpcode id="%d"]', $this->snippet_id );
+			$shortcode  = sprintf( '[wpcode id="%d"]', $this->snippet_id );
+			$attributes = $this->snippet->get_shortcode_attributes();
+			if ( ! empty( $attributes ) ) {
+				$attributes_string = implode( '="" ', $attributes );
+				$shortcode         = str_replace( ']', ' ' . $attributes_string . '=""]', $shortcode );
+			}
 		}
 		$input  = sprintf(
 			'<input type="text" value=\'%1$s\' id="wpcode-shortcode" class="wpcode-input-text" readonly />',
@@ -968,22 +1002,30 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 
 		$rules = isset( $_POST['wpcode_cl_rules'] ) ? json_decode( sanitize_textarea_field( wp_unslash( $_POST['wpcode_cl_rules'] ) ), true ) : array();
 
+		if ( isset( $_POST['wpcode_shortcode_attributes'] ) ) {
+			$attributes = array_map( 'sanitize_key', wp_unslash( $_POST['wpcode_shortcode_attributes'] ) );
+		} else {
+			$attributes = array();
+		}
+
+
 		$snippet = new WPCode_Snippet(
 			array(
-				'id'             => empty( $_REQUEST['id'] ) ? 0 : absint( $_REQUEST['id'] ),
-				'title'          => isset( $_POST['wpcode_snippet_title'] ) ? sanitize_text_field( wp_unslash( $_POST['wpcode_snippet_title'] ) ) : '',
-				'code'           => $snippet_code,
-				'active'         => isset( $_REQUEST['wpcode_active'] ),
-				'code_type'      => $code_type,
-				'location'       => isset( $_POST['wpcode_auto_insert_location'] ) ? sanitize_text_field( wp_unslash( $_POST['wpcode_auto_insert_location'] ) ) : '',
-				'insert_number'  => isset( $_POST['wpcode_auto_insert_number'] ) ? absint( $_POST['wpcode_auto_insert_number'] ) : 0,
-				'auto_insert'    => isset( $_POST['wpcode_auto_insert'] ) ? absint( $_POST['wpcode_auto_insert'] ) : 0,
-				'tags'           => $tags,
-				'use_rules'      => isset( $_POST['wpcode_conditional_logic_enable'] ),
-				'rules'          => $rules,
-				'priority'       => isset( $_POST['wpcode_priority'] ) ? intval( $_POST['wpcode_priority'] ) : 10,
-				'note'           => isset( $_POST['wpcode_note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['wpcode_note'] ) ) : '',
-				'location_extra' => isset( $_POST['wpcode_auto_insert_location_extra'] ) ? sanitize_text_field( wp_unslash( $_POST['wpcode_auto_insert_location_extra'] ) ) : '',
+				'id'                   => empty( $_REQUEST['id'] ) ? 0 : absint( $_REQUEST['id'] ),
+				'title'                => isset( $_POST['wpcode_snippet_title'] ) ? sanitize_text_field( wp_unslash( $_POST['wpcode_snippet_title'] ) ) : '',
+				'code'                 => $snippet_code,
+				'active'               => isset( $_REQUEST['wpcode_active'] ),
+				'code_type'            => $code_type,
+				'location'             => isset( $_POST['wpcode_auto_insert_location'] ) ? sanitize_text_field( wp_unslash( $_POST['wpcode_auto_insert_location'] ) ) : '',
+				'insert_number'        => isset( $_POST['wpcode_auto_insert_number'] ) ? absint( $_POST['wpcode_auto_insert_number'] ) : 0,
+				'auto_insert'          => isset( $_POST['wpcode_auto_insert'] ) ? absint( $_POST['wpcode_auto_insert'] ) : 0,
+				'tags'                 => $tags,
+				'use_rules'            => isset( $_POST['wpcode_conditional_logic_enable'] ),
+				'rules'                => $rules,
+				'priority'             => isset( $_POST['wpcode_priority'] ) ? intval( $_POST['wpcode_priority'] ) : 10,
+				'note'                 => isset( $_POST['wpcode_note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['wpcode_note'] ) ) : '',
+				'location_extra'       => isset( $_POST['wpcode_auto_insert_location_extra'] ) ? sanitize_text_field( wp_unslash( $_POST['wpcode_auto_insert_location_extra'] ) ) : '',
+				'shortcode_attributes' => $attributes,
 			)
 		);
 
@@ -1066,6 +1108,11 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			$this->code_type = $this->snippet->get_code_type();
 		} else {
 			$this->code_type = apply_filters( 'wpcode_default_code_type', $this->code_type );
+			$snippet_types   = wpcode()->execute->get_options();
+			// If the selected code type is not in the available types, change the selected type to the first available type.
+			if ( ! isset( $snippet_types[ $this->code_type ] ) ) {
+				$this->code_type = key( $snippet_types );
+			}
 		}
 	}
 
@@ -1338,12 +1385,16 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		$data['blocks_text']            = __( 'Upgrade to PRO today and unlock building snippets using the Gutenberg Block Editor. Create templates using blocks and use the full power of WPCode to insert them in your site.', 'insert-headers-and-footers' );
 		$data['blocks_url']             = wpcode_utm_url( 'https://wpcode.com/lite/', 'snippet-editor', 'blocks', 'modal' );
 		$data['blocks_button']          = $data['save_to_library_button'];
+		$data['shortcode_attributes']   = __( 'Shortcode Attributes', 'insert-headers-and-footers' );
 		$data['php_cl_location_notice'] = sprintf(
 		// Translators: %1$s Opening anchor tag. %2$s Closing anchor tag.
 			__( 'For better results using conditional logic with PHP snippets we automatically switched the auto-insert location to "Frontend Conditional Logic" that runs later. If you want to run the snippet earlier please switch back to "Run Everywhere" but note not all conditional logic options will be available. %1$sRead more%2$s', 'insert-headers-and-footers' ),
 			'<a href="' . wpcode_utm_url( 'https://wpcode.com/docs/conditional-logic-php-snippets/', 'snippet-editor', 'php-conditional-logic' ) . '" target="_blank">',
 			'</a>'
 		);
+
+		$data['cl_labels']        = wpcode_get_conditions_relation_labels();
+		$data['cl_labels_custom'] = $this->get_conditional_logic_operators_custom_labels();
 
 		return $data;
 	}
@@ -1372,6 +1423,23 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		$height_auto = wpcode()->settings->get_option( 'editor_height_auto' );
 		if ( false !== $height_auto ) {
 			$body_class .= ' wpcode-editor-auto ';
+		}
+
+		return $body_class;
+	}
+
+	/**
+	 * If the current user has syntax_highlighting disabled add a body class.
+	 *
+	 * @param string $body_class The body class.
+	 *
+	 * @return string
+	 */
+	public function maybe_syntax_highlighting_disabled( $body_class ) {
+		$user = wp_get_current_user();
+
+		if ( ! isset( $user->syntax_highlighting ) || 'false' === $user->syntax_highlighting || ! function_exists( 'wp_enqueue_code_editor' ) ) {
+			$body_class .= ' wpcode-syntax-highlighting-disabled ';
 		}
 
 		return $body_class;
@@ -1415,6 +1483,87 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			'',
 			__( 'Use this field to define a custom shortcode name instead of the id-based one.', 'insert-headers-and-footers' ),
 			true
+		);
+	}
+
+	/**
+	 * Method used to output the markup for the shortcode attributes input.
+	 *
+	 * @return void
+	 */
+	public function get_input_row_shortcode_attributes() {
+		$button = sprintf(
+			'<button class="wpcode-button wpcode-button-icon wpcode-button-secondary" id="wpcode_add_attribute" type="button"><span>%1$s</span> %2$s</button>',
+			get_wpcode_icon( 'plus', 16, 16, '0 96 960 960' ),
+			__( 'Add&nbsp;Attribute', 'insert-headers-and-footers' )
+		);
+		$input  = sprintf(
+			'<div class="wpcode-input-with-button"><input type="text" id="wpcode-shortcode-attribute-name" placeholder="%1$s" class="wpcode-input-text" />%2$s</div>',
+			__( 'Attribute name', 'insert-headers-and-footers' ),
+			$button
+		);
+
+		$input .= $this->help_icon(
+			sprintf(
+			// Translators: %1$s is the opening <code> tag, %2$s is the closing </code> tag.
+				__( 'Use this field to define the attribute name for your shortcode and click Add Attribute. Attributes added here will be available to use as smart tags and as variables inside snippets. E.g. an attribute named "keyword" will be available in a PHP snippet as %1$s$keyword%2$s. %3$sLearn more%4$s.', 'insert-headers-and-footers' ),
+				'<code>',
+				'</code>',
+				'<a href="' . wpcode_utm_url( 'https://wpcode.com/docs/shortcode-attributes/', 'snippet-editor', 'shortcode-attributes' ) . '" target="_blank">',
+				'</a>'
+			),
+			false
+		);
+
+		$input .= '<div id="wpcode-shortcode-attributes-list" class="wpcode-shortcode-attributes-list">';
+		$input .= $this->get_shortcode_attributes_list();
+		$input .= '<script type="text/template" id="wpcode_shortcode_attribute_list_item_template">' . $this->get_shortcode_attribute_list_item() . '</script>';
+		$input .= '</div>';
+
+		$this->metabox_row(
+			__( 'Shortcode Attributes', 'insert-headers-and-footers' ),
+			$input,
+			'wpcode-shortcode-attribute-name',
+			'',
+			''
+		);
+	}
+
+	/**
+	 * Get the markup of the shortcode attributes list.
+	 *
+	 * @return string|void
+	 */
+	public function get_shortcode_attributes_list() {
+		if ( ! isset( $this->snippet ) ) {
+			return '<ul></ul>';
+		}
+		$attributes = $this->snippet->get_shortcode_attributes();
+		if ( empty( $attributes ) ) {
+			return '<ul></ul>';
+		}
+		$output = '<ul>';
+		foreach ( $attributes as $attribute ) {
+			$output .= sprintf(
+				$this->get_shortcode_attribute_list_item(),
+				esc_html( $attribute )
+			);
+		}
+		$output .= '</ul>';
+
+		return $output;
+	}
+
+	/**
+	 * Get the markup of the shortcode attribute list item.
+	 *
+	 * @return string
+	 */
+	public function get_shortcode_attribute_list_item() {
+		return sprintf(
+			'<li><span class="wpcode-shortcode-attribute-name">%1$s</span><button class="wpcode-shortcode-attribute-remove wpcode-button-just-icon">%2$s</button><input name="wpcode_shortcode_attributes[]" class="wpcode-shortcode-attribute-item-input" value="%1$s" type="hidden" /></li>',
+			'%1$s',
+			get_wpcode_icon( 'trash' )
 		);
 	}
 
@@ -1849,5 +1998,32 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			</p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Get a list of custom conditional logic operators for the conditional logic builder.
+	 *
+	 * @return array
+	 */
+	public function get_conditional_logic_operators_custom_labels() {
+		$options = wpcode()->conditional_logic->get_all_admin_options();
+
+		$labels = array();
+
+		foreach ( $options as $option ) {
+			foreach ( $option['options'] as $key => $opt_group ) {
+				if ( ! empty( $opt_group['operator_labels'] ) ) {
+					$labels[ $key ] = $opt_group['operator_labels'];
+				}
+				if ( ! empty( $opt_group['placeholder'] ) ) {
+					if ( ! isset( $labels[ $key ] ) ) {
+						$labels[ $key ] = array();
+					}
+					$labels[ $key ]['placeholder'] = $opt_group['placeholder'];
+				}
+			}
+		}
+
+		return $labels;
 	}
 }

@@ -22,6 +22,9 @@
 .header-html-inner img.alignnone {
     display: inline-block;
 }
+.drawer-content .mobile-html, .drawer-content .mobile-html2 {
+    width: 100%;
+}
 .site-header-row {
     display: grid;
 	grid-template-columns: auto auto;

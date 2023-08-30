@@ -63,10 +63,32 @@ class WPCode_Code_Editor {
 		// Allow filtering of the editor args.
 		$editor_args = apply_filters( 'wpcode_editor_config', $editor_args );
 
+		// Add filter to override the current user meta for syntax highlighting.
+		add_filter( 'get_user_metadata', array( $this, 'override_user_meta' ), 10, 4 );
 		// Enqueue code editor and settings for manipulating HTML.
 		$this->settings = wp_enqueue_code_editor( $editor_args );
+		// Remove the filter.
+		remove_filter( 'get_user_metadata', array( $this, 'override_user_meta' ) );
 
 		return $this->settings;
+	}
+
+	/**
+	 * When using the WPCode editor always load syntax highlighting.
+	 *
+	 * @param mixed  $value The meta value.
+	 * @param int    $object_id The user ID.
+	 * @param string $meta_key The meta key being looked up.
+	 * @param bool   $single True if only the first value should be returned.
+	 *
+	 * @return bool|mixed
+	 */
+	public function override_user_meta( $value, $object_id, $meta_key, $single ) {
+		if ( 'syntax_highlighting' !== $meta_key || ! apply_filters( 'wpcode_override_syntax_highlighting', true ) ) {
+			return $value;
+		}
+
+		return true;
 	}
 
 	/**

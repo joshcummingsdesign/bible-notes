@@ -734,6 +734,7 @@ function mobile_button() {
  */
 function header_cart() {
 	if ( class_exists( 'woocommerce' ) ) {
+		wp_enqueue_script( 'wc-cart-fragments' );
 		$label      = kadence()->option( 'header_cart_label' );
 		$show_total = kadence()->option( 'header_cart_show_total' );
 		$icon       = kadence()->option( 'header_cart_icon', 'shopping-bag' );
@@ -835,6 +836,7 @@ function cart_popup() {
  */
 function mobile_cart() {
 	if ( class_exists( 'woocommerce' ) ) {
+		wp_enqueue_script( 'wc-cart-fragments' );
 		$label      = kadence()->option( 'header_mobile_cart_label' );
 		$show_total = kadence()->option( 'header_mobile_cart_show_total' );
 		$icon       = kadence()->option( 'header_mobile_cart_icon', 'shopping-bag' );

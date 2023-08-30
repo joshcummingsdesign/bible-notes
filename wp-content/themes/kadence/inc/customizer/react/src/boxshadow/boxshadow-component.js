@@ -185,6 +185,7 @@ class BoxshadowComponent extends Component {
 								tooltip={ __( 'Border Color' ) }
 								onChangeComplete={ ( color, isPalette ) => this.handleChangeComplete( color, isPalette ) }
 								customizer={ this.props.customizer }
+								controlRef={ this.anchorNodeRef }
 							/>
 						</div>
 						<div className="kt-box-x-settings kt-box-shadow-subset">
@@ -276,6 +277,7 @@ class BoxshadowComponent extends Component {
 										tooltip={ __( 'Border Color' ) }
 										onChangeComplete={ ( color, isPalette ) => this.handleChangeComplete( color, isPalette ) }
 										customizer={ this.props.customizer }
+										controlRef={ this.anchorNodeRef }
 									/>
 								</div>
 								<div className="kt-box-x-settings kt-box-shadow-subset">

@@ -20,7 +20,6 @@ if ( ! class_exists( 'ezTOC_Admin' ) ) {
 		public function __construct() {
 
 			$this->hooks();
-			//$this->registerMetaboxes();
 		}
 
 		/**
@@ -92,13 +91,10 @@ if ( ! class_exists( 'ezTOC_Admin' ) ) {
 		 * @static
 		 */
 		public function registerScripts() {
+			$min = defined ( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			wp_register_script( 'cn_toc_admin_script', EZ_TOC_URL . "assets/js/admin$min.js", array( 'jquery', 'wp-color-picker' ), ezTOC::VERSION, true );
+			wp_register_style( 'cn_toc_admin_style', EZ_TOC_URL . "assets/css/admin$min.css", array( 'wp-color-picker' ), ezTOC::VERSION );
 
-			wp_register_script( 'cn_toc_admin_script', EZ_TOC_URL . 'assets/js/admin.js', array( 'jquery', 'wp-color-picker' ), ezTOC::VERSION, true );
-			wp_register_style( 'cn_toc_admin_style', EZ_TOC_URL . 'assets/css/admin.css', array( 'wp-color-picker' ), ezTOC::VERSION );
-
-
-//                                wp_enqueue_style( 'ez-toc' );
-//                                self::inlineStickyToggleCSS();
 			wp_enqueue_script( 'cn_toc_admin_script' );
             $data = array(
                 'ajax_url'      		       => admin_url( 'admin-ajax.php' ),
@@ -110,10 +106,10 @@ if ( ! class_exists( 'ezTOC_Admin' ) ) {
             wp_localize_script( 'cn_toc_admin_script', 'cn_toc_admin_data', $data );
 			self::inlineAdminStickyToggleJS();
                         
-//                        self::inlineAdminOccasionalAdsPopUpCSS_JS();
-                        
                         self::inlineAdminAMPNonJS();
 						self::inlineAdminHeadingsPaddingJS();
+						self::inlineAdminDisplayHeaderLabel();
+						self::inlineAdminInitialView();
 		}
                 
                 /**
@@ -136,7 +132,6 @@ if ( ! class_exists( 'ezTOC_Admin' ) ) {
                         $inlineAdminAMPNonJS = <<<inlineAdminAMPNonJS
 jQuery(function($) {
     let tocAMPSupportOption = $(document).find("input[name='ez-toc-settings[toc-run-on-amp-pages]']");
-//        console.log(tocAMPSupportOption.length);
     if( tocAMPSupportOption.length > 0 ) {
         $(tocAMPSupportOption).attr('disabled', true);
     }
@@ -232,6 +227,84 @@ inlineAdminHeadingsPaddingJS;
 					wp_add_inline_script( 'cn_toc_admin_script', $inlineAdminHeadingsPaddingJS );
 					 
 				}
+
+		/**
+		 * inlineAdminDisplayHeaderLabel Method
+		 * Prints out inline AMP Non JS.
+		 *
+		 * @access private
+		 * @return void
+		 * @since  2.0.51
+		 * @static
+		*/
+		private static function inlineAdminDisplayHeaderLabel() {
+			
+		$inlineAdminDisplayHeaderLabel = <<<inlineAdminDisplayHeaderLabel
+jQuery(function($) {
+
+	let showHeadingText = $('#eztoc-general').find("input[name='ez-toc-settings[show_heading_text]']");
+	let visiblityOnHeaderText = $('#eztoc-general').find("input[name='ez-toc-settings[visibility_on_header_text]']");
+	let headerText = $('#eztoc-general').find("input[name='ez-toc-settings[heading_text]']");
+
+	if($(showHeadingText).prop('checked') == false) {
+		$(visiblityOnHeaderText).parents('tr').hide(500);
+		$(headerText).parents('tr').hide(500);
+	}
+
+	$(document).on("change, click", "input[name='ez-toc-settings[show_heading_text]']", function() {
+	
+		if($(this).prop('checked') == true) {
+			$(visiblityOnHeaderText).parents('tr').show(500);
+			$(headerText).parents('tr').show(500);
+		} else {
+			$(visiblityOnHeaderText).parents('tr').hide(500);
+			$(headerText).parents('tr').hide(500);
+		}
+
+	});
+});
+inlineAdminDisplayHeaderLabel;
+
+			wp_add_inline_script( 'cn_toc_admin_script', $inlineAdminDisplayHeaderLabel );
+				
+		}
+
+		/**
+		 * inlineAdminInitialView Method
+		 * Prints out inline AMP Non JS.
+		 *
+		 * @access private
+		 * @return void
+		 * @since  2.0.51
+		 * @static
+		*/
+		private static function inlineAdminInitialView() {
+			
+		$inlineAdminInitialView = <<<inlineAdminInitialView
+jQuery(function($) {
+
+	let visibility = $('#eztoc-general').find("input[name='ez-toc-settings[visibility]']");
+	let visiblityHideByDefault = $('#eztoc-general').find("input[name='ez-toc-settings[visibility_hide_by_default]']");
+	
+	if($(visibility).prop('checked') == false) {
+		$(visiblityHideByDefault).parents('tr').hide(500);
+	}
+
+	$(document).on("change, click", "input[name='ez-toc-settings[visibility]']", function() {
+	
+		if($(this).prop('checked') == true) {
+			$(visiblityHideByDefault).parents('tr').show(500);
+		} else {
+			$(visiblityHideByDefault).parents('tr').hide(500);
+		}
+
+	});
+});
+inlineAdminInitialView;
+
+			wp_add_inline_script( 'cn_toc_admin_script', $inlineAdminInitialView );
+				
+		}
 				
                 /**
                  * inlineAdminOccasionalAdsPopUpCSS_JS Method
@@ -283,6 +356,7 @@ jQuery(function($) {
     let stickyToggleHeight = $('#eztoc-general').find("select[name='ez-toc-settings[sticky-toggle-height]']");
     let stickyToggleHeightCustom = $('#eztoc-general').find("input[name='ez-toc-settings[sticky-toggle-height-custom]']");
     let stickyToggleCloseOnMobile = $('#eztoc-general').find("input[name='ez-toc-settings[sticky-toggle-close-on-mobile]']");
+	let stickyToggleOpen = $('#eztoc-general').find("input[name='ez-toc-settings[sticky-toggle-open]']");
     
     $stickyToggleOpenButtonTextJS
     
@@ -292,12 +366,14 @@ jQuery(function($) {
         $(stickyToggleWidthCustom).parents('tr').hide(500);
         $(stickyToggleHeight).parents('tr').hide(500);
         $(stickyToggleCloseOnMobile).parents('tr').hide(500);
+		$(stickyToggleOpen).parents('tr').hide(500);
                                 
         $(stickyToggleHeightCustom).parents('tr').hide(500);
         $('#eztoc-general').find("input[name='ez-toc-settings[sticky-toggle-position]'][value='left']").prop('checked', true);
         $(stickyToggleWidth).val('auto');
         $(stickyToggleHeight).val('auto');
         $(stickyToggleCloseOnMobile).prop('checked', false);
+		$(stickyToggleOpen).prop('checked', false);
 
                                 
         $('input[name="ez-toc-settings[sticky-toggle-open-button-text]"').parents('tr').hide(500);
@@ -310,6 +386,7 @@ jQuery(function($) {
             $(stickyToggleWidth).parents('tr').show(500);
             $(stickyToggleHeight).parents('tr').show(500);
             $(stickyToggleCloseOnMobile).parents('tr').show(500);
+			$(stickyToggleOpen).parents('tr').show(500);
                                 
             $('input[name="ez-toc-settings[sticky-toggle-open-button-text]"').parents('tr').show(500);
             $('input[name="ez-toc-settings[sticky-toggle-open-button-text]"').val('Index');
@@ -319,6 +396,7 @@ jQuery(function($) {
             $(stickyToggleWidthCustom).parents('tr').hide(500);
             $(stickyToggleHeight).parents('tr').hide(500);
             $(stickyToggleCloseOnMobile).parents('tr').hide(500);
+			$(stickyToggleOpen).parents('tr').hide(500);
                                 
             $(stickyToggleHeightCustom).parents('tr').hide(500);
             $('input[name="ez-toc-settings[sticky-toggle-open-button-text]"').parents('tr').hide(500);
@@ -326,6 +404,7 @@ jQuery(function($) {
             $(stickyToggleWidth).val('auto');
             $(stickyToggleHeight).val('auto');
             $(stickyToggleCloseOnMobile).prop('checked', false);
+			$(stickyToggleOpen).prop('checked', false);
                                 
             $('input[name="ez-toc-settings[sticky-toggle-open-button-text]"').val('Index');
         }
@@ -337,7 +416,6 @@ jQuery(function($) {
         $(stickyToggleWidthCustom).parents('tr').hide();
         
     $(document).on("change", "select[name='ez-toc-settings[sticky-toggle-width]']", function() {
-//        console.log("change-stickyToggleWidth");
         if($(stickyToggleWidth).val() == 'custom') {
             $(stickyToggleWidthCustom).val('350px');
             $(stickyToggleWidthCustom).parents('tr').show(500);
@@ -352,7 +430,6 @@ jQuery(function($) {
         $(stickyToggleHeightCustom).parents('tr').hide();
         
     $(document).on("change", "select[name='ez-toc-settings[sticky-toggle-height]']", function() {
-//        console.log("change-stickyToggleHeight");
         if($(stickyToggleHeight).val() == 'custom') {
             $(stickyToggleHeightCustom).val('800px');
             $(stickyToggleHeightCustom).parents('tr').show(500);
@@ -434,7 +511,7 @@ INLINESTICKYTOGGLEJS;
 		 */
 		public function metabox() {
 
-			add_meta_box( 'ez-toc', esc_html__( 'Table of Contents', 'ez-toc' ), array( $this, 'displayMetabox' ) );
+			add_meta_box( 'ez-toc', esc_html__( 'Table of Contents', 'easy-table-of-contents' ), array( $this, 'displayMetabox' ) );
 		}
 
 		/**
@@ -691,21 +768,20 @@ INLINESTICKYTOGGLEJS;
 
 				if ( isset( $_REQUEST['ez-toc-settings']['alttext'] ) && ! empty( $_REQUEST['ez-toc-settings']['alttext'] ) ) {
 
+					$alttext = '';
+					
 					if ( is_string( $_REQUEST['ez-toc-settings']['alttext'] ) ) {
 
 						$alttext = trim( $_REQUEST['ez-toc-settings']['alttext'] );
 
-					} else {
+							/*
+						* This is basically `esc_html()` but does not encode quotes.
+						* This is to allow angle brackets and such which `wp_kses_post` would strip as "evil" scripts.
+						*/
+						$alttext = wp_check_invalid_utf8( $alttext );
+						$alttext = _wp_specialchars( $alttext, ENT_NOQUOTES );
 
-						$alttext = '';
-					}
-
-					/*
-					 * This is basically `esc_html()` but does not encode quotes.
-					 * This is to allow angle brackets and such which `wp_kses_post` would strip as "evil" scripts.
-					 */
-					$alttext = wp_check_invalid_utf8( $alttext );
-					$alttext = _wp_specialchars( $alttext, ENT_NOQUOTES );
+					} 					
 
 					update_post_meta( $post_id, '_ez-toc-alttext', wp_kses_post( $alttext ) );
 
@@ -725,21 +801,19 @@ INLINESTICKYTOGGLEJS;
 
 				if ( isset( $_REQUEST['ez-toc-settings']['exclude'] ) && ! empty( $_REQUEST['ez-toc-settings']['exclude'] ) ) {
 
+					$exclude = '';
 					if ( is_string( $_REQUEST['ez-toc-settings']['exclude'] ) ) {
 
 						$exclude = trim( $_REQUEST['ez-toc-settings']['exclude'] );
 
-					} else {
+							/*
+						* This is basically `esc_html()` but does not encode quotes.
+						* This is to allow angle brackets and such which `wp_kses_post` would strip as "evil" scripts.
+						*/
+						$exclude = wp_check_invalid_utf8( $exclude );
+						$exclude = _wp_specialchars( $exclude, ENT_NOQUOTES );
 
-						$exclude = '';
-					}
-
-					/*
-					 * This is basically `esc_html()` but does not encode quotes.
-					 * This is to allow angle brackets and such which `wp_kses_post` would strip as "evil" scripts.
-					 */
-					$exclude = wp_check_invalid_utf8( $exclude );
-					$exclude = _wp_specialchars( $exclude, ENT_NOQUOTES );
+					} 					
 
 					update_post_meta( $post_id, '_ez-toc-exclude', wp_kses_post( $exclude ) );
 
@@ -758,13 +832,10 @@ INLINESTICKYTOGGLEJS;
 	     *
 	     */
 		public function load_scripts($pagenow){
-
-			if (isset($pagenow) && $pagenow != 'settings_page_table-of-contents' && strpos($pagenow, 'table-of-contents') == false) {
-                
-                return false;
-             }
-
-			  wp_enqueue_script( 'eztoc-admin-js', EZ_TOC_URL . 'assets/js/eztoc-admin.js',array('jquery'), ezTOC::VERSION,true );
+			
+			 if($pagenow == 'settings_page_table-of-contents'){
+			 	$min = defined ( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+				wp_enqueue_script( 'eztoc-admin-js', EZ_TOC_URL . "assets/js/eztoc-admin$min.js",array('jquery'), ezTOC::VERSION,true );
 
 				 $data = array(     
 					'ajax_url'      		       => admin_url( 'admin-ajax.php' ),
@@ -774,6 +845,11 @@ INLINESTICKYTOGGLEJS;
 				$data = apply_filters('eztoc_localize_filter',$data,'eztoc_admin_data');
 
 				wp_localize_script( 'eztoc-admin-js', 'eztoc_admin_data', $data );
+
+				$this->eztoc_dequeue_scripts();
+
+			 }
+			  
 		}
 
      /**
@@ -789,6 +865,9 @@ INLINESTICKYTOGGLEJS;
 		        if ( !wp_verify_nonce( $_POST['eztoc_security_nonce'], 'eztoc_ajax_check_nonce' ) ){
 		           return;  
 		        }   
+				if ( !current_user_can( 'manage_options' ) ) {
+					return;  					
+				}
 		        $message        = $this->eztoc_sanitize_textarea_field($_POST['message']); 
 		        $email          = sanitize_email($_POST['email']);
 		                                
@@ -877,6 +956,16 @@ INLINESTICKYTOGGLEJS;
 		public function page() {
 
 			include EZ_TOC_PATH . '/includes/inc.admin-options-page.php';
+		}
+
+		/**
+		 * Function used to dequeue unwanted scripts on ETOC settings page.
+		 *
+		 * @since  2.0.52
+		 */
+		public function eztoc_dequeue_scripts() {						
+				wp_dequeue_script( 'chats-js' ); 
+				wp_dequeue_script( 'custom_wp_admin_js' );						            
 		}
 	}
 

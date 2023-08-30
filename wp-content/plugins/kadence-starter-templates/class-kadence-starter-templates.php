@@ -10,6 +10,7 @@ namespace Kadence_Starter_Templates;
 use function activate_plugin;
 use function plugins_api;
 use function wp_send_json_error;
+use WP_Query;
 
 /**
  * Block direct access to the main plugin file.
@@ -196,8 +197,42 @@ class Starter_Templates {
 			define( 'KADENCE_STARTER_TEMPLATES_URL', trailingslashit( plugin_dir_url( __FILE__ ) ) );
 		}
 		if ( ! defined( 'KADENCE_STARTER_TEMPLATES_VERSION' ) ) {
-			define( 'KADENCE_STARTER_TEMPLATES_VERSION', '1.2.20' );
+			define( 'KADENCE_STARTER_TEMPLATES_VERSION', '1.2.21' );
 		}
+	}
+
+	/**
+	 * Get Page by title.
+	 */
+	public function get_page_by_title( $page_title, $output = OBJECT, $post_type = 'page' ) {
+		$query = new WP_Query(
+			array(
+				'post_type'              => $post_type,
+				'title'                  => $page_title,
+				'post_status'            => 'all',
+				'posts_per_page'         => 1,
+				'no_found_rows'          => true,
+				'ignore_sticky_posts'    => true,
+				'update_post_term_cache' => false,
+				'update_post_meta_cache' => false,
+				'orderby'                => 'date',
+				'order'                  => 'ASC',
+			)
+		);
+
+		if ( ! empty( $query->post ) ) {
+			$_post = $query->post;
+
+			if ( ARRAY_A === $output ) {
+				return $_post->to_array();
+			} elseif ( ARRAY_N === $output ) {
+				return array_values( $_post->to_array() );
+			}
+
+			return $_post;
+		}
+
+		return null;
 	}
 
 	/**
@@ -246,14 +281,14 @@ class Starter_Templates {
 			set_theme_mod( 'nav_menu_locations', $menus_array );
 		}
 		if ( isset( $selected_import['homepage'] ) && ! empty( $selected_import['homepage'] ) ) {
-			$homepage = get_page_by_title( $selected_import['homepage'] );
+			$homepage = $this->get_page_by_title( $selected_import['homepage'] );
 			if ( isset( $homepage ) && $homepage->ID ) {
 				update_option( 'show_on_front', 'page' );
 				update_option( 'page_on_front', $homepage->ID ); // Front Page.
 			}
 		}
 		if ( isset( $selected_import['blogpage'] ) && ! empty( $selected_import['blogpage'] ) ) {
-			$blogpage = get_page_by_title( $selected_import['blogpage'] );
+			$blogpage = $this->get_page_by_title( $selected_import['blogpage'] );
 			if ( isset( $blogpage ) && $blogpage->ID ) {
 				update_option( 'page_for_posts', $blogpage->ID );
 			}
@@ -524,7 +559,7 @@ class Starter_Templates {
 			'update_card' => 'Update Billing Card',
 		);
 		foreach ( $rcppages as $rcp_page_name => $rcp_page_title ) {
-			$rcppage = get_page_by_title( $rcp_page_title );
+			$rcppage = $this->get_page_by_title( $rcp_page_title );
 			if ( isset( $rcppage ) && $rcppage->ID ) {
 				$rcp_options[ $rcp_page_name ] = $rcppage->ID;
 			}
@@ -543,7 +578,7 @@ class Starter_Templates {
 			'woocommerce_myaccount_page_id' => $myaccount,
 		);
 		foreach ( $woopages as $woo_page_name => $woo_page_title ) {
-			$woopage = get_page_by_title( $woo_page_title );
+			$woopage = $this->get_page_by_title( $woo_page_title );
 			if ( isset( $woopage ) && $woopage->ID ) {
 				update_option( $woo_page_name, $woopage->ID );
 			}
@@ -595,6 +630,7 @@ class Starter_Templates {
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-customizer-importer.php';
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-import-elementor.php';
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-import-fluent.php';
+		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-import-depicter.php';
 	}
 
 	/**
@@ -1517,7 +1553,7 @@ class Starter_Templates {
 
 							$installed = $upgrader->install( $api->download_link );
 							if ( $installed ) {
-								$silent = ( 'give' === $base || 'elementor' === $base || 'restrict-content' === $base ? false : true );
+								$silent = ( 'give' === $base || 'elementor' === $base || 'fluentform' === $base || 'restrict-content' === $base ? false : true );
 								if ( 'give' === $base ) {
 									add_option( 'give_install_pages_created', 1, '', false );
 								}
@@ -2164,11 +2200,11 @@ class Starter_Templates {
 			/**
 			 * Clean up default contents.
 			 */
-			$hello_world = get_page_by_title( 'Hello World', OBJECT, 'post' );
+			$hello_world = $this->get_page_by_title( 'Hello World', OBJECT, 'post' );
 			if ( $hello_world ) {
 				wp_delete_post( $hello_world->ID, true );// Hello World.
 			}
-			$sample_page = get_page_by_title( 'Sample Page' );
+			$sample_page = $this->get_page_by_title( 'Sample Page' );
 			if ( $sample_page ) {
 				wp_delete_post( $sample_page->ID, true ); // Sample Page.
 			}

@@ -5,6 +5,10 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_action( 'wp_head', 'wpcode_global_frontend_header' );
 add_action( 'wp_footer', 'wpcode_global_frontend_footer' );
 add_action( 'wp_body_open', 'wpcode_global_frontend_body', 1 );

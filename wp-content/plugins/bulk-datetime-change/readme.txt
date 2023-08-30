@@ -4,8 +4,8 @@ Donate link: https://shop.riverforest-wp.info/donate/
 Tags: date, time, media, posts, pages
 Requires at least: 4.6
 Requires PHP: 5.6
-Tested up to: 6.1
-Stable tag: 1.12
+Tested up to: 6.3
+Stable tag: 1.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,15 @@ none
 2. Settings
 
 == Changelog ==
+
+= 1.15 =
+Additions regarding add-ons.
+
+= 1.14 =
+The "Filter" for post types now have explanatory tooltips.
+
+= 1.13 =
+The "Update" and "Change" buttons now have explanatory tooltips.
 
 = 1.12 =
 Fixed potential security issue.

@@ -3,6 +3,10 @@
  * Lite-specific admin notices.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_action( 'admin_init', 'wpcode_maybe_add_library_connect_notice' );
 add_action( 'wpcode_admin_page', 'wpcode_maybe_add_lite_top_bar_notice', 4 );
 add_action( 'wpcode_admin_page_content_wpcode-headers-footers', 'wpcode_headers_footers_bottom_notice', 250 );
@@ -73,9 +77,9 @@ function wpcode_maybe_add_lite_top_bar_notice() {
 	}
 
 	$upgrade_url = wpcode_utm_url(
-		'https://wpcode.com/lite',
-		$screen,
-		'top-notice'
+		'https://wpcode.com/lite/',
+		'top-notice',
+		$screen
 	);
 
 	WPCode_Notice::top(

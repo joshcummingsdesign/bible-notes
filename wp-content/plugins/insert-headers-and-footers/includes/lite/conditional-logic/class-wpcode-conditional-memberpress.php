@@ -5,6 +5,11 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+
 /**
  * The WPCode_Conditional_MemberPress class.
  */
@@ -61,7 +66,7 @@ class WPCode_Conditional_MemberPress_Lite extends WPCode_Conditional_Type {
 				),
 			),
 			'memberpress_user' => array(
-				'label'   => __( 'User active membership', 'wpcode-premium' ),
+				'label'   => __( 'User active membership', 'insert-headers-and-footers' ),
 				'type'    => 'select',
 				'options' => array(),
 				'upgrade' => array(

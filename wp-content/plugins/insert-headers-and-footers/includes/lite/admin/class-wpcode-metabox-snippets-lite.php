@@ -60,31 +60,31 @@ class WPCode_Metabox_Snippets_Lite extends WPCode_Metabox_Snippets {
 		?>
 		<div class="wpcode-blur-area">
 			<p>
-				<?php esc_html_e( 'Choose the snippets you want to run on this page. Please note: only active snippets will be executed.', 'wpcode-premium' ); ?>
+				<?php esc_html_e( 'Choose the snippets you want to run on this page. Please note: only active snippets will be executed.', 'insert-headers-and-footers' ); ?>
 			</p>
 			<div class="wpcode-metabox-snippets">
 				<div id="wpcode-snippet-chooser">
 					<h3>
-						<?php esc_html_e( 'Select snippets', 'wpcode-premium' ); ?>
+						<?php esc_html_e( 'Select snippets', 'insert-headers-and-footers' ); ?>
 						<button class="wpcode-button-just-icon wpcode-drawer-toggle" id="wpcode-close-drawer">
 							<?php wpcode_icon( 'close' ); ?>
 						</button>
 					</h3>
 					<div class="wpcode-snippets-search">
-						<input type="text" id="wpcode-search-snippets" class="wpcode-input-text" placeholder="<?php esc_attr_e( 'Search snippets', 'wpcode-premium' ); ?>"/>
+						<input type="text" id="wpcode-search-snippets" class="wpcode-input-text" placeholder="<?php esc_attr_e( 'Search snippets', 'insert-headers-and-footers' ); ?>"/>
 						<span class="wpcode-loading-spinner" id="wpcode-chooser-spinner"></span>
 					</div>
 					<div class="wpcode-chooser-fixed-height">
 						<div id="wpcode-choose-snippets"></div>
 						<div class="wpcode-choose-actions">
-							<button type="button" class="wpcode-button wpcode-button-secondary" id="wpcode-metabox-load-more"><?php esc_html_e( 'Load more snippets', 'wpcode-premium' ); ?></button>
+							<button type="button" class="wpcode-button wpcode-button-secondary" id="wpcode-metabox-load-more"><?php esc_html_e( 'Load more snippets', 'insert-headers-and-footers' ); ?></button>
 						</div>
 					</div>
 				</div>
 				<div class="wpcode-picked-snippets-area">
 					<h3>
 						<button class="wpcode-button wpcode-drawer-toggle" id="wpcode-add-snippet-toggle" type="button">
-							<?php esc_html_e( '+ Choose Snippet', 'wpcode-premium' ); ?>
+							<?php esc_html_e( '+ Choose Snippet', 'insert-headers-and-footers' ); ?>
 						</button>
 					</h3>
 					<div id="wpcode-picked-snippets">

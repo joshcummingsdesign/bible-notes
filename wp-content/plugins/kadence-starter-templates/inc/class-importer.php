@@ -7,6 +7,8 @@
 
 namespace Kadence_Starter_Templates;
 
+use WP_Query;
+
 class Importer {
 	/**
 	 * The importer class object used for importing content.
@@ -627,6 +629,39 @@ class Importer {
 		return $data;
 	}
 	/**
+	 * Get Page by title.
+	 */
+	public function get_page_by_title( $page_title, $output = OBJECT, $post_type = 'page' ) {
+		$query = new WP_Query(
+			array(
+				'post_type'              => $post_type,
+				'title'                  => $page_title,
+				'post_status'            => 'all',
+				'posts_per_page'         => 1,
+				'no_found_rows'          => true,
+				'ignore_sticky_posts'    => true,
+				'update_post_term_cache' => false,
+				'update_post_meta_cache' => false,
+				'orderby'                => 'date',
+				'order'                  => 'ASC',
+			)
+		);
+
+		if ( ! empty( $query->post ) ) {
+			$_post = $query->post;
+
+			if ( ARRAY_A === $output ) {
+				return $_post->to_array();
+			} elseif ( ARRAY_N === $output ) {
+				return array_values( $_post->to_array() );
+			}
+
+			return $_post;
+		}
+
+		return null;
+	}
+	/**
 	 * Helper function: Sideload Image import
 	 * Taken from the core media_sideload_image function and
 	 * modified to return an array of data instead of html.
@@ -643,7 +678,7 @@ class Importer {
 			$clean_filename = str_replace( $ext, "", $file_name );
 			$clean_filename = trim( html_entity_decode( sanitize_title( $clean_filename ) ) );
 			if ( post_exists( $clean_filename ) ) {
-				$attachment = get_page_by_title( $clean_filename, OBJECT, 'attachment' );
+				$attachment = $this->get_page_by_title( $clean_filename, OBJECT, 'attachment' );
 				if ( ! empty( $attachment ) ) {
 					return wp_get_attachment_url( $attachment->ID );
 				}

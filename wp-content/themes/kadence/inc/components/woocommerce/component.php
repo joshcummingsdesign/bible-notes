@@ -844,14 +844,14 @@ class Component implements Component_Interface {
 	 * Checks to see if theme needs to hook into cart fragments.
 	 */
 	public function check_for_fragment_support() {
-		add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'get_refreshed_fragments_class' ) );
+		add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'get_refreshed_fragments_class' ), 11 );
 		if ( kadence()->option( 'header_cart_show_total' ) ) {
 			self::$show_cart_total = true;
-			add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'get_refreshed_fragments_number' ) );
+			add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'get_refreshed_fragments_number' ), 11 );
 		}
 		if ( 'slide' === kadence()->option( 'header_cart_style' ) || 'slide' === kadence()->option( 'header_mobile_cart_style' ) || 'dropdown' === kadence()->option( 'header_cart_style' ) ) {
 			self::$show_mini_cart = true;
-			add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'get_refreshed_fragments_mini' ) );
+			add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'get_refreshed_fragments_mini' ), 11 );
 		}
 	}
 	/**

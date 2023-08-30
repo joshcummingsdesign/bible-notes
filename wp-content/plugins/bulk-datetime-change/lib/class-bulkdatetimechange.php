@@ -29,11 +29,23 @@ $bulkdatetimechange = new BulkDatetimeChange();
 class BulkDatetimeChange {
 
 	/** ==================================================
+	 * Add on bool
+	 *
+	 * @var $is_add_on_activate  is_add_on_activate.
+	 */
+	public $is_add_on_activate;
+
+	/** ==================================================
 	 * Construct
 	 *
 	 * @since 1.00
 	 */
 	public function __construct() {
+
+		$this->is_add_on_activate = false;
+		if ( function_exists( 'bulk_datetime_change_add_on_load_textdomain' ) ) {
+			$this->is_add_on_activate = true;
+		}
 
 		add_action( 'bdtc_filter_form', array( $this, 'filter_form' ), 10, 1 );
 		add_action( 'bdtc_update', array( $this, 'datetime_update' ), 10, 3 );
@@ -91,6 +103,13 @@ class BulkDatetimeChange {
 	public function filter_form( $uid ) {
 
 		$scriptname = admin_url( 'admin.php?page=bulkdatetimechange' );
+
+		if ( ! $this->is_add_on_activate ) {
+			?>
+			<div class="cp_tooltip_update">
+				<span class="cp_tooltip_update_text"><?php esc_html_e( 'Currently, only the default WordPress post type is supported. Other custom post types (e.g. WooCommerce products, orders) require an add-on to be supported.', 'bulk-datetime-change' ); ?></span>
+			<?php
+		}
 		?>
 		<form method="post" action="<?php echo esc_url( $scriptname ); ?>">
 		<?php
@@ -127,6 +146,11 @@ class BulkDatetimeChange {
 		?>
 		</select>
 		<?php
+		if ( ! $this->is_add_on_activate ) {
+			?>
+			</div>
+			<?php
+		}
 
 		if ( current_user_can( 'manage_options' ) ) {
 			$users = get_users(
@@ -378,9 +402,12 @@ class BulkDatetimeChange {
 		}
 		?>
 		<div style="margin: 0px; text-align: right;">
-		<?php esc_html_e( 'Bulk Change', 'bulk-datetime-change' ); ?> : 
-		<input type="text" id="datetimepicker-bdtc" name="all_change_datetime" value="<?php echo esc_html( $now_date_time ); ?>" />
-		<?php submit_button( __( 'Change' ), 'large', 'all_change', false ); ?>
+			<div class="cp_tooltip_change">
+			<?php esc_html_e( 'Bulk Change', 'bulk-datetime-change' ); ?> : 
+			<span class="cp_tooltip_change_text"><?php esc_html_e( 'Changes made by pressing this "Change" button are temporary. To confirm the change, check the checkbox for the date and time you wish to change and press the "Update" button.', 'bulk-datetime-change' ); ?></span>
+			<input type="text" id="datetimepicker-bdtc" name="all_change_datetime" value="<?php echo esc_html( $now_date_time ); ?>" />
+			<?php submit_button( __( 'Change' ), 'large', 'all_change', false ); ?>
+			</div>
 		</div>
 		<?php
 

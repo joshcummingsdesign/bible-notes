@@ -27,23 +27,11 @@ $bulkdatetimechangeadmin = new BulkDatetimeChangeAdmin();
 class BulkDatetimeChangeAdmin {
 
 	/** ==================================================
-	 * Add on bool
-	 *
-	 * @var $is_add_on_activate  is_add_on_activate.
-	 */
-	private $is_add_on_activate;
-
-	/** ==================================================
 	 * Construct
 	 *
 	 * @since 1.00
 	 */
 	public function __construct() {
-
-		$this->is_add_on_activate = false;
-		if ( function_exists( 'bulk_datetime_change_add_on_load_textdomain' ) ) {
-			$this->is_add_on_activate = true;
-		}
 
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 
@@ -109,6 +97,7 @@ class BulkDatetimeChangeAdmin {
 	 */
 	public function load_custom_wp_admin_style() {
 		if ( $this->is_my_plugin_screen() ) {
+			wp_enqueue_style( 'tooltip', plugin_dir_url( __DIR__ ) . 'css/tooltip.css', array(), '1.0.0' );
 			wp_enqueue_style( 'jquery-datetimepicker', plugin_dir_url( __DIR__ ) . 'css/jquery.datetimepicker.css', array(), '2.3.4' );
 			wp_enqueue_script( 'jquery' );
 
@@ -243,11 +232,23 @@ class BulkDatetimeChangeAdmin {
 				<?php
 				$bulk_datetime_change_list_table = new TT_BulkDatetimeChange_List_Table();
 				$bulk_datetime_change_list_table->prepare_items();
+				?>
+				<div class="cp_tooltip_update">
+				<?php
 				submit_button( __( 'Update' ), 'primary', 'bulk-datetime-change-update1', false, array( 'form' => 'bulkdatetimechange_forms' ) );
+				?>
+				<span class="cp_tooltip_update_text"><?php esc_html_e( 'This "Update" button changes the date and time of the items checked in the checkbox.', 'bulk-datetime-change' ); ?></span>
+				</div>
+				<?php
 				do_action( 'bdtc_per_page_set', get_current_user_id() );
 				$bulk_datetime_change_list_table->display();
+				?>
+				<div class="cp_tooltip_update">
+				<?php
 				submit_button( __( 'Update' ), 'primary', 'bulk-datetime-change-update2', false, array( 'form' => 'bulkdatetimechange_forms' ) );
 				?>
+				<span class="cp_tooltip_update_text"><?php esc_html_e( 'This "Update" button changes the date and time of the items checked in the checkbox.', 'bulk-datetime-change' ); ?></span>
+				</div>
 			</div>
 
 		</div>
@@ -266,6 +267,8 @@ class BulkDatetimeChangeAdmin {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.' ) );
 		}
 
+		$bulkdatetimechange = new BulkDatetimeChange();
+
 		$this->options_updated();
 
 		$bulkdatetimechange_settings = get_user_option( 'bulkdatetimechange', get_current_user_id() );
@@ -283,7 +286,7 @@ class BulkDatetimeChangeAdmin {
 				<details style="margin-bottom: 5px;">
 				<summary style="cursor: pointer; padding: 10px; border: 1px solid #ddd; background: #f4f4f4; color: #000;"><?php esc_html_e( 'Add on', 'bulk-datetime-change' ); ?></summary>
 				<?php
-				if ( $this->is_add_on_activate ) {
+				if ( $bulkdatetimechange->is_add_on_activate ) {
 					do_action( 'bdtc_addon_license' );
 				} else {
 					$plugin_base_dir = untrailingslashit( plugin_dir_path( __DIR__ ) );
@@ -295,7 +298,7 @@ class BulkDatetimeChangeAdmin {
 					<div style="display: block;padding:5px 5px">
 						<h2>Bulk Datetime Change Add On</h2>
 						<p class="description">
-						<?php esc_html_e( 'Adding this add-on will add custom post types and the ability to read media Exif time to the "Bulk Datetime Change".', 'bulk-datetime-change' ); ?>
+						<?php esc_html_e( 'This add-on will add to "Bulk Datetime Change" the ability to add custom post types, read media Exif times, and automatically change some random posts to the current date and time at 24 hour intervals.', 'bulk-datetime-change' ); ?>
 						</p>
 						<div style="margin: 0 10px 10px; ">
 						<?php
@@ -339,7 +342,7 @@ class BulkDatetimeChangeAdmin {
 						><?php esc_html_e( 'Last updated' ); ?>
 					</div>
 					<?php
-					if ( $this->is_add_on_activate ) {
+					if ( $bulkdatetimechange->is_add_on_activate ) {
 						do_action( 'bdtc_exif_settings', get_current_user_id() );
 					} else {
 						?>
@@ -397,8 +400,22 @@ class BulkDatetimeChangeAdmin {
 				<details style="margin-bottom: 5px;" open>
 				<summary style="cursor: pointer; padding: 10px; border: 1px solid #ddd; background: #f4f4f4; color: #000;"><?php esc_html_e( 'Custom post types', 'bulk-datetime-change' ); ?></summary>
 					<?php
-					if ( $this->is_add_on_activate ) {
+					if ( $bulkdatetimechange->is_add_on_activate ) {
 						do_action( 'bdtc_custompost_settings', get_current_user_id() );
+					} else {
+						?>
+						<div style="display: block;padding:5px 5px">
+							<span style="color: red;"><?php esc_html_e( 'Add On is required.', 'bulk-datetime-change' ); ?></span>
+						</div>
+						<?php
+					}
+					?>
+				</details>
+				<details style="margin-bottom: 5px;" open>
+				<summary style="cursor: pointer; padding: 10px; border: 1px solid #ddd; background: #f4f4f4; color: #000;"><?php esc_html_e( 'Automatically random update', 'bulk-datetime-change' ); ?></summary>
+					<?php
+					if ( $bulkdatetimechange->is_add_on_activate ) {
+						do_action( 'bdtc_randomupdate_settings', get_current_user_id() );
 					} else {
 						?>
 						<div style="display: block;padding:5px 5px">
@@ -514,6 +531,7 @@ class BulkDatetimeChangeAdmin {
 				update_user_option( get_current_user_id(), 'bulkdatetimechange', $bulkdatetimechange_settings );
 				do_action( 'bdtc_custompost_options_updated', get_current_user_id() );
 				do_action( 'bdtc_exif_options_updated', get_current_user_id() );
+				do_action( 'bdtc_randomupdate_options_updated', get_current_user_id() );
 				echo '<div class="notice notice-success is-dismissible"><ul><li>' . esc_html( __( 'Settings' ) . ' --> ' . __( 'Changes saved.' ) ) . '</li></ul></div>';
 			}
 		}

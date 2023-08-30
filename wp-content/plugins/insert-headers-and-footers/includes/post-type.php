@@ -5,11 +5,16 @@
  * @package wpcode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_action( 'init', 'wpcode_register_post_type', - 5 );
 add_action( 'init', 'wpcode_register_taxonomies', - 5 );
 add_filter( 'update_post_term_count_statuses', 'wpcode_taxonomies_count_drafts', 10, 2 );
 add_action( 'wpcode_before_snippet_save', 'wpcode_maybe_remove_core_content_filters' );
 add_action( 'wpcode_snippet_after_update', 'wpcode_restore_core_content_filters' );
+add_filter( 'wp_import_post_data_raw', 'wpcode_prevent_wp_importer_import' );
 
 /**
  * Register the post type for snippets.
@@ -20,8 +25,9 @@ function wpcode_register_post_type() {
 	register_post_type(
 		'wpcode',
 		array(
-			'public'  => false,
-			'show_ui' => false,
+			'public'     => false,
+			'show_ui'    => false,
+			'can_export' => false,
 		)
 	);
 }
@@ -116,4 +122,20 @@ function wpcode_restore_core_content_filters() {
 		return;
 	}
 	wp_init_targeted_link_rel_filters();
+}
+
+/**
+ * Prevent the WP Importer plugin from importing snippets.
+ *
+ * @param array $post_data The post data.
+ *
+ * @return array
+ */
+function wpcode_prevent_wp_importer_import( $post_data ) {
+	if ( 'wpcode' === $post_data['post_type'] ) {
+		$post_data['post_type']    = '';
+		$post_data['post_content'] = '';
+	}
+
+	return $post_data;
 }

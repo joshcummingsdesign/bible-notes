@@ -45,6 +45,10 @@ class WPCode_Admin_Page_Loader {
 
 		// Hide submenus.
 		add_filter( 'parent_file', array( $this, 'hide_menus' ), 1020 );
+
+		// Save Screen options.
+		add_filter( 'set-screen-option', array( $this, 'screen_options_set' ), 10, 3 );
+		add_filter( 'set_screen_option_wpcode_snippets_per_page', array( $this, 'screen_options_set' ), 10, 3 );
 	}
 
 	/**
@@ -63,6 +67,7 @@ class WPCode_Admin_Page_Loader {
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-settings.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-click.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-pixel.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-file-editor.php';
 	}
 
 	/**
@@ -84,6 +89,7 @@ class WPCode_Admin_Page_Loader {
 		$this->pages['pixel']           = 'WPCode_Admin_Page_Pixel';
 		$this->pages['library']         = 'WPCode_Admin_Page_Library';
 		$this->pages['generator']       = 'WPCode_Admin_Page_Generator';
+		$this->pages['file_editor']     = 'WPCode_Admin_Page_File_Editor';
 		$this->pages['tools']           = 'WPCode_Admin_Page_Tools';
 		$this->pages['settings']        = 'WPCode_Admin_Page_Settings';
 		$this->pages['click']           = 'WPCode_Admin_Page_Click';
@@ -194,7 +200,7 @@ class WPCode_Admin_Page_Loader {
 		}
 		$custom = array();
 
-		$custom['pro'] = sprintf(
+		$custom['wpcodepro'] = sprintf(
 			'<a href="%1$s" aria-label="%2$s" target="_blank" rel="noopener noreferrer" 
 				style="color: #00a32a; font-weight: 700;" 
 				onmouseover="this.style.color=\'#008a20\';" 
@@ -233,5 +239,35 @@ class WPCode_Admin_Page_Loader {
 		}
 
 		return $parent_file;
+	}
+
+
+	/**
+	 * Set the per page option for the snippets list screen.
+	 *
+	 * @param $status
+	 * @param $option
+	 * @param $value
+	 *
+	 * @return mixed
+	 */
+	public function screen_options_set( $status, $option, $value ) {
+
+		if ( isset( $_POST['wpcode_screen_order_by'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$order_by = sanitize_text_field( wp_unslash( $_POST['wpcode_screen_order_by'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			update_user_option( get_current_user_id(), 'wpcode_snippets_order_by', $order_by );
+		}
+
+		if ( isset( $_POST['wpcode_screen_order'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$order_by = sanitize_text_field( wp_unslash( $_POST['wpcode_screen_order'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			update_user_option( get_current_user_id(), 'wpcode_snippets_order', $order_by );
+		}
+
+		if ( 'wpcode_snippets_per_page' === $option ) {
+			return absint( $value );
+		}
+
+
+		return $status;
 	}
 }

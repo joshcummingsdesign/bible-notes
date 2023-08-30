@@ -5,6 +5,10 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_action( 'wp_ajax_wpcode_update_snippet_status', 'wpcode_update_snippet_status' );
 add_action( 'wp_ajax_wpcode_search_terms', 'wpcode_search_terms' );
 add_action( 'wp_ajax_wpcode_generate_snippet', 'wpcode_generate_snippet' );
@@ -19,7 +23,15 @@ add_action( 'wp_ajax_wpcode_verify_ssl', 'wpcode_verify_ssl' );
 function wpcode_update_snippet_status() {
 	check_ajax_referer( 'wpcode_admin' );
 
-	if ( ! current_user_can( 'wpcode_activate_snippets' ) ) {
+	if ( empty( $_POST['snippet_id'] ) ) {
+		return;
+	}
+	$snippet_id = absint( $_POST['snippet_id'] );
+	$active     = isset( $_POST['active'] ) && 'true' === $_POST['active'];
+
+	$snippet = new WPCode_Snippet( $snippet_id );
+
+	if ( ! current_user_can( 'wpcode_activate_snippets', $snippet ) ) {
 		wpcode()->error->add_error(
 			array(
 				'message' => __( 'You are not allowed to change snippet status, please contact your webmaster.', 'insert-headers-and-footers' ),
@@ -28,13 +40,6 @@ function wpcode_update_snippet_status() {
 		);
 		$active = false;
 	} else {
-		if ( empty( $_POST['snippet_id'] ) ) {
-			return;
-		}
-		$snippet_id = absint( $_POST['snippet_id'] );
-		$active     = isset( $_POST['active'] ) && 'true' === $_POST['active'];
-
-		$snippet = new WPCode_Snippet( $snippet_id );
 		if ( $active ) {
 			$snippet->activate();
 		} else {
@@ -220,7 +225,8 @@ function wpcode_verify_ssl() {
 	wp_send_json_error(
 		array(
 			'msg'   => esc_html__( 'There was an error and the connection failed. Please contact your web host with the technical details below.', 'insert-headers-and-footers' ),
-			'debug' => '<pre>' . print_r( map_deep( $response, 'wp_strip_all_tags' ), true ) . '</pre>', // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			'debug' => '<pre>' . print_r( map_deep( $response, 'wp_strip_all_tags' ), true ) . '</pre>',
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		)
 	);
 }

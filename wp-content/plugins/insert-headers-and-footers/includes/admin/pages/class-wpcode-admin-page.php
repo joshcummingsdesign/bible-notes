@@ -86,6 +86,13 @@ abstract class WPCode_Admin_Page {
 	public $hide_menu = false;
 
 	/**
+	 * The capability needed for the current user to view this page.
+	 *
+	 * @var string
+	 */
+	protected $capability = 'wpcode_edit_snippets';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -107,6 +114,9 @@ abstract class WPCode_Admin_Page {
 		// Only load if we are actually on the desired page.
 		if ( $this->page_slug !== $page ) {
 			return;
+		}
+		if ( ! current_user_can( $this->capability ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'insert-headers-and-footers' ) );
 		}
 		remove_all_actions( 'admin_notices' );
 		add_action( 'wpcode_admin_page', array( $this, 'output' ) );
@@ -141,7 +151,7 @@ abstract class WPCode_Admin_Page {
 			'wpcode',
 			$this->page_title,
 			$this->menu_title,
-			'wpcode_edit_snippets',
+			$this->capability,
 			$this->page_slug,
 			array(
 				wpcode()->admin_page_loader,
@@ -208,6 +218,8 @@ abstract class WPCode_Admin_Page {
 				<div class="wpcode-header-right">
 					<?php $this->output_header_right(); ?>
 				</div>
+			</div>
+			<div id="wpcode-header-between">
 			</div>
 			<div class="wpcode-header-bottom">
 				<?php $this->output_header_bottom(); ?>
@@ -1215,6 +1227,10 @@ abstract class WPCode_Admin_Page {
 			return;
 		}
 
+		if ( ! current_user_can( 'wpcode_manage_settings' ) ) {
+			return;
+		}
+
 		$data  = wpcode()->library->get_data();
 		$count = 0;
 		if ( ! empty( $data['snippets'] ) ) {
@@ -1227,7 +1243,7 @@ abstract class WPCode_Admin_Page {
 					<h3>
 						<?php
 						/* translators: %d - snippets count. */
-						printf( esc_html__( 'Get Access to Our Library of %d FREE Snippets', 'insert-headers-and-footers' ), $count );
+						printf( esc_html__( 'Get Access to Our Library of %d FREE Snippets', 'insert-headers-and-footers' ), absint( $count ) );
 						?>
 					</h3>
 

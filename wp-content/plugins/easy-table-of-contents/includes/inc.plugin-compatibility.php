@@ -119,13 +119,6 @@ add_filter(
 
 		if ( function_exists( 'vchelper' ) ) {
 
-			//$sourceId = intval( vchelper( "Request" )->input( 'vcv-source-id' ) );
-			//
-			//if ( $sourceId === get_the_ID() ) {
-			//
-			//	$apply = false;
-			//}
-
 			if ( vchelper( 'Frontend' )->isPageEditable() ) {
 
 				$apply = false;
@@ -195,29 +188,6 @@ add_action(
 );
 
 /**
- * Disabled for now as it does not appear to be required.
- *
- * Do not allow `the_content` TOC callback to run when rendering a Divi layout.
- *
- * @since 2.0
- */
-//add_filter(
-//	'ez_toc_maybe_apply_the_content_filter',
-//	function( $apply ) {
-//
-//		global $wp_current_filter;
-//
-//		// Do not execute if root current filter is one of those in the array.
-//		if ( in_array( $wp_current_filter[0], array( 'et_builder_render_layout' ), true ) ) {
-//
-//			$apply = false;
-//		}
-//
-//		return $apply;
-//	}
-//);
-
-/**
  * Callback the for `et_builder_render_layout` filter.
  *
  * Attaches the ezTOC `the_content` filter callback to the Divi layout content filter so the in page anchors will be
@@ -281,7 +251,7 @@ add_action(
 			add_filter(
 				'uncode_single_content',
 				function( $content ) {
-					return ( in_array( 'divi-machine/divi-machine.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) || 'Fortunato Pro' == apply_filters( 'current_theme', get_option( 'current_theme' ) ) || 'Pale Moon' == ez_toc_get_browser_name() ) ? $content : wptexturize($content);
+					return ( in_array( 'divi-machine/divi-machine.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) || 'Fortunato Pro' == apply_filters( 'current_theme', get_option( 'current_theme' ) ) ) ? $content : wptexturize($content);
 				},
 				10,
 				1
@@ -375,22 +345,6 @@ add_filter(
 );
 
 /**
- * Remove the Create by Mediavine node from the post content before extracting headings.
- *
- * @link https://wordpress.org/plugins/mediavine-create/
- * @since 2.0.8
- */
-add_filter(
-	'ez_toc_exclude_by_selector',
-	function( $selectors ) {
-
-		$selectors['mediavine-create'] = '.mv-create-card';
-
-		return $selectors;
-	}
-);
-
-/**
  * Remove the Contextual Related Posts node from the post content before extracting headings.
  *
  * @link https://wordpress.org/plugins/contextual-related-posts/
@@ -425,8 +379,6 @@ class ezTOC_Elementor {
 	 * @since 2.0.2
 	 */
 	public function __construct() {
-
-		//add_filter( 'elementor/frontend/the_content', array( 'ezTOC', 'the_content' ), 100 );
 
 		// Hack to avoid enqueue post CSS while it's a `the_excerpt` call.
 		add_filter( 'get_the_excerpt', array( $this, 'start_excerpt_flag' ), 1 );
@@ -517,7 +469,6 @@ class ezTOC_Elementor {
 		return $apply;
 	}
 }
-//new ezTOC_Elementor();
 add_action( 'elementor/init', array( 'ezTOC_Elementor', 'start' ) );
 
 
@@ -546,8 +497,7 @@ add_filter(
 		if ( class_exists( 'WooCommerce' ) && FALSE !== stripos( $string, 'woocommerce.php' ) ) {
 
 			/** @noinspection PhpUndefinedFunctionInspection */
-			if ( is_shop() ||
-			     is_product_category() ||
+			if ( is_shop() ||			     
 			     is_product_tag() ||
 			     is_cart() ||
 			     is_checkout() ||
@@ -579,10 +529,6 @@ function flBuilderLayoutDataEZTOC( $data ) {
 		$post = get_post( get_the_ID() );
 		foreach( $data as $nodeKey => $node )
 		{
-//			if( $node->type == 'module' )
-//			{
-////				$node->settings->text = ezTOC::the_content($post->post_content);
-//			}
 			$data[$nodeKey] = $node;
 		}
 	}
@@ -758,3 +704,165 @@ if ( 'Avada' == apply_filters( 'current_theme', get_option( 'current_theme' ) ) 
     }
     
 }
+
+
+/**
+ * Grow, Social Pro by Mediavine plugin compatibility
+ * Anchors were not being generated for special char like inverted comma.
+ * @since 2.0.52
+ */
+add_filter('ez_toc_extract_headings_content', 'ez_toc_social_pro_by_mediavine_com',10,1);
+
+function ez_toc_social_pro_by_mediavine_com($content){
+	
+	if(class_exists( '\Mediavine\Grow\Shortcodes' ) && ezTOC_Option::get('mediavine-create') == 1){
+
+		$settings = Mediavine\Grow\Settings::get_setting( 'dpsp_pinterest_share_images_setting', [] );		
+		if ( !empty( $settings['share_image_page_builder_compatibility'] ) || ! empty( $settings['share_image_lazy_load_compatibility'] )  ) {
+			$content = mb_convert_encoding( html_entity_decode($content), 'HTML-ENTITIES', 'UTF-8' );	
+		}
+						
+	}
+		
+	return $content;
+}
+
+/**
+ * Parse Gutenberg reusable block
+ * @since 2.0.53
+ */
+add_filter('ez_toc_modify_process_page_content', 'ez_toc_parse_gutenberg_reusable_block',10,1);
+
+function ez_toc_parse_gutenberg_reusable_block($content){
+	
+	if(function_exists('do_blocks')){
+		$content = do_blocks($content);
+	}
+	return $content;
+}
+
+/**
+ * Create by Mediavine plugin compatibility
+ * shortcode were not being parse for custom post type mv_create added by this plugin inside post content
+ * @since 2.0.52
+ */
+add_filter('ez_toc_modify_process_page_content', 'ez_toc_parse_mv_create_shortcode',10,1);
+
+function ez_toc_parse_mv_create_shortcode($content){
+	
+	if ( in_array( 'mediavine-create/mediavine-create.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) && ezTOC_Option::get('mediavine-create') == 1) {
+		if ( has_shortcode( $content, 'mv_create' )) {
+			$content = do_shortcode($content);		
+		}		
+	}			
+	return $content;
+}
+/**
+ * Remove the Create by Mediavine node from the post content before extracting headings.
+ *
+ * @link https://wordpress.org/plugins/mediavine-create/
+ * @since 2.0.8
+ * Modifyed in 2.0.52
+ */
+add_filter(
+	'ez_toc_exclude_by_selector',
+	function( $selectors ) {
+		if(ezTOC_Option::get('mediavine-create') != 1){
+			$selectors['mediavine-create'] = '.mv-create-card';
+		}	
+		return $selectors;
+	}
+);
+
+
+/**
+ * UpSolution Core compatibility
+ * @link https://help.us-themes.com/impreza/us-core/
+ * @since 2.0.54
+ */
+
+ add_filter('ez_toc_sidebar_has_toc_filter', 'ez_toc_sidebar_has_toc_status_us_core', 10,1);
+
+ function ez_toc_sidebar_has_toc_status_us_core($status){
+ 
+	if(function_exists('us_get_page_area_id')){
+		$content_template_id = us_get_page_area_id( 'content' );
+		$content_template    = get_post( (int) $content_template_id );
+		if(isset($content_template->post_content)){
+			if ( has_shortcode( $content_template->post_content, 'toc' ) || has_shortcode( $content_template->post_content, 'ez-toc' ) ) {
+				$status = true;				
+			}
+		}
+	}
+
+	 return $status;
+}
+
+/**
+ * Custom Field Suite plugin sidebar compatibility
+ *
+ * @link https://wordpress.org/plugins/custom-field-suite/
+ * @since 2.0.52
+ *
+ */
+
+add_filter('ez_toc_sidebar_has_toc_filter', 'ez_toc_sidebar_has_toc_status_cfs', 10,1);
+
+function ez_toc_sidebar_has_toc_status_cfs($status){
+
+	global $post;
+	if(function_exists('CFS')){
+		$fields = CFS()->get(false, $post->ID);
+		if(isset($fields['use_ez_toc']) &&  $fields['use_ez_toc'] == true){
+			$status = true;
+		}
+
+	}
+	
+	return $status;
+}
+
+/** 
+ * If Chamomile theme is active then remove hamburger div from content
+ * @since 2.0.53
+ * */
+if('Chamomile' == apply_filters( 'current_theme', get_option( 'current_theme' ) )){
+	add_action('wp_footer', 'ez_toc_add_custom_script');
+	function ez_toc_add_custom_script()
+	{
+		?>
+		<script type="text/javascript">
+			jQuery(document).ready(function($){
+				$('#ez-toc-container').find('.hamburger').remove();
+			});
+		</script>
+		<?php
+	}
+}
+
+/**
+ * Block Editor Template
+ *
+ * @link https://developer.wordpress.org/block-editor/
+ * @since 2.0.54
+ *
+ */
+
+ if(function_exists('wp_is_block_theme') && wp_is_block_theme()){
+	add_filter('ez_toc_sidebar_has_toc_filter', 'ez_toc_guttenberg_has_toc', 10,1);
+ }
+
+ function ez_toc_guttenberg_has_toc($status){
+
+	$block_post_template = get_block_template(get_stylesheet() . '//' .'single');
+	$block_page_template = get_block_template(get_stylesheet() . '//' .'page');
+	if(is_single() && (has_shortcode($block_post_template->content,'toc') || has_shortcode($block_post_template->content,'ez-toc')))
+	{
+		$status=true;
+	}
+	if(is_page() && (has_shortcode($block_page_template->content,'toc') || has_shortcode($block_page_template->content,'ez-toc')))
+	{
+		$status=true;
+	}
+	return $status;
+ }

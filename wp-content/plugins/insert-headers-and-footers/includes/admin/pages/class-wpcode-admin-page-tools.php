@@ -46,6 +46,13 @@ class WPCode_Admin_Page_Tools extends WPCode_Admin_Page {
 	private $importers = array();
 
 	/**
+	 * The capability required to view this page.
+	 *
+	 * @var string
+	 */
+	protected $capability = 'wpcode_edit_php_snippets';
+
+	/**
 	 * Call this just to set the page title translatable.
 	 */
 	public function __construct() {
@@ -635,7 +642,7 @@ class WPCode_Admin_Page_Tools extends WPCode_Admin_Page {
 		}
 
 		wp_safe_redirect(
-			add_query_arg( 'message', 1 )
+			add_query_arg( 'message', 1, $this->get_page_action_url() )
 		);
 		exit;
 	}
@@ -957,7 +964,7 @@ class WPCode_Admin_Page_Tools extends WPCode_Admin_Page {
 	 */
 	public function output_view_logs() {
 
-		if ( ! current_user_can( 'wpcode_activate_snippets' ) ) {
+		if ( ! current_user_can( 'wpcode_edit_php_snippets' ) ) {
 			echo '<p>' . esc_html__( 'You do not have sufficient permissions to view logs.', 'insert-headers-and-footers' ) . '</p>';
 
 			return;

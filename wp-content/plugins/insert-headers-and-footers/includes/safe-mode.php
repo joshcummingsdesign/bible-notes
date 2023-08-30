@@ -5,6 +5,10 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_action( 'plugins_loaded', 'wpcode_maybe_enable_safe_mode' );
 add_filter( 'wpcode_do_auto_insert', 'wpcode_maybe_prevent_execution' );
 

@@ -200,6 +200,20 @@ class WPCode_Snippet {
 	public $location_extra;
 
 	/**
+	 * Get an array of the shortcode attributes for this snippet.
+	 *
+	 * @var array
+	 */
+	public $shortcode_attributes;
+
+	/**
+	 * Used to store the shortcode attributes values.
+	 *
+	 * @var array
+	 */
+	public $attributes;
+
+	/**
 	 * Constructor. If the post passed is not the correct post type
 	 * the object will clear itself.
 	 *
@@ -427,7 +441,7 @@ class WPCode_Snippet {
 		}
 
 		// If the user is not allowed to activate/deactivate snippets, prevent it and show error.
-		if ( ! current_user_can( 'wpcode_activate_snippets' ) ) {
+		if ( ! current_user_can( 'wpcode_activate_snippets', $this ) ) {
 			wpcode()->error->add_error(
 				array(
 					'message' => __( 'You are not allowed to change snippet status, please contact your webmaster.', 'insert-headers-and-footers' ),
@@ -538,6 +552,9 @@ class WPCode_Snippet {
 		}
 		if ( isset( $this->schedule ) ) {
 			update_post_meta( $this->id, '_wpcode_schedule', $this->schedule );
+		}
+		if ( isset( $this->shortcode_attributes ) ) {
+			update_post_meta( $this->id, '_wpcode_shortcode_attributes', $this->shortcode_attributes );
 		}
 
 		/**
@@ -843,17 +860,18 @@ class WPCode_Snippet {
 	 */
 	public function get_data_for_caching() {
 		return array(
-			'id'             => $this->get_id(),
-			'title'          => $this->get_title(),
-			'code'           => $this->get_code(),
-			'code_type'      => $this->get_code_type(),
-			'location'       => $this->get_location(),
-			'auto_insert'    => $this->get_auto_insert(),
-			'insert_number'  => $this->get_auto_insert_number(),
-			'use_rules'      => $this->conditional_rules_enabled(),
-			'rules'          => $this->get_conditional_rules(),
-			'priority'       => $this->get_priority(),
-			'location_extra' => $this->get_location_extra(),
+			'id'                   => $this->get_id(),
+			'title'                => $this->get_title(),
+			'code'                 => $this->get_code(),
+			'code_type'            => $this->get_code_type(),
+			'location'             => $this->get_location(),
+			'auto_insert'          => $this->get_auto_insert(),
+			'insert_number'        => $this->get_auto_insert_number(),
+			'use_rules'            => $this->conditional_rules_enabled(),
+			'rules'                => $this->get_conditional_rules(),
+			'priority'             => $this->get_priority(),
+			'location_extra'       => $this->get_location_extra(),
+			'shortcode_attributes' => $this->get_shortcode_attributes(),
 		);
 	}
 
@@ -997,5 +1015,68 @@ class WPCode_Snippet {
 		}
 
 		return $this->location_extra;
+	}
+
+	/**
+	 * Load the shortcode attributes and return.
+	 *
+	 * @return array
+	 */
+	public function get_shortcode_attributes() {
+		if ( ! isset( $this->shortcode_attributes ) ) {
+			$attributes = get_post_meta( $this->get_id(), '_wpcode_shortcode_attributes', true );
+			if ( ! is_array( $attributes ) ) {
+				$attributes = array();
+			}
+			$this->shortcode_attributes = $attributes;
+		}
+
+		return $this->shortcode_attributes;
+	}
+
+	/**
+	 * Set shortcode attribute value.
+	 *
+	 * @param string $key The attribute key.
+	 * @param string $value The value for the attribute.
+	 *
+	 * @return void
+	 */
+	public function set_attribute( $key, $value ) {
+		$this->attributes[ $key ] = $value;
+	}
+
+	/**
+	 * Duplicates a snippet with all its data.
+	 *
+	 * @return void
+	 */
+	public function duplicate() {
+		$this->get_data_for_caching();
+		$this->get_note();
+		$this->get_tags();
+		$this->get_custom_shortcode();
+		$this->get_device_type();
+		$this->get_schedule();
+		// Add a suffix to the title.
+		$this->title = $this->get_title() . ' - Copy';
+		// Make sure the snippet is not active.
+		$this->post_data->post_status = 'draft';
+		/**
+		 * Fires before a snippet that is about to be duplicated is saved.
+		 *
+		 * @param WPCode_Snippet $snippet The snippet object.
+		 */
+		do_action( 'wpcode_before_snippet_duplicated', $this );
+		// Remove the id to create a new snippet.
+		unset( $this->id );
+		// Save the new snippet.
+		$this->save();
+		/**
+		 * Fires after a snippet has been duplicated.
+		 *
+		 * @param WPCode_Snippet $snippet The snippet object.
+		 */
+		do_action( 'wpcode_after_snippet_duplicated', $this );
 	}
 }

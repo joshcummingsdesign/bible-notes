@@ -300,6 +300,8 @@
 				document.body.classList.remove( 'kadence-scrollbar-fixer' );
 				setTimeout(function () {
 					target.classList.remove('show-drawer');
+					var drawerEvent = new Event('kadence-drawer-closed');
+					window.dispatchEvent(drawerEvent);
 					if ( toggle.dataset.setFocus && changeFocus ) {
 						var focusElement = document.querySelector(toggle.dataset.setFocus);
 						if ( focusElement ) {
@@ -323,6 +325,8 @@
 				}
 				setTimeout(function () {
 					target.classList.add('active');
+					var drawerEvent = new Event('kadence-drawer-opened');
+					window.dispatchEvent(drawerEvent);
 					if ( toggle.dataset.setFocus && changeFocus ) {
 						var focusElement = document.querySelector(toggle.dataset.setFocus);
 

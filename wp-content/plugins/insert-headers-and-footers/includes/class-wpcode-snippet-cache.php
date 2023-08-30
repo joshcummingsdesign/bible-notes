@@ -107,6 +107,9 @@ class WPCode_Snippet_Cache {
 
 		$data_for_cache = array();
 		foreach ( $snippets_by_location as $location => $snippets ) {
+			if ( empty( $snippets ) ) {
+				continue;
+			}
 			$data_for_cache[ $location ] = $this->prepare_snippets_for_caching( $snippets );
 		}
 

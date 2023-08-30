@@ -3,7 +3,7 @@ Contributors: britner
 Tags: templates, gutenberg
 Requires at least: 5.6
 Tested up to: 6.2
-Stable tag: 1.2.20
+Stable tag: 1.2.21
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -107,6 +107,11 @@ Absolutely not.
 
 
 == Changelog ==
+
+= 1.2.21 =
+* Add: Support for depicter.
+* Add: Filter for filesystem.
+* Fix: Issue with in fluent forms. 
 
 = 1.2.20 =
 * Add: Search to grid view.

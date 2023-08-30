@@ -478,7 +478,8 @@ class Template_Database_Importer {
 			if ( ! function_exists( 'WP_Filesystem' ) ) {
 				require_once wp_normalize_path( ABSPATH . '/wp-admin/includes/file.php' );
 			}
-			WP_Filesystem();
+			$credentials = apply_filters( 'kadence_wpfs_credentials', false );
+			WP_Filesystem( $credentials );
 		}
 		return $wp_filesystem;
 	}

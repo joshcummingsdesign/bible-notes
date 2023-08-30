@@ -5,16 +5,25 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_shortcode( 'wpcode', 'wpcode_shortcode_handler' );
+add_action( 'wpcode_shortcode_before_output', 'wpcode_pass_shortcode_attributes_to_snippet', 10, 4 );
+
+add_filter( 'wpcode_shortcode_attribute_value', 'wp_kses_post' );
 
 /**
  * Generic handler for the shortcode.
  *
- * @param array $args The shortcode attributes.
+ * @param array  $args The shortcode attributes.
+ * @param string $content The shortcode content.
+ * @param string $tag The shortcode tag.
  *
  * @return string
  */
-function wpcode_shortcode_handler( $args ) {
+function wpcode_shortcode_handler( $args, $content, $tag ) {
 	$atts = wp_parse_args(
 		$args,
 		array(
@@ -43,5 +52,31 @@ function wpcode_shortcode_handler( $args ) {
 		return '';
 	}
 
+	do_action( 'wpcode_shortcode_before_output', $snippet, $atts, $content, $tag );
+
 	return wpcode()->execute->get_snippet_output( $snippet );
+}
+
+/**
+ * Before the shortcode output, let's check if we have to load any shortcode attributes to the class instance.
+ *
+ * @param WPCode_Snippet $snippet The snippet instance.
+ * @param array          $atts The shortcode attributes.
+ * @param string|null    $content Shortcode content, if any.
+ * @param string         $tag The shortcode tag.
+ *
+ * @return void
+ */
+function wpcode_pass_shortcode_attributes_to_snippet( $snippet, $atts, $content, $tag ) {
+	// Let's see if we have to load any shortcode attributes.
+	$shortcode_attributes = $snippet->get_shortcode_attributes();
+	if ( ! empty( $shortcode_attributes ) ) {
+		foreach ( $shortcode_attributes as $attribute ) {
+			$value = isset( $atts[ $attribute ] ) ? $atts[ $attribute ] : '';
+			$snippet->set_attribute( $attribute, apply_filters( 'wpcode_shortcode_attribute_value', $value, $attribute ) );
+		}
+	}
+	if ( ! empty( $content ) ) {
+		$snippet->set_attribute( 'content', $content );
+	}
 }

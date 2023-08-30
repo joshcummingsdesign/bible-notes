@@ -53,6 +53,13 @@ class WPCode_Admin_Page_Generator extends WPCode_Admin_Page {
 	public $snippet;
 
 	/**
+	 * The capability required to view this page.
+	 *
+	 * @var string
+	 */
+	protected $capability = 'wpcode_edit_php_snippets';
+
+	/**
 	 * Call this just to set the page title translatable.
 	 */
 	public function __construct() {

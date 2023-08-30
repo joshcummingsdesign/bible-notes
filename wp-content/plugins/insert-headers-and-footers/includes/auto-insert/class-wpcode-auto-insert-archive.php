@@ -5,6 +5,10 @@
  * @package wpcode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class WPCode_Auto_Insert_Archive.
  */

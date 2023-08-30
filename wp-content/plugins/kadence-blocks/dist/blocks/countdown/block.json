@@ -1,6 +1,6 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
-  "apiVersion": 2,
+  "apiVersion": 3,
   "title": "Countdown",
   "name": "kadence/countdown",
   "category": "kadence-blocks",
@@ -463,6 +463,7 @@
       "full"
     ],
     "reusable": false,
-    "html": false
+    "html": false,
+    "kbMetadata": true
   }
 }

@@ -13,7 +13,6 @@ if ( ! defined( 'FLUENTFORM_VERSION' ) ) {
 
 use FluentForm\Framework\Helpers\ArrayHelper;
 use FluentForm\App\Modules\Form\wpFluent;
-use FluentForm\App\Databases\DatabaseMigrator;
 
 /**
  * Class for importing fluent forms.
@@ -121,8 +120,6 @@ class Kadence_Starter_Templates_Fluent_Import {
 				__( 'Error: Form import data could not be read. Please try a different file.', 'kadence-starter-templates' )
 			);
 		}
-		// Make sure we can import.
-		DatabaseMigrator::run();
 		$insertedForms = [];
 		if ( $forms && is_array( $forms ) ) {
 			foreach ( $forms as $formItem ) {

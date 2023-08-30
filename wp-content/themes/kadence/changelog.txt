@@ -1,3 +1,21 @@
+== 1.1.42 | 10th August 2023 ==
+* Fix: Possible issue with social styles causing PHP error.
+* Fix: Customizer styling for footer social.
+* Fix: RankMath conflict with author profile social url.
+
+== 1.1.41 | 7th August 2023 ==
+* Update: Add Twitter X logo as option.
+* Update: Optimize social icon brand css.
+* Fix: Minfiy splide-init.min.js file.
+* Fix: Issue with woocommerce cart fragments not loading.
+* Fix: Box shadow color position.
+* Fix: LearnDash Styling
+
+== 1.1.40 | 5th June 2023 ==
+* Fix: Possible issue with wide layout inside of wide layout breaking boxed layout.
+* Fix: Align issue with inline images in table block.
+* Fix: Issue with filter by rating.
+
 == 1.1.39 | 16th May 2023 ==
 * Fix: Possible issue with footer widgets spacing.
 * Fix: Issue with product buttons style.

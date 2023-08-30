@@ -1298,7 +1298,9 @@ class Component implements Component_Interface, Templating_Component_Interface {
 		$css->add_property( '--global-content-width', kadence()->sub_option( 'content_width', 'size' ) . kadence()->sub_option( 'content_width', 'unit' ) );
 		$css->add_property( '--global-content-narrow-width', kadence()->sub_option( 'content_narrow_width', 'size' ) . kadence()->sub_option( 'content_narrow_width', 'unit' ) );
 		$css->add_property( '--global-content-edge-padding', $css->render_range( kadence()->option( 'content_edge_spacing' ), 'desktop' ) );
+		$css->add_property( '--global-content-boxed-padding', $this->render_range( kadence()->option( 'boxed_spacing' ), 'desktop' ) );
 		$css->add_property( '--global-calc-content-width', 'calc(' . kadence()->sub_option( 'content_width', 'size' ) . kadence()->sub_option( 'content_width', 'unit' ) . ' - var(--global-content-edge-padding) - var(--global-content-edge-padding) )' );
+		$css->add_property( '--wp--style--global--content-size', 'var(--global-calc-content-width)' );
 		//$css->add_property( '--scrollbar-offset', '0px' );
 		$css->set_selector( '.wp-site-blocks' );
 		$css->add_property( '--global-vw', 'calc( 100vw - ( 0.5 * var(--scrollbar-offset)))' );
@@ -1550,18 +1552,8 @@ class Component implements Component_Interface, Templating_Component_Interface {
 		$css->stop_media_query();
 		// Wide layout when boxed.
 		$css->set_selector( '.content-style-boxed .wp-site-blocks .entry-content .alignwide' );
-		$css->add_property( 'margin-left', '-' . $this->render_range( kadence()->option( 'boxed_spacing' ), 'desktop' ) );
-		$css->add_property( 'margin-right', '-' . $this->render_range( kadence()->option( 'boxed_spacing' ), 'desktop' ) );
-		$css->start_media_query( $media_query['tablet'] );
-		$css->set_selector( '.content-style-boxed .wp-site-blocks .entry-content .alignwide' );
-		$css->add_property( 'margin-left', '-' . $this->render_range( kadence()->option( 'boxed_spacing' ), 'tablet' ) );
-		$css->add_property( 'margin-right', '-' . $this->render_range( kadence()->option( 'boxed_spacing' ), 'tablet' ) );
-		$css->stop_media_query();
-		$css->start_media_query( $media_query['mobile'] );
-		$css->set_selector( '.content-style-boxed .wp-site-blocks .entry-content .alignwide' );
-		$css->add_property( 'margin-left', '-' . $this->render_range( kadence()->option( 'boxed_spacing' ), 'mobile' ) );
-		$css->add_property( 'margin-right', '-' . $this->render_range( kadence()->option( 'boxed_spacing' ), 'mobile' ) );
-		$css->stop_media_query();
+		$css->add_property( 'margin-left', 'calc( -1 * var( --global-content-boxed-padding ) )' );
+		$css->add_property( 'margin-right', 'calc( -1 * var( --global-content-boxed-padding ) )' );
 		// Content Spacing.
 		$css->set_selector( '.content-area' );
 		$css->add_property( 'margin-top', $css->render_range( kadence()->option( 'content_spacing' ), 'desktop' ) );
@@ -1580,10 +1572,12 @@ class Component implements Component_Interface, Templating_Component_Interface {
 		$css->start_media_query( $media_query['tablet'] );
 		$css->set_selector( ':root' );
 		$css->add_property( '--global-content-edge-padding', $css->render_range( kadence()->option( 'content_edge_spacing' ), 'tablet' ) );
+		$css->add_property( '--global-content-boxed-padding', $this->render_range( kadence()->option( 'boxed_spacing' ), 'tablet' ) );
 		$css->stop_media_query();
 		$css->start_media_query( $media_query['mobile'] );
 		$css->set_selector( ':root' );
 		$css->add_property( '--global-content-edge-padding', $css->render_range( kadence()->option( 'content_edge_spacing' ), 'mobile' ) );
+		$css->add_property( '--global-content-boxed-padding', $this->render_range( kadence()->option( 'boxed_spacing' ), 'mobile' ) );
 		$css->stop_media_query();
 		// Boxed Spacing.
 		$css->set_selector( '.entry-content-wrap' );
@@ -3868,6 +3862,16 @@ class Component implements Component_Interface, Templating_Component_Interface {
 		}
 		// Social brands.
 		if ( '' !== kadence()->option( 'header_social_brand' ) || '' !== kadence()->option( 'header_mobile_social_brand' ) || '' !== kadence()->option( 'footer_social_brand' ) ) {
+			$items = array();
+			if ( '' !== kadence()->option( 'footer_social_brand' ) && is_array( kadence()->sub_option( 'footer_social_items', 'items' ) ) ) {
+				$items = array_merge( $items, kadence()->sub_option( 'footer_social_items', 'items' ) );
+			}
+			if ( '' !== kadence()->option( 'header_social_brand' ) && is_array( kadence()->sub_option( 'header_social_items', 'items' ) ) ) {
+				$items = array_merge( $items, kadence()->sub_option( 'header_social_items', 'items' ) );
+			}
+			if ( '' !== kadence()->option( 'header_mobile_social_brand' ) && is_array( kadence()->sub_option( 'header_mobile_social_items', 'items' ) ) ) {
+				$items = array_merge( $items, kadence()->sub_option( 'header_mobile_social_items', 'items' ) );
+			}
 			$socials = array(
 				'facebook'=> '#3b5998',
 				'instagram'=> '#517fa4',
@@ -3900,7 +3904,17 @@ class Component implements Component_Interface, Templating_Component_Interface {
 				'tiktok'=> '#69C9D0',
 				'discord'=> '#7289DA',
 			);
-			foreach( $socials as $name => $color ) {
+			$socials_final = array();
+			if ( is_array( $items ) && ! empty( $items ) ) {
+				foreach ( $items as $item ) {
+					if ( isset( $item['enabled'] ) && $item['enabled'] ) {
+						if ( ! isset( $socials_final[ $item['id'] ] ) ) {
+							$socials_final[ $item['id' ] ] = $socials[ $item['id'] ];
+						}
+					}
+				}
+			}
+			foreach ( $socials_final as $name => $color ) {
 				$css->set_selector( 'body.social-brand-colors .social-show-brand-hover .social-link-' . $name . ':not(.ignore-brand):not(.skip):not(.ignore):hover, body.social-brand-colors .social-show-brand-until .social-link-' . $name . ':not(:hover):not(.skip):not(.ignore), body.social-brand-colors .social-show-brand-always .social-link-' . $name . ':not(.ignore-brand):not(.skip):not(.ignore)' );
 				$css->add_property( 'background', $color );
 				$css->set_selector( 'body.social-brand-colors .social-show-brand-hover.social-style-outline .social-link-' . $name . ':not(.ignore-brand):not(.skip):not(.ignore):hover, body.social-brand-colors .social-show-brand-until.social-style-outline .social-link-' . $name . ':not(:hover):not(.skip):not(.ignore), body.social-brand-colors .social-show-brand-always.social-style-outline .social-link-' . $name . ':not(.ignore-brand):not(.skip):not(.ignore)' );

@@ -5,6 +5,10 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( is_admin() || defined( 'DOING_CRON' ) && DOING_CRON ) {
 	// Class used for loading the scripts metabox.
 	require_once WPCODE_PLUGIN_PATH . 'includes/lite/admin/class-wpcode-metabox-snippets-lite.php';
@@ -20,7 +24,11 @@ if ( is_admin() || defined( 'DOING_CRON' ) && DOING_CRON ) {
 	require_once WPCODE_PLUGIN_PATH . 'includes/admin/class-wpcode-usage-tracking.php';
 	// Usage tracking lite.
 	require_once WPCODE_PLUGIN_PATH . 'includes/lite/admin/class-wpcode-usage-tracking-lite.php';
+	// Load smart tags class.
+	require_once WPCODE_PLUGIN_PATH . 'includes/lite/class-wpcode-smart-tags-lite.php';
 }
+// Load the admin bar info.
+require_once WPCODE_PLUGIN_PATH . 'includes/lite/class-wpcode-admin-bar-info-lite.php';
 
 add_action( 'plugins_loaded', 'wpcode_plugins_loaded_load_lite_files', 2 );
 
@@ -30,6 +38,8 @@ add_action( 'plugins_loaded', 'wpcode_plugins_loaded_load_lite_files', 2 );
  * @return void
  */
 function wpcode_plugins_loaded_load_lite_files() {
+	// Make sure this is loaded in older versions of WP.
+	require_once WPCODE_PLUGIN_PATH . 'includes/auto-insert/class-wpcode-auto-insert-type.php';
 	// Load WooCommerce auto-insert locations.
 	require_once WPCODE_PLUGIN_PATH . 'includes/lite/auto-insert/class-wpcode-auto-insert-woocommerce.php';
 	// Load EDD auto-insert locations.

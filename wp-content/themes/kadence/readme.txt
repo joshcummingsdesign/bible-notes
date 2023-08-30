@@ -2,9 +2,9 @@
 Contributors: britner
 Tags: translation-ready, two-columns, right-sidebar, left-sidebar, footer-widgets, blog, custom-logo, custom-background, custom-menu, rtl-language-support, editor-style, threaded-comments, custom-colors, featured-images, wide-blocks, full-width-template, theme-options, e-commerce.
 Requires at least: 5.4
-Tested up to: 6.2
+Tested up to: 6.3
 Requires PHP: 7.2
-Stable tag: 1.1.39
+Stable tag: 1.1.42
 License: GNU General Public License v3.0 (or later)
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,6 +18,24 @@ Kadence is released under GNU General Public License v3.0 (or later)
 
 
 = Changelog =
+
+== 1.1.42 | 10th August 2023 ==
+* Fix: Possible issue with social styles causing PHP error.
+* Fix: Customizer styling for footer social.
+* Fix: RankMath conflict with author profile social url.
+
+== 1.1.41 | 7th August 2023 ==
+* Update: Add Twitter X logo as option.
+* Update: Optimize social icon brand css.
+* Fix: Minfiy splide-init.min.js file.
+* Fix: Issue with woocommerce cart fragments not loading.
+* Fix: Box shadow color position.
+* Fix: LearnDash Styling
+
+== 1.1.40 | 5th June 2023 ==
+* Fix: Possible issue with wide layout inside of wide layout breaking boxed layout.
+* Fix: Align issue with inline images in table block.
+* Fix: Issue with filter by rating.
 
 == 1.1.39 | 16th May 2023 ==
 * Fix: Possible issue with footer widgets spacing.

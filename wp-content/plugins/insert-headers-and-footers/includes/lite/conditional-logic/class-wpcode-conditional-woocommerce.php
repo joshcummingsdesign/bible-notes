@@ -5,6 +5,10 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * The WPCode_Conditional_WooCommerce class.
  */
@@ -82,6 +86,16 @@ class WPCode_Conditional_WooCommerce_Lite extends WPCode_Conditional_Type {
 						'value'    => '',
 						'disabled' => true,
 					),
+				),
+			),
+			'wc_cart' => array(
+				'label'   => __( 'WooCommerce Cart', 'insert-headers-and-footers' ),
+				'type'    => 'select',
+				'options' => array(),
+				'upgrade' => array(
+					'title' => __( 'WooCommerce Cart Contents Rule is a Pro Feature', 'insert-headers-and-footers' ),
+					'text'  => __( 'Get access to advanced conditional logic rules for WooCommerce by upgrading to PRO today.', 'insert-headers-and-footers' ),
+					'link'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'edit-snippet', 'conditional-logic', 'woocommerce-cart' ),
 				),
 			),
 		);

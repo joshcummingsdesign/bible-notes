@@ -178,7 +178,7 @@ class WPCode_Snippet_Execute {
 			$options[ $type_key ] = $type_values['label'];
 		}
 
-		return $options;
+		return apply_filters( 'wpcode_code_type_options', $options );
 	}
 
 	/**
@@ -268,6 +268,10 @@ class WPCode_Snippet_Execute {
 		ob_start();
 
 		$error = false;
+
+		if ( ! empty( $snippet->attributes ) ) {
+			extract( $snippet->attributes, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		}
 
 		try {
 			eval( $code ); // phpcs:ignore Squiz.PHP.Eval.Discouraged

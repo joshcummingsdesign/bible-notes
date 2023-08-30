@@ -5,6 +5,11 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+
 /**
  * Class WPCode_Auto_Insert_WooCommerce_Lite.
  */

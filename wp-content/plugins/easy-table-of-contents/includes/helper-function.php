@@ -30,18 +30,13 @@ if( !defined( 'ABSPATH' ) )
 
 add_filter('admin_footer', 'eztoc_add_deactivation_feedback_modal');
 function eztoc_add_deactivation_feedback_modal() {
-    
-    if( !is_admin()) {
-        return;
+    global $pagenow;
+
+    if(  is_admin() && 'plugins.php' == $pagenow ) 
+    {
+        require_once EZ_TOC_PATH ."/includes/deactivate-feedback.php";
     }
 
-    $current_user = wp_get_current_user();
-    if( !($current_user instanceof WP_User) ) {
-        $email = '';
-    } else {
-        $email = trim( $current_user->user_email );
-    }
-    require_once EZ_TOC_PATH ."/includes/deactivate-feedback.php";
 }
 
 /**
@@ -57,6 +52,9 @@ function eztoc_send_feedback() {
     
     if( !isset( $form['eztoc_security_nonce'] ) || isset( $form['eztoc_security_nonce'] ) && !wp_verify_nonce( sanitize_text_field( $form['eztoc_security_nonce'] ), 'eztoc_ajax_check_nonce' ) ) {
         echo 'security_nonce_not_verified';
+        die();
+    }
+    if ( !current_user_can( 'manage_options' ) ) {
         die();
     }
     
@@ -111,10 +109,12 @@ add_action( 'admin_enqueue_scripts', 'eztoc_enqueue_makebetter_email_js' );
 
 
 add_action('wp_ajax_eztoc_subscribe_newsletter','eztoc_subscribe_for_newsletter');
-add_action('wp_ajax_nopriv_eztoc_subscribe_newsletter','eztoc_subscribe_for_newsletter');
 function eztoc_subscribe_for_newsletter(){
     if( !wp_verify_nonce( sanitize_text_field( $_POST['eztoc_security_nonce'] ), 'eztoc_ajax_check_nonce' ) ) {
         echo 'security_nonce_not_verified';
+        die();
+    }
+    if ( !current_user_can( 'manage_options' ) ) {
         die();
     }
     $api_url = 'http://magazine3.company/wp-json/api/central/email/subscribe';

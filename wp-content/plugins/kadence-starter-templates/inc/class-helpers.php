@@ -345,7 +345,8 @@ class Helpers {
 	 */
 	private static function check_wp_filesystem_credentials() {
 		// Check if the file-system method is 'direct', if not display an error.
-		if ( ! ( 'direct' === get_filesystem_method() ) ) {
+		$file_system_method = apply_filters( 'kadence-starter-templates/file_system_method', 'direct' );
+		if ( ! ( $file_system_method === get_filesystem_method() ) ) {
 			return new \WP_Error(
 				'no_direct_file_access',
 				sprintf(

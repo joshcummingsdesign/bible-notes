@@ -1150,7 +1150,6 @@ class KadenceImporter extends Component {
 		}
 		const KadencesSiteMode = () => {
 			const item = this.state.activeTemplates[this.state.activeTemplate];
-			console.log( item );
 			return (
 				// <div className="kst-grid-single-site">
 				// 	<div className="kst-import-selection-item">

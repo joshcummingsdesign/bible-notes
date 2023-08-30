@@ -5,6 +5,10 @@
  * @package WPCode
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_action( 'admin_enqueue_scripts', 'wpcode_admin_scripts' );
 add_filter( 'admin_body_class', 'wpcode_admin_body_class' );
 
@@ -27,7 +31,7 @@ function wpcode_admin_scripts() {
 		return;
 	}
 
-	$asset = include_once $admin_asset_file;
+	$asset = require $admin_asset_file;
 
 	wp_enqueue_style( 'wpcode-admin-css', WPCODE_PLUGIN_URL . 'build/admin.css', null, $asset['version'] );
 
@@ -77,7 +81,7 @@ function wpcode_admin_scripts_global( $version = 'lite' ) {
 		return;
 	}
 
-	$asset = include_once $admin_asset_file;
+	$asset = require $admin_asset_file;
 
 	wp_enqueue_style( 'wpcode-admin-global-css', WPCODE_PLUGIN_URL . "build/admin-global-{$version}.css", null, $asset['version'] );
 

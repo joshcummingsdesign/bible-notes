@@ -787,7 +787,7 @@ class Kadence_Blocks_CSS {
 			$this->add_property( 'font-style', $font['style'] );
 		}
 		if ( isset( $font['weight'] ) && ! empty( $font['weight'] ) ) {
-			$this->add_property( 'font-weight', $font['weight'] );
+			$this->add_property( 'font-weight', $this->render_font_weight( $font['weight'] ) );
 		}
 		$size_type = ( isset( $font['sizeType'] ) && ! empty( $font['sizeType'] ) ? $font['sizeType'] : 'px' );
 		$line_type = ( isset( $font['lineType'] ) ? $font['lineType'] : '' );
@@ -1769,7 +1769,6 @@ class Kadence_Blocks_CSS {
 			'fourth_prop' => 'border-left',
 		);
 		$args = wp_parse_args( $args, $defaults );
-
 		$sides_prop_keys = array(
 			'top' => 'first_prop',
 			'right' => 'second_prop',
@@ -1781,10 +1780,8 @@ class Kadence_Blocks_CSS {
 			'tablet',
 			'mobile',
 		);
-
 		foreach ( $sizes as $size ) {
 			$this->set_media_state( $size );
-
 			foreach ( $sides_prop_keys as $side => $prop_key ) {
 				$width = $this->get_border_value( $attributes, $args, $side, $size, 'width', $single_styles );
 				$color = $this->get_border_value( $attributes, $args, $side, $size, 'color', $single_styles );
