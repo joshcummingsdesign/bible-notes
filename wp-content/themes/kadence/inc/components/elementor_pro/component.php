@@ -8,6 +8,7 @@
 namespace Kadence\Elementor_Pro;
 
 use Kadence\Component_Interface;
+use Kadence\Theme;
 use Elementor;
 use \Elementor\Plugin;
 use ElementorPro\Modules\ThemeBuilder\ThemeSupport;
@@ -43,6 +44,21 @@ class Component implements Component_Interface {
 	public function initialize() {
 		add_action( 'elementor/theme/register_locations', array( $this, 'register_elementor_locations' ) );
 		add_action( 'elementor/dynamic_tags/register_tags', array( $this, 'add_palette_colors' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'disable_theme_account_css' ), 20 );
+	}
+	/**
+	 * Disable theme account css.
+	 */
+	public function disable_theme_account_css() {
+		if ( class_exists( 'woocommerce' ) && is_account_page() ) {
+			if ( function_exists( 'elementor_location_exits' ) && \Elementor\Plugin::$instance->db->is_built_with_elementor( get_the_ID() ) ) {
+				wp_dequeue_style( 'kadence-account-woocommerce' );
+				$kadence_theme_class = \Kadence\Theme::instance();
+				remove_action( 'woocommerce_before_account_navigation', array( $kadence_theme_class->components['woocommerce'], 'myaccount_nav_wrap_start' ), 2 );
+				remove_action( 'woocommerce_before_account_navigation', array( $kadence_theme_class->components['woocommerce'], 'myaccount_nav_avatar' ), 20 );
+				remove_action( 'woocommerce_after_account_navigation', array( $kadence_theme_class->components['woocommerce'], 'myaccount_nav_wrap_end' ), 50 );
+			}
+		}
 	}
 	/**
 	 * Elementor dynamic tag support.

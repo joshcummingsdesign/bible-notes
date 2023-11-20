@@ -1190,7 +1190,13 @@ class Img_Optm extends Base
 		$offset++;
 		$to_be_continued = $wpdb->get_row($wpdb->prepare($img_q, array($offset * $limit, 1)));
 		if ($to_be_continued) {
-			return Router::self_redirect(Router::ACTION_IMG_OPTM, self::TYPE_DESTROY);
+			# Check if post_id is beyond next_post_id
+			self::debug('[next_post_id] ' . $this->_summary['next_post_id'] . ' [cursor post id] ' . $to_be_continued->post_id);
+			if ($to_be_continued->post_id <= $this->_summary['next_post_id']) {
+				self::debug('redirecting to next');
+				return Router::self_redirect(Router::ACTION_IMG_OPTM, self::TYPE_DESTROY);
+			}
+			self::debug('🎊 Finished destroying');
 		}
 
 		// Delete postmeta info
@@ -1219,6 +1225,7 @@ class Img_Optm extends Base
 		if (!$is_ori_file) {
 			$short_file_path = $this->tmp_path . $short_file_path;
 		}
+		self::debug('deleting ' . $short_file_path);
 
 		// del webp
 		$this->__media->info($short_file_path . '.webp', $this->tmp_pid) && $this->__media->del($short_file_path . '.webp', $this->tmp_pid);
@@ -1231,6 +1238,7 @@ class Img_Optm extends Base
 
 		// del optimized ori
 		if ($this->__media->info($bk_file, $this->tmp_pid)) {
+			self::debug('deleting optim ori');
 			$this->__media->del($short_file_path, $this->tmp_pid);
 			$this->__media->rename($bk_file, $short_file_path, $this->tmp_pid);
 		}

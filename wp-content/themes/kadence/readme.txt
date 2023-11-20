@@ -1,10 +1,10 @@
 === Kadence ===
 Contributors: britner
 Tags: translation-ready, two-columns, right-sidebar, left-sidebar, footer-widgets, blog, custom-logo, custom-background, custom-menu, rtl-language-support, editor-style, threaded-comments, custom-colors, featured-images, wide-blocks, full-width-template, theme-options, e-commerce.
-Requires at least: 5.4
-Tested up to: 6.3
+Requires at least: 6.2
+Tested up to: 6.4
 Requires PHP: 7.2
-Stable tag: 1.1.42
+Stable tag: 1.1.49
 License: GNU General Public License v3.0 (or later)
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,8 +16,58 @@ Kadence Theme is a lightweight yet full featured WordPress theme for creating be
 == License ==
 Kadence is released under GNU General Public License v3.0 (or later)
 
+== Frequently Asked Questions ==
+= Where do I report security bugs found in this theme? =
+Please report security bugs found in the source code of the
+Kadence Theme through the [Patchstack
+Vulnerability Disclosure Program] https://patchstack.com/database/vdp/kadence. The
+Patchstack team will assist you with verification, CVE assignment, and
+notify the developers of this theme.
+
+== Security Policy ==
+= Reporting Security Bugs =
+Please report security bugs found in the
+Kadence theme's source code through the
+Patchstack Vulnerability Disclosure
+Program https://patchstack.com/database/vdp/kadence. The Patchstack team will
+assist you with verification, CVE assignment, and notify the
+developers of this theme.
 
 = Changelog =
+
+== 1.1.49 | 9th October 2023 ==
+* Fix: Issue with image select in customizer.
+* Fix: Issue with gradient control in customizer.
+
+== 1.1.48 | 18th October 2023 ==
+* Add: Option to use logo icon.
+* Update: Typography options to include inherit header.
+* Fix: Possible issue where error could show in error log regarding cart contents.
+* Fix: Issue with search styles if only used on mobile.
+* Fix: Issue with navigation toggle aria label.
+* Fix: Issue with Woocommerce 8.2 and star styles in blocks.
+
+== 1.1.47 | 3rd October 2023 ==
+* Add: Font family variables to live css in customizer.
+* Fix: Possible issue with aria label.
+
+== 1.1.46 | 26th September 2023 ==
+* Fix: Issue with search icon designs css.
+
+== 1.1.45 | 26th September 2023 ==
+* Fix: Issue with archive design settings.
+
+== 1.1.44 | 25th September 2023 ==
+* Update: Optimize dynamic css generation.
+* Update: Translations update.
+* Update: My account css to work with elementor pro.
+* Fix: Post Archive breadcrumb categories.
+* Fix: CSS specificity with search block.
+
+== 1.1.43 | 5th September 2023 ==
+* Fix: Possible issue with navigation and some screen readers.
+* Fix: Possible issue with logo aria label when tagline showing.
+* Fix: Issue with custom social icon styling.
 
 == 1.1.42 | 10th August 2023 ==
 * Fix: Possible issue with social styles causing PHP error.

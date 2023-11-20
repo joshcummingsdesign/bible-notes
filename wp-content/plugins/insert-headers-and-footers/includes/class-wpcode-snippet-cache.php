@@ -31,8 +31,14 @@ class WPCode_Snippet_Cache {
 	 */
 	public function get_cached_snippets() {
 		if ( ! isset( $this->snippets ) ) {
-			$all_snippets = get_option( $this->option_name, array() );
+			$all_snippets = (array) get_option( $this->option_name, array() );
 			foreach ( $all_snippets as $location => $snippets ) {
+				if ( empty( $snippets ) ) {
+					continue;
+				}
+				if ( ! is_array( $all_snippets[ $location ] ) ) {
+					$all_snippets[ $location ] = array();
+				}
 				// Load minimal snippet data from array.
 				foreach ( $snippets as $key => $snippet ) {
 					$all_snippets[ $location ][ $key ] = new WPCode_Snippet( $snippet );
@@ -40,7 +46,6 @@ class WPCode_Snippet_Cache {
 
 				usort( $all_snippets[ $location ], array( $this, 'priority_order' ) );
 			}
-
 
 			$this->snippets = $all_snippets;
 		}

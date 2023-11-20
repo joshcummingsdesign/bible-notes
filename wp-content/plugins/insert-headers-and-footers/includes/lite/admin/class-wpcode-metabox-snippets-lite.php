@@ -143,11 +143,11 @@ class WPCode_Metabox_Snippets_Lite extends WPCode_Metabox_Snippets {
 			),
 			array(
 				'text' => esc_html__( 'Upgrade to Pro and Unlock Page Scripts', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'post-editor-metabox', 'custom-snippets', 'upgrade-to-pro' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'post-editor-metabox', 'custom-snippets', 'upgrade-to-pro' ) ),
 			),
 			array(
 				'text' => esc_html__( 'Learn more about all the features', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'post-editor-metabox', 'custom-snippets', 'features' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'post-editor-metabox', 'custom-snippets', 'features' ) ),
 			)
 		);
 	}
@@ -286,11 +286,11 @@ class WPCode_Metabox_Snippets_Lite extends WPCode_Metabox_Snippets {
 			),
 			array(
 				'text' => esc_html__( 'Upgrade to Pro and Unlock Page Scripts', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'post-editor-metabox', 'main-' . sanitize_title( $label ), 'upgrade-to-pro' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'post-editor-metabox', 'main-' . sanitize_title( $label ), 'upgrade-to-pro' ) ),
 			),
 			array(
 				'text' => esc_html__( 'Learn more about all the features', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'post-editor-metabox', 'main-' . sanitize_title( $label ), 'features' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'post-editor-metabox', 'main-' . sanitize_title( $label ), 'features' ) ),
 			)
 		);
 	}

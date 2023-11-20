@@ -269,7 +269,7 @@ class ColorComponent extends Component {
 							<Dashicon icon="portfolio" />
 						</Button>
 						{ this.state.isVisible && (
-							<Popover position="bottom right" className="kadence-palette-popover-copy-paste kadence-customizer-popover" onClose={ toggleClose }>
+							<Popover position="bottom right" inline={true} className="kadence-palette-popover-copy-paste kadence-customizer-popover" onClose={ toggleClose }>
 								<TabPanel className="kadence-palette-popover-tabs"
 									activeClass="active-tab"
 									initialTabName={ 'import'}

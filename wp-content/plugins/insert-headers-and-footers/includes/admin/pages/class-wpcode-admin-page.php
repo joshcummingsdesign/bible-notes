@@ -425,6 +425,9 @@ abstract class WPCode_Admin_Page {
 				absint( $notifications_count )
 			);
 		}
+		echo '<span class="wpcode-toggle-testing-mode-wrap">';
+		echo $this->get_checkbox_toggle( wpcode_testing_mode_enabled(), 'wpcode-toggle-testing-mode', '', '', esc_html__( 'Testing Mode', 'insert-headers-and-footers' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '</span>';
 		?>
 		<button
 				type="button"
@@ -567,6 +570,9 @@ abstract class WPCode_Admin_Page {
 		);
 		if ( ! empty( $this->view ) ) {
 			$args['view'] = $this->view;
+		}
+		if ( ! empty( $this->snippet_id ) ) {
+			$args['snippet_id'] = $this->snippet_id;
 		}
 
 		return add_query_arg( $args, admin_url( 'admin.php' ) );

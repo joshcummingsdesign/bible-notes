@@ -511,6 +511,7 @@ class Theme_Customizer {
 		require_once $react_path . 'class-kadence-control-focus-button.php'; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
 		require_once $react_path . 'class-kadence-control-color-link.php'; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
 		require_once $react_path . 'class-kadence-control-text.php'; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
+		require_once $react_path . 'class-kadence-control-textarea.php'; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
 		require_once $react_path . 'class-kadence-control-measure.php'; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
 		require_once $react_path . 'class-kadence-control-editor.php'; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
 		require_once $react_path . 'class-kadence-control-sorter.php'; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound

@@ -187,12 +187,12 @@ class WPCode_Admin_Page_Headers_Footers extends WPCode_Admin_Page {
 	 * @return void
 	 */
 	public function textarea_field( $option, $title, $desc ) {
-		$value = esc_html( wp_unslash( get_option( 'ihaf_insert_' . $option ) ) );
+		$value = wp_unslash( get_option( 'ihaf_insert_' . $option ) );
 		?>
 		<div class="wpcode-code-textarea" id="wpcode-global-<?php echo esc_attr( $option ); ?>">
 			<h2><label for="ihaf_insert_<?php echo esc_attr( $option ); ?>"><?php echo esc_html( $title ); ?></label>
 			</h2>
-			<textarea name="ihaf_insert_<?php echo esc_attr( $option ); ?>" id="ihaf_insert_<?php echo esc_attr( $option ); ?>" class="widefat" rows="8" <?php disabled( ! current_user_can( 'unfiltered_html', 'wpcode-editor' ) ); ?>><?php echo $value; ?></textarea>
+			<textarea name="ihaf_insert_<?php echo esc_attr( $option ); ?>" id="ihaf_insert_<?php echo esc_attr( $option ); ?>" class="widefat" rows="8" <?php disabled( ! current_user_can( 'unfiltered_html', 'wpcode-editor' ) ); ?>><?php echo esc_html( $value ); ?></textarea>
 			<p>
 				<?php echo wp_kses( $desc, array( 'code' => array() ) ); ?>
 			</p>

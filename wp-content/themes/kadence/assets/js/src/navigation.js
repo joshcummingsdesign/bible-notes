@@ -111,7 +111,6 @@
 		
 			for ( let i = 0; i < SUBMENUS.length; i++ ) {
 				var parentMenuItem = SUBMENUS[ i ].parentNode;
-				let parentMenuItemLink = parentMenuItem.querySelector( 'a' );
 				let dropdown = parentMenuItem.querySelector( '.dropdown-nav-toggle' );
 				// If dropdown.
 				if ( dropdown ) {
@@ -119,11 +118,7 @@
 					var dropdownBtn = document.createElement( 'BUTTON' ); // Create a <button> element
 					dropdownBtn.setAttribute( 'aria-label', ( dropdown_label ? kadenceConfig.screenReader.expandOf + ' ' + dropdown_label : kadenceConfig.screenReader.expand ) );
 					dropdownBtn.classList.add( 'dropdown-nav-special-toggle' );
-					if ( parentMenuItemLink ) {
-						parentMenuItemLink.insertBefore( dropdownBtn, parentMenuItemLink.childNodes[1] );
-					} else {
-						parentMenuItem.insertBefore( dropdownBtn, parentMenuItem.childNodes[1] );
-					}
+					parentMenuItem.insertBefore( dropdownBtn, parentMenuItem.childNodes[1] );
 					// Toggle the submenu when we click the dropdown button.
 					dropdownBtn.addEventListener( 'click', function( e ) {
 						e.preventDefault();

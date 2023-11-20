@@ -82,7 +82,7 @@ class WPCode_Admin_Page_Settings extends WPCode_Admin_Page {
 	 * @return void
 	 */
 	public function process_message() {
-		if ( isset( $_GET['message'] ) && 1 === absint( $_GET['message'] ) ) {
+		if ( isset( $_GET['message'] ) && 1 === absint( $_GET['message'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->set_success_message( __( 'Settings Saved.', 'insert-headers-and-footers' ) );
 		}
 	}
@@ -450,24 +450,24 @@ class WPCode_Admin_Page_Settings extends WPCode_Admin_Page {
 	public function get_access_overlay() {
 		$text = sprintf(
 		// translators: %1$s and %2$s are <u> tags.
-			'<p>' . __( 'Improve the way you and your team manage your snippets with the WPCode Access Control settings. Enable other users on your site to manage different types of snippets or configure Conversion Pixels settings and update configuration files. This feature is available on the %1$sWPCode Pro%2$s plan or higher.', 'insert-headers-and-footers' ) . '</p>',
+			'<p>' . esc_html__( 'Improve the way you and your team manage your snippets with the WPCode Access Control settings. Enable other users on your site to manage different types of snippets or configure Conversion Pixels settings and update configuration files. This feature is available on the %1$sWPCode Pro%2$s plan or higher.', 'insert-headers-and-footers' ) . '</p>',
 			'<u>',
 			'</u>'
 		);
 
 		return self::get_upsell_box(
-			__( 'Access Control is a PRO Feature', 'insert-headers-and-footers' ),
+			esc_html__( 'Access Control is a PRO Feature', 'insert-headers-and-footers' ),
 			$text,
 			array(
-				'text' => __( 'Upgrade to WPCode PRO', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'settings', 'tab-' . $this->view, 'upgrade-to-pro' ),
+				'text' => esc_html__( 'Upgrade to WPCode PRO', 'insert-headers-and-footers' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'settings', 'tab-' . $this->view, 'upgrade-to-pro' ) ),
 			),
 			array(),
 			array(
-				__( 'Save time and improve website management with your team', 'insert-headers-and-footers' ),
-				__( 'Delegate snippet management to other users with full control', 'insert-headers-and-footers' ),
-				__( 'Enable other users to set up ads & 3rd party services', 'insert-headers-and-footers' ),
-				__( 'Choose if PHP snippets should be enabled on the site', 'insert-headers-and-footers' ),
+				esc_html__( 'Save time and improve website management with your team', 'insert-headers-and-footers' ),
+				esc_html__( 'Delegate snippet management to other users with full control', 'insert-headers-and-footers' ),
+				esc_html__( 'Enable other users to set up ads & 3rd party services', 'insert-headers-and-footers' ),
+				esc_html__( 'Choose if PHP snippets should be enabled on the site', 'insert-headers-and-footers' ),
 			)
 		);
 	}

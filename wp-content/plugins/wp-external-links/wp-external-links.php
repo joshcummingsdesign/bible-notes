@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name:    WP External Links
- * Version:        2.58
+ * Version:        2.59
  * Plugin URI:     https://getwplinks.com/
  * Description:    Open external links in a new tab or window, control "nofollow" and "noopener", set font icon; SEO friendly.
  * Author:         WebFactory Ltd

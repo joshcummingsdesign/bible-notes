@@ -34,6 +34,7 @@ class Optimize extends Base
 	private $cfg_ggfonts_rm;
 
 	private $dns_prefetch;
+	private $dns_preconnect;
 	private $_ggfonts_urls = array();
 	private $_ccss;
 	private $_ucss = false;
@@ -127,6 +128,12 @@ class Optimize extends Base
 		 * @since 1.7.1
 		 */
 		$this->_dns_prefetch_init();
+
+		/**
+		 * Preconnect
+		 * @since 5.6.1
+		 */
+		$this->_dns_preconnect_init();
 
 		add_filter('litespeed_buffer_finalize', array($this, 'finalize'), 20);
 	}
@@ -658,6 +665,20 @@ class Optimize extends Base
 	}
 
 	/**
+	 * Preconnect init
+	 *
+	 * @since 5.6.1
+	 */
+	private function _dns_preconnect_init()
+	{
+
+		$this->dns_preconnect = $this->conf(self::O_OPTM_DNS_PRECONNECT);
+		if ($this->dns_preconnect) {
+			add_action('litespeed_optm', array($this, 'dns_preconnect_output'));
+		}
+	}
+
+	/**
 	 * Prefetch DNS hook for WP
 	 *
 	 * @since 1.7.1
@@ -689,6 +710,21 @@ class Optimize extends Base
 		foreach ($this->dns_prefetch as $v) {
 			if ($v) {
 				$this->html_head .= '<link rel="dns-prefetch" href="' . $v . '" />';
+			}
+		}
+	}
+
+	/**
+	 * Preconnect
+	 *
+	 * @since 5.6.1
+	 * @access public
+	 */
+	public function dns_preconnect_output()
+	{
+		foreach ($this->dns_preconnect as $v) {
+			if ($v) {
+				$this->html_head .= '<link rel="preconnect" href="' . $v . '" />';
 			}
 		}
 	}
@@ -822,6 +858,10 @@ class Optimize extends Base
 		$excludes = apply_filters('litespeed_optimize_js_excludes', $this->conf(self::O_OPTM_JS_EXC));
 
 		$combine_ext_inl = $this->conf(self::O_OPTM_JS_COMB_EXT_INL);
+		if (!apply_filters('litespeed_optm_js_comb_ext_inl', true)) {
+			Debug2::debug2('[Optm] js_comb_ext_inl bypassed via litespeed_optm_js_comb_ext_inl filter');
+			$combine_ext_inl = false;
+		}
 
 		$src_list = array();
 		$html_list = array();
@@ -995,6 +1035,10 @@ class Optimize extends Base
 		$ucss_file_exc_inline = apply_filters('litespeed_optimize_ucss_file_exc_inline', $this->conf(self::O_OPTM_UCSS_FILE_EXC_INLINE));
 
 		$combine_ext_inl = $this->conf(self::O_OPTM_CSS_COMB_EXT_INL);
+		if (!apply_filters('litespeed_optm_css_comb_ext_inl', true)) {
+			Debug2::debug2('[Optm] css_comb_ext_inl bypassed via litespeed_optm_css_comb_ext_inl filter');
+			$combine_ext_inl = false;
+		}
 
 		$css_to_be_removed = apply_filters('litespeed_optm_css_to_be_removed', array());
 

@@ -575,6 +575,7 @@ class Cloud extends Base
 	{
 		$home_url = home_url();
 		if (!wp_http_validate_url($home_url)) {
+			self::debug('wp_http_validate_url failed: ' . $home_url);
 			return false;
 		}
 
@@ -588,6 +589,7 @@ class Cloud extends Base
 
 		/** @since 5.0 If in valid err_domains, bypass request */
 		if ($this->_is_err_domain($home_url)) {
+			self::debug('home url is in err_domains, bypass request: ' . $home_url);
 			return false;
 		}
 
@@ -1252,7 +1254,7 @@ class Cloud extends Base
 	public function token_validate()
 	{
 		try {
-			$this->_validate_hash();
+			$this->validate_hash();
 		} catch (\Exception $e) {
 			return self::err($e->getMessage());
 		}
@@ -1278,7 +1280,7 @@ class Cloud extends Base
 		}
 
 		try {
-			$this->_validate_hash(1);
+			$this->validate_hash(1);
 		} catch (\Exception $e) {
 			return self::err($e->getMessage());
 		}
@@ -1306,7 +1308,7 @@ class Cloud extends Base
 	 *
 	 * @since  3.0
 	 */
-	private function _validate_hash($offset = 0)
+	public function validate_hash($offset = 0)
 	{
 		if (empty($_POST['hash'])) {
 			self::debug('Lack of hash param');
@@ -1369,6 +1371,9 @@ class Cloud extends Base
 	{
 		$this->_summary['is_linked'] = 1;
 		self::save_summary();
+
+		# Force resync qc conf
+		$this->cls('CDN\Quic')->try_sync_conf(true);
 	}
 
 	/**

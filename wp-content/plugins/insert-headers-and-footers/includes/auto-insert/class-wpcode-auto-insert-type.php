@@ -114,6 +114,10 @@ abstract class WPCode_Auto_Insert_Type {
 		if ( ! apply_filters( 'wpcode_do_auto_insert', true ) ) {
 			return;
 		}
+		// If we're in headers & footers mode prevent execution of any type of snippet.
+		if ( WPCode()->settings->get_option( 'headers_footers_mode' ) ) {
+			return;
+		}
 
 		$this->add_start_hook();
 	}
@@ -234,42 +238,23 @@ abstract class WPCode_Auto_Insert_Type {
 			return;
 		}
 
-		$terms = $this->get_locations_ids();
-		if ( empty( $terms ) ) {
-			// If no terms are yet set we don't have to load anything as
-			// no snippet has been added to the current type.
-			$this->snippets = array();
-
-			return;
-		}
-		$args = array(
+		$this->snippets = array();
+		$args           = array(
 			'post_type'      => 'wpcode',
 			'posts_per_page' => - 1,
-			'tax_query'      => array( //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				array(
-					'taxonomy' => 'wpcode_location',
-					'terms'    => $terms,
-				),
-			),
 			'post_status'    => 'publish',
+			'cache_results'  => false, // We don't want to cache this query ever as it should only run when snippets are preloaded in case of an error it will provide false values if cached.
 		);
-		add_filter( 'posts_clauses', array( $this, 'include_term_in_post' ) );
 		$snippets_query = new WP_Query( $args );
-		remove_filter( 'posts_clauses', array( $this, 'include_term_in_post' ) );
-		$snippets = $snippets_query->posts;
+		$snippets       = $snippets_query->posts;
 
-		// Get the terms that are defined and then assign found snippets to their respective taxonomies
-		// so that they can be picked up by id later without having to query again.
-		$location_terms = $this->get_location_terms();
-		foreach ( $location_terms as $location_key => $location_term ) {
-			$term_id                         = $location_term->term_taxonomy_id;
-			$this->snippets[ $location_key ] = array();
-			// Until we update to PHP 5.3 this is the easiest way to do this.
-			foreach ( $snippets as $snippet ) {
-				if ( isset( $snippet->term_taxonomy_id ) && absint( $snippet->term_taxonomy_id ) === $term_id ) {
-					$this->snippets[ $location_key ][] = new WPCode_Snippet( $snippet );
-				}
+		foreach ( $snippets as $snippet ) {
+			$snippet_locations = wp_get_post_terms( $snippet->ID, 'wpcode_location', array( 'fields' => 'slugs' ) );
+			if ( empty( $snippet_locations ) || is_wp_error( $snippet_locations ) ) {
+				continue;
 			}
+			$location_key                      = $snippet_locations[0];
+			$this->snippets[ $location_key ][] = new WPCode_Snippet( $snippet );
 		}
 	}
 
@@ -390,7 +375,7 @@ abstract class WPCode_Auto_Insert_Type {
 	public function output_location( $location_name ) {
 		$snippets = $this->get_snippets_for_location( $location_name );
 		foreach ( $snippets as $snippet ) {
-			echo wpcode()->execute->get_snippet_output( $snippet );
+			echo wpcode()->execute->get_snippet_output( $snippet ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 

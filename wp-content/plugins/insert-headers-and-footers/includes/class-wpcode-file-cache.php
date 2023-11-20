@@ -58,6 +58,20 @@ class WPCode_File_Cache {
 
 		// If the file doesn't exist there's not much to do.
 		if ( ! file_exists( $file ) ) {
+			// Let's see if we have it in the database.
+			$option = get_option( 'wpcode_alt_cache_' . $name, false );
+			if ( false !== $option ) {
+				// Let's check if the time since the option was saved is less than the TTL.
+				if ( empty( $option['time'] ) || $ttl > 0 && (int) $option['time'] + $ttl < time() ) {
+					// If the option expired let's delete it, so we clean up in case the file will now work.
+					delete_option( 'wpcode_alt_cache_' . $name );
+
+					return false;
+				}
+
+				return json_decode( $option['data'], true );
+			}
+
 			return false;
 		}
 
@@ -80,6 +94,8 @@ class WPCode_File_Cache {
 		$file = $this->get_directory_path( $this->get_cache_filename_by_key( $key ) );
 
 		wp_delete_file( $file );
+
+		delete_option( 'wpcode_alt_cache_' . $key );
 	}
 
 	/**
@@ -104,7 +120,19 @@ class WPCode_File_Cache {
 	 */
 	private function write_file( $name, $data ) {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-		file_put_contents( $this->get_directory_path( $name ), $data );
+		$written = file_put_contents( $this->get_directory_path( $name ), $data );
+		if ( false === $written ) {
+			// If we can't save the file to the file cache let's try to save it to the database.
+			// This is not ideal but it prevents having endless requests.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+			$option = array(
+				'time' => time(),
+				'data' => $data,
+			);
+			// $name is the file name, in order to save it in the db we should remove the file extension.
+			$name = str_replace( '.json', '', $name );
+			update_option( 'wpcode_alt_cache_' . $name, $option, false );
+		}
 	}
 
 	/**

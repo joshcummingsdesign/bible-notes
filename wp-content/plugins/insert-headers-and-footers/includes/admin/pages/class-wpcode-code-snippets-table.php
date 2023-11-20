@@ -94,7 +94,8 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 					if ( 'trash' === $this->view ) {
 						$value = $label;
 					} else {
-						$url   = add_query_arg( 'location', $snippet->get_location_term()->term_id );
+						$url   = add_query_arg( 'location', $snippet->get_location_term()->slug );
+						$url   = remove_query_arg( 'paged', $url );
 						$value = sprintf( '<a href="%1$s">%2$s</a>', esc_url( $url ), esc_html( $label ) );
 					}
 				}
@@ -139,9 +140,11 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 				$tags_links = array();
 				if ( 'trash' !== $this->view ) {
 					foreach ( $tags as $tag ) {
+						$url          = add_query_arg( 'tag', $tag );
+						$url          = remove_query_arg( 'paged', $url );
 						$tags_links[] = sprintf(
 							'<a href="%1$s" title="%2$s">%3$s</a>',
-							esc_url( add_query_arg( 'tag', $tag ) ),
+							esc_url( $url ),
 							// Translators: The tag by which to filter the list of snippets in the admin.
 							sprintf( __( 'Filter snippets by tag: %s', 'insert-headers-and-footers' ), esc_attr( $tag ) ),
 							esc_html( $tag )
@@ -156,6 +159,32 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 			case 'status':
 				$value = $this->get_status_toggle( $snippet->is_active(), $snippet->get_id() );
 				break;
+
+			case 'shortcode':
+				$shortcode = apply_filters( 'wpcode_shortcode_preview', '[wpcode id="' . absint( $snippet->get_id() ) . '"]', $snippet );
+				// Show the shortcode in a code tag so it's easy to copy.
+				$value = '<code class="wpcode-copy" data-copy-value="' . esc_attr( $shortcode ) . '">' . esc_html( $shortcode ) . get_wpcode_icon( 'copy' ) . '</code>';
+				break;
+
+			case 'code_type':
+				// Let's display the code type with a link to filter by code type.
+				$code_type = $snippet->get_code_type();
+				if ( 'trash' === $this->view ) {
+					$value = $code_type;
+				} else {
+					$url   = add_query_arg(
+						array(
+							'filter_action' => 'Filter',
+							'type'          => $code_type,
+						),
+						admin_url( 'admin.php?page=wpcode' )
+					);
+					$value = sprintf( '<a href="%1$s">%2$s</a>', esc_url( $url ), esc_html( $code_type ) );
+				}
+				break;
+
+			case 'priority':
+				echo esc_html( $snippet->get_priority() );
 
 			default:
 				$value = '';
@@ -180,19 +209,27 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		$markup .= '<span class="screen-reader-text">' . esc_html__( 'Toggle Snippet Status', 'insert-headers-and-footers' ) . '</span>';
 		$markup .= '</label>';
 
-		// Let's check if the snippet is marked as recently deactivated and display an icon with a tooltip.
-		if ( ! $active ) {
-			$recently_deactivated = get_post_meta( $snippet_id, '_wpcode_recently_deactivated', true );
-			if ( ! empty( $recently_deactivated ) ) {
-				$tooltip_text = sprintf(
-				// Translators: %1$s is the time since the snippet was deactivated, %2$s is the date and time of deactivation.
-					__( 'This snippet was automatically deactivated because of a fatal erorr at %2$s on %3$s (%1$s ago)', 'insert-headers-and-footers' ),
-					human_time_diff( $recently_deactivated, time() ),
-					gmdate( 'H:i:s', $recently_deactivated ),
-					gmdate( 'Y-m-d', $recently_deactivated )
-				);
+		$snippets_with_errors = wpcode()->error->get_snippets_with_errors();
+		// Let's check if the snippet threw an error.
+		if ( ! empty( $snippets_with_errors ) && in_array( $snippet_id, $snippets_with_errors, true ) ) {
+			$last_error = get_post_meta( $snippet_id, '_wpcode_last_error', true );
+			if ( ! empty( $last_error ) ) {
+				$type = 'error';
+				if ( isset( $last_error['wpc_type'] ) && 'deactivated' === $last_error['wpc_type'] ) {
+					$tooltip_text = sprintf(
+					// Translators: %1$s is the time since the snippet was deactivated, %2$s is the date and time of deactivation.
+						__( 'This snippet was automatically deactivated because of a fatal error at %2$s on %3$s (%1$s ago)', 'insert-headers-and-footers' ),
+						human_time_diff( $last_error['time'], time() ),
+						gmdate( 'H:i:s', $last_error['time'] ),
+						gmdate( 'Y-m-d', $last_error['time'] )
+					);
 
-				$markup .= '<span class="wpcode-table-status-icon wpcode-help-tooltip">' . get_wpcode_icon( 'info' ) . '<span class="wpcode-help-tooltip-text">' . esc_html( $tooltip_text ) . '</span></span>';
+					$type = 'deactivated';
+				} else {
+					$tooltip_text = esc_html__( 'This snippet threw an error, you can see more details when editing the snippet.', 'insert-headers-and-footers' );
+				}
+
+				$markup .= '<span class="wpcode-table-status-icon wpcode-help-tooltip wpcode-table-status-icon-' . esc_attr( $type ) . '">' . get_wpcode_icon( 'info' ) . '<span class="wpcode-help-tooltip-text">' . $tooltip_text . '</span></span>';
 			}
 		}
 
@@ -312,7 +349,7 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 				);
 			}
 
-			if ( current_user_can( 'edit_post', $snippet->ID ) ) {
+			if ( current_user_can( 'edit_post', $snippet->ID ) && ! wpcode_testing_mode_enabled() ) {
 				$actions['trash'] = sprintf(
 					'<a href="%s" title="%s">%s</a>',
 					esc_url(
@@ -363,17 +400,19 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	 */
 	public function get_bulk_actions() {
 		if ( 'trash' === $this->view ) {
-			return array(
+			$bulk_actions = array(
 				'untrash' => esc_html__( 'Restore', 'insert-headers-and-footers' ),
 				'delete'  => esc_html__( 'Delete Permanently', 'insert-headers-and-footers' ),
 			);
+		} else {
+			$bulk_actions = array(
+				'trash'   => __( 'Trash', 'insert-headers-and-footers' ),
+				'enable'  => __( 'Activate', 'insert-headers-and-footers' ),
+				'disable' => __( 'Deactivate', 'insert-headers-and-footers' ),
+			);
 		}
 
-		return array(
-			'trash'   => __( 'Trash', 'insert-headers-and-footers' ),
-			'enable'  => __( 'Activate', 'insert-headers-and-footers' ),
-			'disable' => __( 'Deactivate', 'insert-headers-and-footers' ),
-		);
+		return apply_filters( 'wpcode_snippets_bulk_actions', $bulk_actions );
 	}
 
 	/**
@@ -400,9 +439,17 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		$hidden = get_hidden_columns( $this->screen );
 
 		$sortable = array(
-			'name'    => array( 'title', false ),
-			'created' => array( 'date', false ),
-			'updated' => array( 'last_updated', false ),
+			'name'     => array( 'title', false ),
+			'created'  => array( 'date', false ),
+			'updated'  => array( 'last_updated', false ),
+			'priority' => array( 'priority', false ),
+		);
+
+		$sortable_query_params = array(
+			'last_updated' => 'modified',
+			'title'        => 'title',
+			'date'         => 'id',
+			'priority'     => 'priority',
 		);
 
 		// Set column headers.
@@ -421,20 +468,26 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		}
 		// Same thing but for order by.
 		if ( isset( $_GET['orderby'] ) ) {
-			$orderby = sanitize_key( $_GET['orderby'] );
+			$order_by = sanitize_key( $_GET['orderby'] );
 		} else {
-			$orderby      = 'ID';
+			$order_by     = 'ID';
 			$user_orderby = get_user_option( 'wpcode_snippets_order_by' );
 			if ( ! empty( $user_orderby ) ) {
-				$orderby = $user_orderby;
+				$order_by = $user_orderby;
 			}
+		}
+
+		if ( isset( $sortable_query_params[ $order_by ] ) ) {
+			$order_by = $sortable_query_params[ $order_by ];
+		} else {
+			$order_by = 'ID';
 		}
 
 		$per_page    = $this->get_items_per_page( 'wpcode_snippets_per_page', $this->per_page );
 		$is_filtered = false;
 
 		$args = array(
-			'orderby'        => $orderby,
+			'orderby'        => $order_by,
 			'order'          => $order,
 			'nopaging'       => false,
 			'posts_per_page' => $per_page,
@@ -443,6 +496,11 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 			'post_status'    => array( 'publish', 'draft' ),
 			'post_type'      => 'wpcode',
 		);
+
+		if ( 'priority' === $order_by ) {
+			$args['orderby']  = 'meta_value_num';
+			$args['meta_key'] = '_wpcode_priority'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		}
 
 		if ( ! empty( $_GET['location'] ) ) {
 			$is_filtered       = true;
@@ -490,9 +548,14 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 			$args['post_status'] = $this->get_post_status_from_view();
 		}
 
-		if ( 'deactivated' === $this->view ) {
-			$args['meta_key']     = '_wpcode_recently_deactivated';
-			$args['meta_compare'] = 'EXISTS';
+		if ( 'has_error' === $this->view ) {
+			$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'relation' => 'OR',
+				array(
+					'key'     => '_wpcode_last_error',
+					'compare' => 'EXISTS',
+				),
+			);
 		}
 
 		/**
@@ -534,13 +597,17 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	public function get_columns() {
 
 		$columns = array(
-			'cb'       => '<input type="checkbox" />',
-			'name'     => esc_html__( 'Name', 'insert-headers-and-footers' ),
-			'author'   => esc_html__( 'Author', 'insert-headers-and-footers' ),
-			'location' => esc_html__( 'Location', 'insert-headers-and-footers' ),
-			'created'  => esc_html__( 'Created', 'insert-headers-and-footers' ),
-			'updated'  => esc_html__( 'Last Updated', 'insert-headers-and-footers' ),
-			'tags'     => esc_html__( 'Tags', 'insert-headers-and-footers' ),
+			'cb'        => '<input type="checkbox" />',
+			'id'        => esc_html__( 'ID', 'insert-headers-and-footers' ),
+			'name'      => esc_html__( 'Name', 'insert-headers-and-footers' ),
+			'author'    => esc_html__( 'Author', 'insert-headers-and-footers' ),
+			'location'  => esc_html__( 'Location', 'insert-headers-and-footers' ),
+			'created'   => esc_html__( 'Created', 'insert-headers-and-footers' ),
+			'updated'   => esc_html__( 'Last Updated', 'insert-headers-and-footers' ),
+			'tags'      => esc_html__( 'Tags', 'insert-headers-and-footers' ),
+			'shortcode' => esc_html__( 'Shortcode', 'insert-headers-and-footers' ),
+			'code_type' => esc_html__( 'Code Type', 'insert-headers-and-footers' ),
+			'priority'  => esc_html__( 'Priority', 'insert-headers-and-footers' ),
 		);
 		if ( 'trash' !== $this->view ) {
 			$columns['status'] = esc_html__( 'Status', 'insert-headers-and-footers' );
@@ -627,17 +694,26 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		$this->count['inactive'] = $counts->draft;
 		$this->count['trash']    = $counts->trash;
 
-		// Grab a count of all the snippets with the '_wpcode_recently_deactivated' meta key.
-		$recently_deactivated       = get_posts(
-			array(
-				'post_type'      => 'wpcode',
-				'post_status'    => 'draft',
-				'posts_per_page' => - 1,
-				'meta_key'       => '_wpcode_recently_deactivated',
-				'meta_compare'   => 'EXISTS',
-			)
-		);
-		$this->count['deactivated'] = count( $recently_deactivated );
+		if ( wpcode()->error->get_error_count() > 0 ) {
+			// Grab a count of all the snippets with the '_wpcode_last_error' meta key.
+			$threw_error              = get_posts(
+				array(
+					'post_type'      => 'wpcode',
+					'post_status'    => array( 'draft', 'publish' ),
+					'posts_per_page' => - 1,
+					'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						'relation' => 'OR',
+						array(
+							'key'     => '_wpcode_last_error',
+							'compare' => 'EXISTS',
+						),
+					),
+				)
+			);
+			$this->count['has_error'] = count( $threw_error );
+		} else {
+			$this->count['has_error'] = 0;
+		}
 
 		/**
 		 * Filters snippets count data after counting all snippets.
@@ -856,11 +932,11 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		if ( $this->count['inactive'] ) {
 			$views['inactive'] = $this->view_markup( 'inactive', __( 'Inactive', 'insert-headers-and-footers' ) );
 		}
-		if ( $this->count['trash'] ) {
+		if ( $this->count['trash'] && ! wpcode_testing_mode_enabled() ) {
 			$views['trash'] = $this->view_markup( 'trash', __( 'Trash', 'insert-headers-and-footers' ) );
 		}
-		if ( $this->count['deactivated'] ) {
-			$views['deactivated'] = $this->view_markup( 'deactivated', __( 'Automatically Deactivated', 'insert-headers-and-footers' ) );
+		if ( $this->count['has_error'] ) {
+			$views['has_error'] = $this->view_markup( 'has_error', __( 'Errors', 'insert-headers-and-footers' ) );
 		}
 
 		return $views;

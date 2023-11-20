@@ -87,7 +87,8 @@ abstract class WPCode_Admin_Bar_Info {
 		add_action( 'wp_footer', array( $this, 'add_footer_info' ), 15 );
 		add_action( 'admin_footer', array( $this, 'add_footer_info' ), 999999 );
 
-		add_action( 'admin_init', array( $this, 'enqueue_scripts' ), -5 );
+		add_action( 'admin_init', array( $this, 'enqueue_scripts' ), - 5 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ), 15 );
 		add_action( 'template_redirect', array( $this, 'enqueue_scripts' ), - 5 );
 	}
 
@@ -125,17 +126,47 @@ abstract class WPCode_Admin_Bar_Info {
 	 * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
 	 */
 	public function add_admin_bar_info( $wp_admin_bar ) {
+		// Let's see if we have any errors.
+		$error_count = wpcode()->error->get_error_count();
+		$indicator   = '';
+
+		if ( $error_count > 0 ) {
+			$indicator = ' <div class="wp-core-ui wp-ui-notification wpcode-menu-notification-counter">' . $error_count . '</div>';
+		}
+
 		// Add an admin menu item to append our count to.
 		$wp_admin_bar->add_menu(
 			array(
 				'id'    => 'wpcode-admin-bar-info',
-				'title' => 'WPCode',
+				'title' => 'WPCode' . $indicator,
 				'meta'  => array(
 					'class' => 'wpcode-admin-bar-info menupop',
 				),
 				'href'  => add_query_arg( 'page', 'wpcode', admin_url( 'admin.php' ) ),
 			)
 		);
+
+		do_action( 'wpcode_admin_bar_info_top', $wp_admin_bar );
+
+		if ( ! empty( $error_count ) ) {
+			$wp_admin_bar->add_menu(
+				array(
+					'id'     => 'wpcode-error-count',
+					'parent' => 'wpcode-admin-bar-info',
+					'title'  => esc_html__( 'Snippets With Errors', 'insert-headers-and-footers' ) . $indicator,
+					'meta'   => array(
+						'class' => 'wpcode-admin-bar-info-submenu',
+					),
+					'href'   => add_query_arg(
+						array(
+							'page' => 'wpcode',
+							'view' => 'has_error',
+						),
+						admin_url( 'admin.php' )
+					),
+				)
+			);
+		}
 
 		$wp_admin_bar->add_menu(
 			array(
@@ -249,25 +280,19 @@ abstract class WPCode_Admin_Bar_Info {
 
 			$location_label = wpcode()->auto_insert->get_location_label( $location );
 			if ( 'shortcode' === $location ) {
-				$location_label = __( 'Shortcode', 'insert-headers-and-footers' );
+				$location_label = esc_html__( 'Shortcode', 'insert-headers-and-footers' );
+			}
+			if ( 'block' === $location ) {
+				$location_label = esc_html__( 'Gutenberg Block', 'insert-headers-and-footers' );
 			}
 			if ( 0 === strpos( $location, 'shortcode-' ) ) {
-				$location_label = __( 'Custom Shortcode', 'insert-headers-and-footers' );
+				$location_label = esc_html__( 'Custom Shortcode', 'insert-headers-and-footers' );
 			}
 			$location_info = array(
 				'label'       => $location_label . ' (' . count( $snippets ) . ')',
 				'location_id' => $location,
 				'snippets'    => array(),
-				'href'        => esc_url(
-					add_query_arg(
-						array(
-							'page'          => 'wpcode',
-							'location'      => $location,
-							'filter_action' => 'filter',
-						),
-						admin_url( 'admin.php' )
-					)
-				),
+				'href'        => $this->get_location_filter_link( $location ),
 			);
 			foreach ( $snippets as $snippet ) {
 				$location_info['snippets'][] = array(
@@ -443,6 +468,32 @@ abstract class WPCode_Admin_Bar_Info {
 		$this->loaded_snippets[ $location ][] = $snippet;
 
 		return $output;
+	}
+
+	/**
+	 * Method for the location link.
+	 *
+	 * @param string $location The location slug.
+	 *
+	 * @return string
+	 */
+	public function get_location_filter_link( $location ) {
+
+		if ( in_array( $location, array( 'shortcode', 'block' ), true ) ) {
+			// If this is for a shortcode or a block let's try to link to the edit page of the currently loaded post.
+			return get_edit_post_link();
+		}
+
+		return esc_url(
+			add_query_arg(
+				array(
+					'page'          => 'wpcode',
+					'location'      => $location,
+					'filter_action' => 'filter',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
 	}
 
 }

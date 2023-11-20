@@ -76,7 +76,7 @@ class AddComponent extends Component {
 		return (
 			<div className={ classForAdd } key={ this.props.id }>
 				{ this.state.isVisible && (
-					<Popover position="top" className="kadence-popover-add-builder" onClose={ toggleClose }>
+					<Popover position="top" inline={true} className="kadence-popover-add-builder" onClose={ toggleClose }>
 						<div className="kadence-popover-builder-list">
 							<ButtonGroup className="kadence-radio-container-control">
 								{ Object.keys( this.props.choices ).map( ( item ) => {

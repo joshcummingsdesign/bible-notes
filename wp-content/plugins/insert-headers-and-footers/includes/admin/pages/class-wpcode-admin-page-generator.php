@@ -219,7 +219,7 @@ class WPCode_Admin_Page_Generator extends WPCode_Admin_Page {
 					<span class="wpcode-default-icon"><?php wpcode_icon( 'copy', 16, 16 ); ?></span><span class="wpcode-success-icon"><?php wpcode_icon( 'check', 16, 13 ); ?></span> <?php echo esc_html_x( 'Copy Code', 'Copy to clipboard', 'insert-headers-and-footers' ); ?>
 				</button>
 			</div>
-			<textarea id="wpcode_generator_code_preview"><?php echo $generator->get_snippet_code(); ?></textarea>
+			<textarea id="wpcode_generator_code_preview"><?php echo esc_textarea( $generator->get_snippet_code() ); ?></textarea>
 		</div>
 		<script type="text/template" id="wpcode-generator-repeater-row">
 			<?php $this->repeater_group_template(); ?>

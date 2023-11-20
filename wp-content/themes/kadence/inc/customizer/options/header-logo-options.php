@@ -163,6 +163,208 @@ $settings = array(
 			),
 		),
 	),
+	'use_logo_icon' => array(
+		'control_type' => 'kadence_switch_control',
+		'sanitize'     => 'kadence_sanitize_toggle',
+		'section'      => 'title_tagline',
+		'transport'    => 'refresh',
+		'priority'     => 6,
+		'default'      => kadence()->default( 'use_logo_icon' ),
+		'label'        => esc_html__( 'Use Logo Icon?', 'kadence' ),
+		'context'      => array(
+			array(
+				'setting' => '__current_tab',
+				'value'   => 'general',
+			),
+			array(
+				'setting'  => 'custom_logo',
+				'operator' => 'empty',
+				'value'    => '',
+			),
+		),
+		'partial'      => array(
+			'selector'            => '#masthead',
+			'container_inclusive' => true,
+			'render_callback'     => 'Kadence\header_markup',
+		),
+	),
+	'logo_icon' => array(
+		'control_type' => 'kadence_radio_icon_control',
+		'section'      => 'title_tagline',
+		'priority'     => 6,
+		'default'      => kadence()->default( 'logo_icon' ),
+		'label'        => esc_html__( 'Logo Icon', 'kadence' ),
+		'context'      => array(
+			array(
+				'setting' => '__current_tab',
+				'value'   => 'general',
+			),
+			array(
+				'setting'  => 'custom_logo',
+				'operator' => 'empty',
+				'value'    => '',
+			),
+			array(
+				'setting'  => 'use_logo_icon',
+				'operator' => '=',
+				'value'    => true,
+			),
+		),
+		'partial'      => array(
+			'selector'            => '.logo-icon',
+			'container_inclusive' => false,
+			'render_callback'     => 'Kadence\logo_icon',
+		),
+		'input_attrs'  => array(
+			'layout' => array(
+				'logoArrow' => array(
+					'icon' => 'logoArrow',
+				),
+				'logoCircle' => array(
+					'icon' => 'logoCircle',
+				),
+				'logoLine' => array(
+					'icon' => 'logoLine',
+				),
+				'custom' => array(
+					'name' => __( 'Custom', 'kadence' ),
+				),
+			),
+			'responsive' => false,
+			'class' => 'radio-icon-padding',
+		),
+	),
+	'logo_icon_custom' => array(
+		'control_type' => 'kadence_textarea_control',
+		'section'      => 'title_tagline',
+		'priority'     => 6,
+		'default'      => kadence()->default( 'logo_icon_custom' ),
+		'partial'      => array(
+			'selector'            => '.logo-icon',
+			'container_inclusive' => true,
+			'render_callback'     => 'Kadence\logo_icon',
+		),
+		'context'      => array(
+			array(
+				'setting' => '__current_tab',
+				'value'   => 'general',
+			),
+			array(
+				'setting'  => 'custom_logo',
+				'operator' => 'empty',
+				'value'    => '',
+			),
+			array(
+				'setting'  => 'use_logo_icon',
+				'operator' => '=',
+				'value'    => true,
+			),
+			array(
+				'setting'  => 'logo_icon',
+				'operator' => '=',
+				'value'    => 'custom',
+			),
+		),
+		'input_attrs'  => array(
+			'id' => 'logo_icon_custom',
+		),
+	),
+	'logo_icon_width' => array(
+		'control_type' => 'kadence_range_control',
+		'section'      => 'title_tagline',
+		'priority'     => 6,
+		'label'        => esc_html__( 'Logo Icon Width', 'kadence' ),
+		'description'  => esc_html__( 'Define the width for the logo icon', 'kadence' ),
+		'context'      => array(
+			array(
+				'setting' => '__current_tab',
+				'value'   => 'general',
+			),
+			array(
+				'setting'  => 'custom_logo',
+				'operator' => 'empty',
+				'value'    => '',
+			),
+			array(
+				'setting'  => 'use_logo_icon',
+				'operator' => '=',
+				'value'    => true,
+			),
+		),
+		'live_method'     => array(
+			array(
+				'type'     => 'css',
+				'selector' => '#masthead .logo-icon',
+				'property' => 'max-width',
+				'pattern'  => '$',
+				'key'      => 'size',
+			),
+		),
+		'default'      => kadence()->default( 'logo_icon_width' ),
+		'input_attrs'  => array(
+			'min'     => array(
+				'px'  => 10,
+				'em'  => 1,
+				'rem' => 1,
+				'vw'  => 2,
+				'%'   => 2,
+			),
+			'max'     => array(
+				'px'  => 800,
+				'em'  => 50,
+				'rem' => 50,
+				'vw'  => 80,
+				'%'   => 80,
+			),
+			'step'    => array(
+				'px'  => 1,
+				'em'  => 0.01,
+				'rem' => 0.01,
+				'vw'  => 1,
+				'%'   => 1,
+			),
+			'units'   => array( 'px', 'em', 'rem', 'vw' ),
+		),
+	),
+	'logo_icon_color' => array(
+		'control_type' => 'kadence_color_control',
+		'section'      => 'title_tagline',
+		'label'        => esc_html__( 'Logo Icon Color', 'kadence' ),
+		'default'      => kadence()->default( 'logo_icon_color' ),
+		'live_method'     => array(
+			array(
+				'type'     => 'css',
+				'selector' => '#masthead .logo-icon',
+				'property' => 'color',
+				'pattern'  => '$',
+				'key'      => 'color',
+			),
+		),
+		'context'      => array(
+			array(
+				'setting' => '__current_tab',
+				'value'   => 'design',
+			),
+			array(
+				'setting'  => 'custom_logo',
+				'operator' => 'empty',
+				'value'    => '',
+			),
+			array(
+				'setting'  => 'use_logo_icon',
+				'operator' => '=',
+				'value'    => true,
+			),
+		),
+		'input_attrs'  => array(
+			'colors' => array(
+				'color' => array(
+					'tooltip' => __( 'Color', 'kadence' ),
+					'palette' => true,
+				),
+			),
+		),
+	),
 	'logo_layout' => array(
 		'control_type' => 'kadence_multi_radio_icon_control',
 		'section'      => 'title_tagline',

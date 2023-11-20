@@ -252,17 +252,17 @@ class WPCode_Admin_Page_File_Editor extends WPCode_Admin_Page {
 			$text,
 			array(
 				'text' => esc_html__( 'Upgrade to WPCode PRO', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'file-editor', 'tab-' . $this->view, 'upgrade-to-pro' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'file-editor', 'tab-' . $this->view, 'upgrade-to-pro' ) ),
 			),
 			array(
 				'text' => esc_html__( 'Learn More about the File Editor', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/docs/file-editor/', 'file-editor', 'tab-' . $this->view, 'learn-more' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/docs/file-editor/', 'file-editor', 'tab-' . $this->view, 'learn-more' ) ),
 			),
 			array(
-				__( 'No manual coding, no FTP', 'insert-headers-and-footers' ),
-				__( 'Effortless integrations setup', 'insert-headers-and-footers' ),
-				__( 'Reduce the number of plugins', 'insert-headers-and-footers' ),
-				__( 'Prevent advertising fraud', 'insert-headers-and-footers' ),
+				esc_html__( 'No manual coding, no FTP', 'insert-headers-and-footers' ),
+				esc_html__( 'Effortless integrations setup', 'insert-headers-and-footers' ),
+				esc_html__( 'Reduce the number of plugins', 'insert-headers-and-footers' ),
+				esc_html__( 'Prevent advertising fraud', 'insert-headers-and-footers' ),
 			)
 		);
 	}

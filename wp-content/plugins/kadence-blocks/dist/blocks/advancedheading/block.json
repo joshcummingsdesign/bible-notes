@@ -540,6 +540,10 @@
         ""
       ]
     },
+    "iconPaddingUnit": {
+      "type": "string",
+      "default": "px"
+    },
     "iconSize": {
       "type": "array",
       "default": [

@@ -321,6 +321,29 @@ $kadence_trans_settings = array(
 			),
 		),
 	),
+	'transparent_logo_icon_color' => array(
+		'control_type' => 'kadence_color_control',
+		'section'      => 'transparent_header_design',
+		'label'        => esc_html__( 'Logo Icon Color', 'kadence' ),
+		'default'      => kadence()->default( 'transparent_logo_icon_color' ),
+		'live_method'     => array(
+			array(
+				'type'     => 'css',
+				'selector' => '.transparent-header #main-header .site-branding .logo-icon',
+				'property' => 'color',
+				'pattern'  => '$',
+				'key'      => 'color',
+			),
+		),
+		'input_attrs'  => array(
+			'colors' => array(
+				'color' => array(
+					'tooltip' => __( 'Initial Color', 'kadence' ),
+					'palette' => true,
+				),
+			),
+		),
+	),
 	'transparent_header_site_title_color' => array(
 		'control_type' => 'kadence_color_control',
 		'section'      => 'transparent_header_design',

@@ -235,7 +235,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 		$options = array(
 			'attachment_id' => $post_id,
 			'blog_id'	   => get_current_blog_id(),
-			'image_quality' => $this->options->get_option('image_quality', 96),
+			'image_quality' => $this->options->get_option('image_quality', 92),
 			'keep_original' => $this->options->get_option('back_up_original', true),
 			'preserve_exif' => $this->options->get_option('preserve_exif', true),
 			'lossy_compression' => $this->options->get_option('lossy_compression', false)
@@ -252,8 +252,8 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 		$description = "$task_name with attachment ID : ".$post_id . $blog_info .", autocreated on : ".date("F d, Y h:i:s", time());
 
 		$task = call_user_func(array($task_name, 'create_task'), 'smush', $description, $options, $task_name);
-		
-		if ($task) $task->add_logger($this->logger);
+
+		if ($task) $this->set_task_logger($task);
 		$this->log($description);
 
 		if (!wp_next_scheduled('process_smush_tasks')) {
@@ -308,7 +308,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 		$description = "$task_name - attachment ID : ". $image . $blog_info. ", started on : ". date("F d, Y h:i:s", time());
 
 		$task = call_user_func(array($task_name, 'create_task'), 'smush', $description, $options, $task_name);
-		$task->add_logger($this->logger);
+		if ($task) $this->set_task_logger($task);
 		$this->clear_cached_data();
 
 		if (!wp_next_scheduled('prune_smush_logs')) {
@@ -540,7 +540,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 			$options = array(
 				'attachment_id' => intval($image['attachment_id']),
 				'blog_id'	   => intval($image['blog_id']),
-				'image_quality' => $this->options->get_option('image_quality', 85),
+				'image_quality' => $this->options->get_option('image_quality', 92),
 				'keep_original' => $this->options->get_option('back_up_original', true),
 				'preserve_exif' => $this->options->get_option('preserve_exif', true),
 				'lossy_compression' => $this->options->get_option('lossy_compression', false)
@@ -552,7 +552,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 			$blog_info = is_multisite() ? ', Blog ID : '.intval($image['blog_id']) : '';
 			$description = "$task_name - Attachment ID : ". intval($image['attachment_id']) . $blog_info . ", Started on : ". date("F d, Y h:i:s", time());
 			$task = call_user_func(array($task_name, 'create_task'), 'smush', $description, $options, $task_name);
-			$task->add_logger($this->logger);
+			if ($task) $this->set_task_logger($task);
 		}
 
 		$this->process_smush_tasks();
@@ -586,7 +586,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 	}
 	
 	/**
-	 * Checks if the queue for smushing is compleete
+	 * Checks if the queue for smushing is complete
 	 *
 	 * @return bool - true if processed, false otherwise
 	 */
@@ -670,7 +670,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 		if (empty($smush_options)) {
 			$smush_options = array(
 				'compression_server' => $this->options->get_option('compression_server', $this->get_default_webservice()),
-				'image_quality' => $this->options->get_option('image_quality', 'very_good'),
+				'image_quality' => $this->options->get_option('image_quality', 92),
 				'lossy_compression' => $this->options->get_option('lossy_compression', false),
 				'back_up_original' => $this->options->get_option('back_up_original', true),
 				'back_up_delete_after' => $this->options->get_option('back_up_delete_after', true),
@@ -772,7 +772,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 		$marked = get_post_meta($post->ID, 'smush-marked', false);
 		
 		$options = Updraft_Smush_Manager()->get_smush_options();
-
+		
 		$file = get_attached_file($post->ID);
 		$ext = WPO_Image_Utils::get_extension($file);
 		$allowed_extensions = WPO_Image_Utils::get_allowed_extensions();
@@ -788,7 +788,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 			'smush_info'		=> $smush_info ? $smush_info : ' ',
 			'file_size'			=> $file_size,
 			'smush_options'     => $options,
-			'custom'            => 100 == $options['image_quality'] || 90 == $options['image_quality'] ? false : true,
+			'custom'            => 90 >= $options['image_quality'] && 65 <= $options['image_quality'],
 			'smush_details'		=> '',
 		);
 
@@ -1126,7 +1126,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 
 		$js_variables['smush_ajax_nonce'] = wp_create_nonce('updraft-task-manager-ajax-nonce');
 
-		wp_enqueue_script('block-ui-js', WPO_PLUGIN_URL.'/includes/blockui/jquery.blockUI'.$min_or_not.'.js', array('jquery'), $enqueue_version);
+		wp_enqueue_script('block-ui-js', WPO_PLUGIN_URL.'includes/blockui/jquery.blockUI'.$min_or_not.'.js', array('jquery'), $enqueue_version);
 		wp_enqueue_script('smush-js', WPO_PLUGIN_URL.'js/wposmush'.$min_or_not_internal.'.js', array('jquery', 'block-ui-js', 'wp-optimize-send-command'), $enqueue_version);
 		wp_enqueue_style('smush-css', WPO_PLUGIN_URL.'css/smush'.$min_or_not_internal.'.css', array(), $enqueue_version);
 		wp_localize_script('smush-js', 'wposmush', $js_variables);
@@ -1148,7 +1148,7 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 
 		$options = array(
 			'compression_server' => $this->get_default_webservice(),
-			'image_quality'		 => 'very_good',
+			'image_quality'		 => 92,
 			'lossy_compression'	 => false,
 			'back_up_original'	 => true,
 			'preserve_exif'		 => false,
@@ -1248,7 +1248,6 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 	 * Writes a standardised header to the log file
 	 */
 	public function write_log_header() {
-		
 		global $wpdb;
 		
 		// phpcs:disable
@@ -1285,9 +1284,10 @@ class Updraft_Smush_Manager extends Updraft_Task_Manager_1_4 {
 		$log_header[] = "multisite: ".(is_multisite() ? 'Y' : 'N');
 		$log_header[] = "openssl: ".(defined('OPENSSL_VERSION_TEXT') ? OPENSSL_VERSION_TEXT : 'N');
 
-
-		foreach ($log_header as $log_entry) {
-			$this->log($log_entry);
+		if (apply_filters("wpo_write_server_info_in_smush_log", false)) {
+			foreach ($log_header as $log_entry) {
+				$this->log($log_entry);
+			}
 		}
 
 		$memlim = $this->memory_check_current();

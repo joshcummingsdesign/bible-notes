@@ -19,7 +19,7 @@
  */
 
 jQuery(
-	function($){
+	function ($) {
 
 		/* Date Time Picker */
 		$( ':input[id^=datetimepicker-bdtc]' ).datetimepicker( {format:'Y-m-d H:i:s'} );

@@ -436,7 +436,7 @@ class Customizer_Import_Export {
 	 */
 	private static function is_image_url( $string = '' ) {
 		if ( is_string( $string ) ) {
-			if ( preg_match( '/\.(jpg|jpeg|png|gif)/i', $string ) ) {
+			if ( preg_match( '/\.(jpg|jpeg|png|webp|gif)/i', $string ) ) {
 				return true;
 			}
 		}

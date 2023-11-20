@@ -196,6 +196,7 @@ abstract class WPCode_Metabox_Snippets {
 					<?php
 					$class = '';
 				}
+				do_action( 'wpcode_metabox_admin_tabs' )
 				?>
 			</ul>
 		</div>
@@ -248,8 +249,8 @@ abstract class WPCode_Metabox_Snippets {
 	 */
 	public function get_active_tab() {
 		$active_tab = 'header';
-		if ( isset( $_GET['wpcode-show'] ) && array_key_exists( $_GET['wpcode-show'], $this->tabs ) ) {
-			$active_tab             = sanitize_text_field( wp_unslash( $_GET['wpcode-show'] ) );
+		if ( isset( $_GET['wpcode-show'] ) && array_key_exists( sanitize_key( $_GET['wpcode-show'] ), $this->tabs ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$active_tab             = sanitize_key( $_GET['wpcode-show'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->scroll_into_view = true;
 		}
 

@@ -152,10 +152,10 @@ class Component implements Component_Interface {
 			'kadenceConfig',
 			array(
 				'screenReader' => array(
-					'expand'     => __( 'Expand child menu', 'kadence' ),
-					'expandOf'   => __( 'Expand child menu of', 'kadence' ),
-					'collapse'   => __( 'Collapse child menu', 'kadence' ),
-					'collapseOf' => __( 'Collapse child menu of', 'kadence' ),
+					'expand'     => __( 'Child menu', 'kadence' ),
+					'expandOf'   => __( 'Child menu of', 'kadence' ),
+					'collapse'   => __( 'Child menu', 'kadence' ),
+					'collapseOf' => __( 'Child menu of', 'kadence' ),
 				),
 				'breakPoints' => array(
 					'desktop' => esc_attr( $breakpoint ),

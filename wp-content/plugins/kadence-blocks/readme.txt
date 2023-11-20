@@ -3,8 +3,8 @@ Contributors: britner, oakesjosh, woodardmc
 Tags: gutenberg, blocks, page builder, google fonts, dual buttons, svg icons, editor width,
 Donate link: https://www.kadencewp.com/about-us/
 Requires at least: 6.1
-Tested up to: 6.3
-Stable tag: 3.1.13
+Tested up to: 6.4
+Stable tag: 3.1.26
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,112 @@ assist you with verification, CVE assignment, and notify the
 developers of this plugin.
 
 == Changelog ==
+
+= 3.1.26 =
+Release Date: November 15th, 2023
+* Fix: Text (Adv) not showing link format option.
+
+= 3.1.25 =
+Release Date: November 14th, 2023
+* Update: Add hooks for dynamic replace control.
+* Fix: Form field custon name not saving.
+
+= 3.1.24 =
+Release Date: November 8th, 2023
+* Update: Add option to allow decimals in Advanced Form number field.
+* Update: Allow mute/unmute buttons row video backgrounds to be displayed separately from the play / pause button.
+* Update: Integrate hide recaptcha settings from Kadence Captcha into Advanced Form.
+* Update: Add option to style buttons with underline text.
+* Fix: Issue creating new Advanced Forms on WordPress 6.4.
+* Fix: Google v3 reCAPTCHA not hiding in when set to hide.
+* Fix: Add aria label to Advanced Gallery lightbox links.
+* Fix: Allow show more button to be focusable using tab key.
+* Fix: Border styling display on Advanced button in editor
+* Fix: Adv gallery dots having an inaccurate count in some situations.
+* Fix: Advanced form help text font size on front end.
+* Fix: Advanced form styling for label font size when using infield.
+* Fix: Advanced form label custom styles being overridden by default styles.
+* Fix: Uploading of documents in advanced form.
+* Fix: Setting active campaign API url in advanced form.
+
+= 3.1.23 =
+Release Date: November 1st, 2023
+* Update: Include a tiktok icon.
+* Fix: Issue with icon list margin.
+* Fix: Issue with advanced form max width units.
+* Fix: Progress bar mask align center.
+* Fix: Issue with gallery hidden when added to a horizontal direction.
+* Fix: Issue with required message for file upload in form.
+
+= 3.1.22 =
+Release Date: October 18th, 2023
+* Update: Add option for radio fields to be inline.
+* Fix: Issue with custom icons that have negative numbers in viewbox.
+* Fix: Initial expand state of accordion toggle.
+* Fix: Media query issue in tabs.
+* Fix: Testimonial block box shadow spacing.
+* Fix: Show more block not initializing in some situations.
+
+= 3.1.21 =
+Release Date: October 11th, 2023
+* Update: Settings for ActiveCampaign
+* Update: Add filter for form upload mime types.
+* Update: Add option to allow multiple uploads.
+* Fix: Issue where inline style tags could break row layout options.
+* Fix: Issue with rank math score going down when adding Advanced Buttons.
+
+= 3.1.20 =
+Release Date: October 3rd, 2023
+* Add: Advanced buttons support Rank Math content analysis.
+* Add: Option to choose heading font family when using Kadence Theme.
+* Update: Brand icons, add threads, and a square x icon.
+* Fix: Issue with some brand icons not being center.
+* Fix: Issue with icon list margin not working in mega menu.
+* Fix: Issue with setting numeric padding & margin on advanced form.
+* Fix: HTML Anchors and additional CSS classes on advanced form.
+* Fix: Block defaults not applying on Testimonial blocks.
+* Fix: Issue when skipping advanced form layout settings.
+* Fix: Issue with email dynamic replacements.
+* Fix: Custom "required" error messages not displaying for advanced form.
+* Fix: Support conditional logic on file upload fields in advanced form.
+
+= 3.1.19 =
+Release Date: September 20th, 2023
+* Fix: Issue with spacer in a reusable block.
+
+= 3.1.18 =
+Release Date: September 20th, 2023
+* Fix: Issue with radio/checkbox field id output.
+
+= 3.1.17 =
+Release Date: September 20th, 2023
+* Fix: Issue with medium_large image size being disabled.
+
+= 3.1.16 =
+Release Date: September 19th, 2023
+* Add: Option to search and add from pexels from within the media library popup.
+* Add: Option to use a mask in progress bar.
+
+= 3.1.15 =
+Release Date: September 14th, 2023
+* Fix: Issue with form file uploads.
+
+= 3.1.14 =
+Release Date: September 11th, 2023
+* Add: Option to disable browser validation on form.
+* Update: Youtube background video cover css.
+* Update: Rely on rest endpoints for taxonomy selection in posts block.
+* Fix: Ability to add dynamic values to radio and textarea fields in advanced forms.
+* Fix: Editing custom CSS in modal.
+* Fix: Autocomplete in CSS editor.
+* Fix: Issue with multiple dynamic galleries all showing in single lightbox.
+* Fix: Accept field recording in advanced forms.
+* Fix: Advanced Text icon padding unit not saving.
+* Fix: Icon list link color issue.
+* Fix: Issue with section background color override.
+* Fix: Possible issue with svg filter.
+* Fix: Issue with countdown container padding and margin.
+* Fix: Issue with missing custom class in lottie block.
 
 = 3.1.13 =
 Release Date: August 24th, 2023

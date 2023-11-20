@@ -845,6 +845,30 @@ class Component implements Component_Interface, Templating_Component_Interface {
 							'desktop' => 'standard',
 						),
 					),
+					// Logo Icon.
+					'use_logo_icon' => false,
+					'logo_icon'   => 'logoArrow',
+					'logo_icon_width' => array(
+						'size' => array(
+							'mobile'  => '',
+							'tablet'  => '',
+							'desktop' => 60,
+						),
+						'unit' => array(
+							'mobile'  => 'px',
+							'tablet'  => 'px',
+							'desktop' => 'px',
+						),
+					),
+					'logo_icon_color' => array(
+						'color' => 'palette3',
+					),
+					'transparent_logo_icon_color' => array(
+						'color' => '',
+					),
+					'header_sticky_logo_icon_color' => array(
+						'color' => '',
+					),
 					'brand_typography'            => array(
 						'size' => array(
 							'desktop' => 26,

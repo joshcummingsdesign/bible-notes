@@ -256,6 +256,41 @@ class Starter_Templates {
 		}
 	}
 	/**
+	 * Get all menu item id's
+	 *
+	 * @return array
+	 */
+	public function get_menu_item_ids() {
+
+		$args = array(
+			'post_type'     => 'nav_menu_item',
+			// Query performance optimization.
+			'fields'        => 'ids',
+			'no_found_rows' => true,
+			'post_status'   => 'any',
+		);
+		$query = new WP_Query( $args );
+
+		// Have posts?
+		if ( $query->have_posts() ) :
+
+			return $query->posts;
+
+		endif;
+		return null;
+	}
+	/**
+	 * Remove trailing slash from url.
+	 *
+	 * @param string $string the url of the site.
+	 */
+	public function remove_trailing_slash( $string ) {
+		if ( substr( $string, -1 ) == '/' ) {
+			return substr( $string, 0, -1 );
+		}
+		return $string;
+	}
+	/**
 	 * Kadence After Import functions.
 	 *
 	 * @param array $selected_import the selected import.
@@ -280,6 +315,24 @@ class Starter_Templates {
 			}
 			set_theme_mod( 'nav_menu_locations', $menus_array );
 		}
+
+		// Fix Custom Menu items.
+		if ( ! empty( $selected_import['url'] ) ) {
+			$site_url = $this->remove_trailing_slash( $selected_import['url'] );
+
+			$menu_item_ids = $this->get_menu_item_ids();
+			if ( is_array( $menu_item_ids ) ) {
+				foreach ( $menu_item_ids as $menu_id ) {
+					$menu_url = get_post_meta( $menu_id, '_menu_item_url', true );
+
+					if ( $menu_url ) {
+						$menu_url = str_replace( $site_url, site_url(), $menu_url );
+						update_post_meta( $menu_id, '_menu_item_url', $menu_url );
+					}
+				}
+			}
+		}
+
 		if ( isset( $selected_import['homepage'] ) && ! empty( $selected_import['homepage'] ) ) {
 			$homepage = $this->get_page_by_title( $selected_import['homepage'] );
 			if ( isset( $homepage ) && $homepage->ID ) {

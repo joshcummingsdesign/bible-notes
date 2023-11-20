@@ -7,6 +7,9 @@
     "uniqueID": {
       "type": "string"
     },
+    "formID": {
+      "type": "string"
+    },
     "label": {
       "type": "string",
       "default": ""
@@ -28,6 +31,10 @@
     },
     "defaultParameter": {
       "type": "string"
+    },
+    "allowDecimals": {
+      "type": "boolean",
+      "default": false
     },
     "maxValue": {
       "type": "number",
@@ -89,6 +96,7 @@
     "anchor": true,
     "html": false,
     "ktdynamic": true,
+    "ktfieldconditional": true,
     "reusable": false,
     "kbMetadata": true,
     "kbContentLabel": "label"

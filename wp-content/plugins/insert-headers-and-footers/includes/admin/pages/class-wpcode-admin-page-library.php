@@ -199,23 +199,23 @@ class WPCode_Admin_Page_Library extends WPCode_Admin_Page {
 		$this->blurred_placeholder_items();
 		// Show upsell.
 		echo WPCode_Admin_Page::get_upsell_box(
-			__( 'My Library is a PRO Feature', 'insert-headers-and-footers' ),
-			'<p>' . __( 'Upgrade to WPCode PRO today and save your snippets in the WPCode Library directly from the plugin and import them with 1-click on other sites.', 'insert-headers-and-footers' ) . '</p>',
+			esc_html__( 'My Library is a PRO Feature', 'insert-headers-and-footers' ),
+			'<p>' . esc_html__( 'Upgrade to WPCode PRO today and save your snippets in the WPCode Library directly from the plugin and import them with 1-click on other sites.', 'insert-headers-and-footers' ) . '</p>',
 			array(
-				'text' => __( 'Upgrade to PRO and Unlock "My Library"', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'library-page', 'my-library', 'upgrade-and-unlock' ),
+				'text' => esc_html__( 'Upgrade to PRO and Unlock "My Library"', 'insert-headers-and-footers' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'library-page', 'my-library', 'upgrade-and-unlock' ) ),
 			),
 			array(
 				'text' => esc_html__( 'Learn more about all the features', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'library-page', 'my-library', 'features' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'library-page', 'my-library', 'features' ) ),
 			),
 			array(
-				__( 'Save your snippets to the WPCode Library', 'insert-headers-and-footers' ),
-				__( 'Import snippets from the WPCode Library', 'insert-headers-and-footers' ),
-				__( 'Set up new websites faster', 'insert-headers-and-footers' ),
-				__( 'Easily implement features on multiple sites', 'insert-headers-and-footers' ),
-				__( 'Edit snippets in the WPCode Library', 'insert-headers-and-footers' ),
-				__( 'Load favorite snippets in the plugin', 'insert-headers-and-footers' ),
+				esc_html__( 'Save your snippets to the WPCode Library', 'insert-headers-and-footers' ),
+				esc_html__( 'Import snippets from the WPCode Library', 'insert-headers-and-footers' ),
+				esc_html__( 'Set up new websites faster', 'insert-headers-and-footers' ),
+				esc_html__( 'Easily implement features on multiple sites', 'insert-headers-and-footers' ),
+				esc_html__( 'Edit snippets in the WPCode Library', 'insert-headers-and-footers' ),
+				esc_html__( 'Load favorite snippets in the plugin', 'insert-headers-and-footers' ),
 			)
 		);
 	}
@@ -229,23 +229,23 @@ class WPCode_Admin_Page_Library extends WPCode_Admin_Page {
 		$this->blurred_placeholder_items();
 		// Show upsell.
 		echo WPCode_Admin_Page::get_upsell_box(
-			__( 'My Favorites is a PRO Feature', 'insert-headers-and-footers' ),
-			'<p>' . __( 'Upgrade to WPCode PRO today and see the snippets you starred in the WPCode Library directly in the plugin.', 'insert-headers-and-footers' ) . '</p>',
+			esc_html__( 'My Favorites is a PRO Feature', 'insert-headers-and-footers' ),
+			'<p>' . esc_html__( 'Upgrade to WPCode PRO today and see the snippets you starred in the WPCode Library directly in the plugin.', 'insert-headers-and-footers' ) . '</p>',
 			array(
-				'text' => __( 'Upgrade to PRO and Unlock "My Favorites"', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'library-page', 'my-favorites', 'upgrade-and-unlock' ),
+				'text' => esc_html__( 'Upgrade to PRO and Unlock "My Favorites"', 'insert-headers-and-footers' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'library-page', 'my-favorites', 'upgrade-and-unlock' ) ),
 			),
 			array(
 				'text' => esc_html__( 'Learn more about all the features', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'library-page', 'my-favorites', 'features' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'library-page', 'my-favorites', 'features' ) ),
 			),
 			array(
-				__( 'Load favorite snippets in the plugin', 'insert-headers-and-footers' ),
-				__( 'Import snippets from the WPCode Library', 'insert-headers-and-footers' ),
-				__( 'Save your snippets to the WPCode Library', 'insert-headers-and-footers' ),
-				__( 'Set up new websites faster', 'insert-headers-and-footers' ),
-				__( 'Easily implement features on multiple sites', 'insert-headers-and-footers' ),
-				__( 'Edit snippets in the WPCode Library', 'insert-headers-and-footers' ),
+				esc_html__( 'Load favorite snippets in the plugin', 'insert-headers-and-footers' ),
+				esc_html__( 'Import snippets from the WPCode Library', 'insert-headers-and-footers' ),
+				esc_html__( 'Save your snippets to the WPCode Library', 'insert-headers-and-footers' ),
+				esc_html__( 'Set up new websites faster', 'insert-headers-and-footers' ),
+				esc_html__( 'Easily implement features on multiple sites', 'insert-headers-and-footers' ),
+				esc_html__( 'Edit snippets in the WPCode Library', 'insert-headers-and-footers' ),
 			)
 		);
 	}

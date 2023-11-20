@@ -7,6 +7,9 @@
     "uniqueID": {
       "type": "string"
     },
+    "formID": {
+      "type": "string"
+    },
     "label": {
       "type": "string",
       "default": ""
@@ -18,6 +21,17 @@
     "required": {
       "type": "boolean",
       "default": false
+    },
+    "requiredMessage": {
+      "type": "string"
+    },
+    "multiple": {
+      "type": "boolean",
+      "default": false
+    },
+    "multipleLimit": {
+      "type": "number",
+      "default": 5
     },
     "allowedTypes": {
       "type": "array",
@@ -39,7 +53,13 @@
     },
     "anchor": {
       "type": "string"
+    },
+    "inputName": {
+      "type": "string"
     }
+  },
+  "supports": {
+    "ktfieldconditional": true
   },
   "parent": [
     "kadence/advanced-form"

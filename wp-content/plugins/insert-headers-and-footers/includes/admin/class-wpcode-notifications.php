@@ -146,6 +146,11 @@ class WPCode_Notifications {
 				continue;
 			}
 
+			// Check that the license type matches.
+			if ( ! in_array( $this->get_license_type(), (array) $notification['type'], true ) ) {
+				continue;
+			}
+
 			// Ignore if notification has already been dismissed.
 			$notification_already_dismissed = false;
 			if ( is_array( $option['dismissed'] ) && ! empty( $option['dismissed'] ) ) {
@@ -492,5 +497,14 @@ class WPCode_Notifications {
 	 */
 	public static function delete_notifications_data() {
 		delete_option( self::$option_name );
+	}
+
+	/**
+	 * Get the license type for the current plugin.
+	 *
+	 * @return string
+	 */
+	public function get_license_type() {
+		return 'lite';
 	}
 }

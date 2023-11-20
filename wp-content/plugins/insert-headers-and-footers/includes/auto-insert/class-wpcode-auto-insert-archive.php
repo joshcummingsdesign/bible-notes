@@ -145,7 +145,7 @@ class WPCode_Auto_Insert_Archive extends WPCode_Auto_Insert_Type {
 		foreach ( $snippets as $snippet ) {
 			$insert_number = $snippet->get_auto_insert_number();
 			if ( $query->current_post === $insert_number - 1 ) {
-				echo wpcode()->execute->get_snippet_output( $snippet );
+				echo wpcode()->execute->get_snippet_output( $snippet ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 		}
 
@@ -154,7 +154,7 @@ class WPCode_Auto_Insert_Archive extends WPCode_Auto_Insert_Type {
 		foreach ( $snippets as $snippet ) {
 			$insert_number = $snippet->get_auto_insert_number();
 			if ( $query->current_post === $insert_number ) {
-				echo wpcode()->execute->get_snippet_output( $snippet );
+				echo wpcode()->execute->get_snippet_output( $snippet ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 		}
 	}

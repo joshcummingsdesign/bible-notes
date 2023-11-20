@@ -1,3 +1,37 @@
+== 1.1.49 | 9th October 2023 ==
+* Fix: Issue with image select in customizer.
+* Fix: Issue with gradient control in customizer.
+
+== 1.1.48 | 18th October 2023 ==
+* Add: Option to use logo icon.
+* Update: Typography options to include inherit header.
+* Fix: Possible issue where error could show in error log regarding cart contents.
+* Fix: Issue with search styles if only used on mobile.
+* Fix: Issue with navigation toggle aria label.
+* Fix: Issue with Woocommerce 8.2 and star styles in blocks.
+
+== 1.1.47 | 3rd October 2023 ==
+* Add: Font family variables to live css in customizer.
+* Fix: Possible issue with aria label.
+
+== 1.1.46 | 26th September 2023 ==
+* Fix: Issue with search icon designs css.
+
+== 1.1.45 | 26th September 2023 ==
+* Fix: Issue with archive design settings.
+
+== 1.1.44 | 25th September 2023 ==
+* Update: Optimize dynamic css generation.
+* Update: Translations update.
+* Update: My account css to work with elementor pro.
+* Fix: Post Archive breadcrumb categories.
+* Fix: CSS specificity with search block.
+
+== 1.1.43 | 5th September 2023 ==
+* Fix: Possible issue with navigation and some screen readers.
+* Fix: Possible issue with logo aria label when tagline showing.
+* Fix: Issue with custom social icon styling.
+
 == 1.1.42 | 10th August 2023 ==
 * Fix: Possible issue with social styles causing PHP error.
 * Fix: Customizer styling for footer social.

@@ -332,6 +332,8 @@ body.content-style-unboxed .wc-block-grid .wc-block-grid__product.woo-archive-ac
     gap: 0.2em;
 	align-items: center;
 }
+// This is required to force our override of the star font to work.
+body {
 .wc-block-grid__product-rating .star-rating, .wc-block-grid__product-rating .wc-block-grid__product-rating__stars, .wc-block-review-list .wc-block-components-review-list-item__rating > .wc-block-components-review-list-item__rating__stars, .wc-block-components-product-rating__stars {
     font-family: "star";
 	display: block;
@@ -361,6 +363,7 @@ body.content-style-unboxed .wc-block-grid .wc-block-grid__product.woo-archive-ac
 			color:inherit;
 		}
 	}
+}
 }
 li.product a .secondary-product-image, .wc-block-grid__product a .secondary-product-image {
     position: absolute;

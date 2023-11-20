@@ -161,13 +161,18 @@ function site_branding() {
 
 	echo '<div class="site-branding branding-layout-' . esc_attr( $layout_class ) . '">';
 	kadence()->customizer_quick_link();
-	echo '<a class="brand' . ( in_array( 'logo', $includes, true ) && kadence()->option( 'custom_logo' ) ? ' has-logo-image' : '' ) . ( in_array( 'logo', $includes, true ) && 'no' !== kadence()->option( 'header_sticky' ) && kadence()->option( 'header_sticky_custom_logo' ) && kadence()->option( 'header_sticky_logo' ) ? ' has-sticky-logo' : '' ) . '" href="' . esc_url( apply_filters( 'kadence_logo_url', home_url( '/' ) ) ) . '" rel="home" aria-label="' . esc_attr( get_bloginfo( 'name' ) ) . '">';
+
+	$has_desktop_tagline_and_logo = in_array( 'tagline', $includes, true ) && ( ! isset( $layouts['desktop'] ) || ( isset( $layouts['desktop'] ) && 'top_title_logo_tag' !== $layouts['desktop'] ) );
+
+	echo '<a class="brand' . ( in_array( 'logo', $includes, true ) && ( kadence()->option( 'custom_logo' ) || ( ! kadence()->option( 'custom_logo' ) && kadence()->option( 'use_logo_icon' ) && kadence()->option( 'logo_icon' ) ) ) ? ' has-logo-image' : '' ) . ( in_array( 'logo', $includes, true ) && 'no' !== kadence()->option( 'header_sticky' ) && kadence()->option( 'header_sticky_custom_logo' ) && kadence()->option( 'header_sticky_logo' ) ? ' has-sticky-logo' : '' ) . '" href="' . esc_url( apply_filters( 'kadence_logo_url', home_url( '/' ) ) ) . '" rel="home">';
 	foreach ( $includes as $include ) {
 		switch ( $include ) {
 			case 'logo':
 				do_action( 'before_kadence_logo_output' );
 				if ( kadence()->desk_transparent_header() && kadence()->option( 'transparent_header_custom_logo' ) && kadence()->option( 'transparent_header_logo' ) ) {
 					render_custom_logo( 'transparent_header_logo', 'kadence-transparent-logo' );
+				} else if ( ! kadence()->option( 'custom_logo' ) && kadence()->option( 'use_logo_icon' ) && kadence()->option( 'logo_icon' ) ) {
+					logo_icon();
 				} else {
 					custom_logo();
 				}
@@ -178,7 +183,7 @@ function site_branding() {
 			case 'title':
 				echo '<div class="site-title-wrap">';
 				echo '<p class="site-title">' . get_bloginfo( 'name' ) . '</p>'; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */
-				if ( in_array( 'tagline', $includes, true ) && ( ! isset( $layouts['desktop'] ) || ( isset( $layouts['desktop'] ) && 'top_title_logo_tag' !== $layouts['desktop'] ) ) ) {
+				if ( $has_desktop_tagline_and_logo ) {
 					echo '<p class="site-description">' . get_bloginfo( 'description' ) . '</p>'; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */
 				}
 				echo '</div>';
@@ -193,7 +198,19 @@ function site_branding() {
 	echo '</a>';
 	echo '</div>';
 }
-
+/**
+ * Logo Icon Render
+ */
+function logo_icon() {
+	echo '<span class="logo-icon">';
+	$icon = kadence()->option( 'logo_icon' );
+	if ( 'custom' === $icon ) {
+		echo kadence()->option( 'logo_icon_custom' ); /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */
+	} else {
+		kadence()->print_icon( $icon, '', false );
+	}
+	echo '</span>';
+}
 /**
  * Desktop Navigation
  */
@@ -429,8 +446,11 @@ function mobile_site_branding() {
 	} else {
 		$mobile_layout_class = 'inherit';
 	}
+
+	$has_mobile_tagline_and_logo = in_array( 'tagline', $includes, true ) && ( ! isset( $layouts['mobile'] ) || ( isset( $layouts['mobile'] ) && 'top_title_logo_tag' !== $layouts['mobile'] ) );
+
 	echo '<div class="site-branding mobile-site-branding branding-layout-' . esc_attr( isset( $layouts['desktop'] ) ? $layouts['desktop'] : 'standard' ) . ' branding-tablet-layout-' . esc_attr( $tab_layout_class ) . ' branding-mobile-layout-' . esc_attr( $mobile_layout_class ) . '">';
-	echo '<a class="brand' . ( in_array( 'logo', $includes, true ) && kadence()->option( 'custom_logo' ) ? ' has-logo-image' : '' ) . ( in_array( 'logo', $includes, true ) && 'no' !== kadence()->option( 'mobile_header_sticky' ) && ( kadence()->option( 'header_sticky_custom_mobile_logo' ) && kadence()->option( 'header_sticky_mobile_logo' ) || kadence()->option( 'header_sticky_custom_logo' ) && kadence()->option( 'header_sticky_logo' ) ) ? ' has-sticky-logo' : '' ) . '" href="' . esc_url( apply_filters( 'kadence_logo_url', home_url( '/' ) ) ) . '" rel="home" aria-label="' . esc_attr( get_bloginfo( 'name' ) ) . '">';
+	echo '<a class="brand' . ( in_array( 'logo', $includes, true ) && ( kadence()->option( 'custom_logo' ) || ( ! kadence()->option( 'custom_logo' ) && kadence()->option( 'use_logo_icon' ) && kadence()->option( 'logo_icon' ) ) ) ? ' has-logo-image' : '' ) . ( in_array( 'logo', $includes, true ) && 'no' !== kadence()->option( 'mobile_header_sticky' ) && ( kadence()->option( 'header_sticky_custom_mobile_logo' ) && kadence()->option( 'header_sticky_mobile_logo' ) || kadence()->option( 'header_sticky_custom_logo' ) && kadence()->option( 'header_sticky_logo' ) ) ? ' has-sticky-logo' : '' ) . '" href="' . esc_url( apply_filters( 'kadence_logo_url', home_url( '/' ) ) ) . '" rel="home">';
 	foreach ( $includes as $include ) {
 		switch ( $include ) {
 			case 'logo':
@@ -439,6 +459,8 @@ function mobile_site_branding() {
 					render_custom_logo( 'transparent_header_mobile_logo', 'kadence-transparent-logo' );
 				} elseif ( kadence()->mobile_transparent_header() && kadence()->option( 'transparent_header_custom_logo' ) && kadence()->option( 'transparent_header_logo' ) ) {
 					render_custom_logo( 'transparent_header_logo', 'kadence-transparent-logo' );
+				} else if ( ! kadence()->option( 'use_mobile_logo' ) && ! kadence()->option( 'custom_logo' ) && kadence()->option( 'use_logo_icon' ) && kadence()->option( 'logo_icon' ) ) {
+					logo_icon();
 				} else {
 					if ( kadence()->option( 'use_mobile_logo' ) && kadence()->option( 'mobile_logo' ) ) {
 						render_custom_logo( 'mobile_logo' );
@@ -455,7 +477,7 @@ function mobile_site_branding() {
 			case 'title':
 				echo '<div class="site-title-wrap">';
 				echo '<div class="site-title' . ( ! empty( $layout['include']['mobile'] ) && ( strpos( $layout['include']['mobile'], 'title' ) === false ) ? ' vs-sm-false' : '' ) . ( ( strpos( $layout['include']['tablet'], 'title' ) === false ) ? ' vs-md-false' : '' ) . '">' . get_bloginfo( 'name' ) . '</div>'; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */
-				if ( in_array( 'tagline', $includes, true ) && ( ! isset( $layouts['desktop'] ) || ( isset( $layouts['desktop'] ) && 'top_title_logo_tag' !== $layouts['desktop'] ) ) ) {
+				if ( $has_mobile_tagline_and_logo ) {
 					echo '<div class="site-description' . ( ( strpos( $layout['include']['mobile'], 'tagline' ) === false ) ? ' vs-sm-false' : '' ) . ( ( strpos( $layout['include']['tablet'], 'tagline' ) === false ) ? ' vs-md-false' : '' ) . '">' . get_bloginfo( 'description' ) . '</div>'; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */
 				}
 				echo '</div>';
@@ -741,7 +763,8 @@ function header_cart() {
 		$dropdown   = 'header-navigation nav--toggle-sub header-navigation-dropdown-animation-' . esc_attr( kadence()->option( 'dropdown_navigation_reveal' ) );
 		echo '<div class="header-cart-wrap kadence-header-cart' . ( 'dropdown' === kadence()->option( 'header_cart_style' ) ? ' ' . esc_attr( $dropdown ) : '' ) . '">';
 		kadence()->customizer_quick_link();
-		echo '<span class="header-cart-empty-check header-cart-is-empty-' . ( WC()->cart->get_cart_contents_count() > 0 ? 'false' : 'true' ) . '"></span>';
+		$cart_contents_count = ( isset( WC()->cart ) ? WC()->cart->get_cart_contents_count() : 0 );
+		echo '<span class="header-cart-empty-check header-cart-is-empty-' . ( $cart_contents_count > 0 ? 'false' : 'true' ) . '"></span>';
 		echo '<div class="header-cart-inner-wrap cart-show-label-' . ( ! empty( $label ) ? 'true' : 'false' ) . ' cart-style-' . esc_attr( kadence()->option( 'header_cart_style' ) ) . ( 'dropdown' === kadence()->option( 'header_cart_style' ) ? ' header-menu-container' : '' ) . '">';
 		if ( 'link' === kadence()->option( 'header_cart_style' ) ) {
 			echo '<a href="' . esc_url( wc_get_cart_url() ) . '"' . ( ! empty( $label ) ? '' : ' aria-label="' . esc_attr__( 'Shopping Cart', 'kadence' ) . '"' ) . ' class="header-cart-button">';
@@ -752,7 +775,7 @@ function header_cart() {
 			}
 			kadence()->print_icon( $icon, '', false );
 			if ( $show_total ) {
-				echo '<span class="header-cart-total header-cart-is-empty-' . ( WC()->cart->get_cart_contents_count() > 0 ? 'false' : 'true' ) . '">' . wp_kses_post( WC()->cart->get_cart_contents_count() ) . '</span>';
+				echo '<span class="header-cart-total header-cart-is-empty-' . ( $cart_contents_count > 0 ? 'false' : 'true' ) . '">' . wp_kses_post( $cart_contents_count ) . '</span>';
 			}
 			echo '</a>';
 		} elseif ( 'slide' === kadence()->option( 'header_cart_style' ) ) {
@@ -765,7 +788,7 @@ function header_cart() {
 			}
 			kadence()->print_icon( $icon, '', false );
 			if ( $show_total ) {
-				echo '<span class="header-cart-total header-cart-is-empty-' . ( WC()->cart->get_cart_contents_count() > 0 ? 'false' : 'true' ) . '">' . wp_kses_post( WC()->cart->get_cart_contents_count() ) . '</span>';
+				echo '<span class="header-cart-total header-cart-is-empty-' . ( $cart_contents_count > 0 ? 'false' : 'true' ) . '">' . wp_kses_post( $cart_contents_count ) . '</span>';
 			}
 			echo '</button>';
 		} elseif ( 'dropdown' === kadence()->option( 'header_cart_style' ) ) {
@@ -779,7 +802,7 @@ function header_cart() {
 			}
 			kadence()->print_icon( $icon, '', false );
 			if ( $show_total ) {
-				echo '<span class="header-cart-total header-cart-is-empty-' . ( WC()->cart->get_cart_contents_count() > 0 ? 'false' : 'true' ) . '">' . wp_kses_post( WC()->cart->get_cart_contents_count() ) . '</span>';
+				echo '<span class="header-cart-total header-cart-is-empty-' . ( $cart_contents_count > 0 ? 'false' : 'true' ) . '">' . wp_kses_post( $cart_contents_count ) . '</span>';
 			}
 			echo '</a>';
 			echo '<ul class="sub-menu">
@@ -842,7 +865,8 @@ function mobile_cart() {
 		$icon       = kadence()->option( 'header_mobile_cart_icon', 'shopping-bag' );
 		echo '<div class="header-mobile-cart-wrap kadence-header-cart">';
 		kadence()->customizer_quick_link();
-		echo '<span class="header-cart-empty-check header-cart-is-empty-' . ( WC()->cart->get_cart_contents_count() > 0 ? 'false' : 'true' ) . '"></span>';
+		$cart_contents_count = ( isset( WC()->cart ) ? WC()->cart->get_cart_contents_count() : 0 );
+		echo '<span class="header-cart-empty-check header-cart-is-empty-' . ( $cart_contents_count > 0 ? 'false' : 'true' ) . '"></span>';
 		echo '<div class="header-cart-inner-wrap cart-show-label-' . ( ! empty( $label ) ? 'true' : 'false' ) . ' cart-style-' . esc_attr( kadence()->option( 'header_mobile_cart_style' ) ) . '">';
 		if ( 'link' === kadence()->option( 'header_mobile_cart_style' ) ) {
 			echo '<a href="' . esc_url( wc_get_cart_url() ) . '"' . ( ! empty( $label ) ? '' : ' aria-label="' . esc_attr__( 'Shopping Cart', 'kadence' ) . '"' ) . ' class="header-cart-button">';
@@ -853,7 +877,7 @@ function mobile_cart() {
 			}
 			kadence()->print_icon( $icon, '', false );
 			if ( $show_total ) {
-				echo '<span class="header-cart-total">' . wp_kses_post( WC()->cart->get_cart_contents_count() ) . '</span>';
+				echo '<span class="header-cart-total">' . wp_kses_post( $cart_contents_count ) . '</span>';
 			}
 			echo '</a>';
 		} elseif ( 'slide' === kadence()->option( 'header_mobile_cart_style' ) ) {
@@ -866,7 +890,7 @@ function mobile_cart() {
 			}
 			kadence()->print_icon( $icon, '', false );
 			if ( $show_total ) {
-				echo '<span class="header-cart-total">' . wp_kses_post( WC()->cart->get_cart_contents_count() ) . '</span>';
+				echo '<span class="header-cart-total">' . wp_kses_post( $cart_contents_count ) . '</span>';
 			}
 			echo '</button>';
 		}

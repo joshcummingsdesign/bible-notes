@@ -310,7 +310,7 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 	 * @return void
 	 */
 	public function maybe_show_deactivated_notice() {
-		if ( ! isset( $_GET['view'] ) || 'deactivated' !== $_GET['view'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! isset( $_GET['view'] ) || 'has_error' !== $_GET['view'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
 		}
 		// Let's see if error logging is enabled.
@@ -326,7 +326,7 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 		?>
 		<div class="info fade notice">
 			<p>
-				<?php esc_html_e( 'This view lists your snippets that have been automatically disabled due to throwing an error.', 'insert-headers-and-footers' ); ?>
+				<?php esc_html_e( 'This view lists your snippets that threw errors. Some of the snippets may have also been automatically disabled due to potentially preventing you from accessing the admin.', 'insert-headers-and-footers' ); ?>
 				<a href="<?php echo esc_url( wpcode_utm_url( 'https://wpcode.com/docs/php-error-handling-safe-mode/', 'snippet-deactivated-notice', 'deactivated-list' ) ); ?>" target="_blank" rel="noopener noreferrer">
 					<?php esc_html_e( 'Learn More', 'insert-headers-and-footers' ); ?>
 				</a>
@@ -335,7 +335,7 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 			if ( ! $logging_enabled ) {
 				?>
 				<p>
-					<?php esc_html_e( 'In order to get more info about the errors that caused the snippets to be disabled please consider enabling error logging.', 'insert-headers-and-footers' ); ?>
+					<?php esc_html_e( 'In order to get more info about the errors please consider enabling error logging.', 'insert-headers-and-footers' ); ?>
 				</p>
 				<p>
 					<a href="<?php echo esc_url( $button_url ); ?>" class="button button-primary">
@@ -373,6 +373,9 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 	 */
 	public function hide_columns( $hidden, $screen ) {
 		$hidden[] = 'updated';
+		$hidden[] = 'id';
+		$hidden[] = 'shortcode';
+		$hidden[] = 'code_type';
 
 		return $hidden;
 	}
@@ -395,7 +398,6 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 			$order = 'desc';
 		}
 
-
 		// Pick which column to order by, title, date or last updated using a select.
 		$screen_settings .= '<h5>' . esc_html__( 'Order Snippets By', 'insert-headers-and-footers' ) . '</h5>';
 		$screen_settings .= '<fieldset>';
@@ -406,6 +408,7 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 		$screen_settings .= '<option value="title" ' . selected( $order_by, 'title', false ) . '>' . esc_html__( 'Name', 'insert-headers-and-footers' ) . '</option>';
 		$screen_settings .= '<option value="ID" ' . selected( $order_by, 'ID', false ) . '>' . esc_html__( 'Created', 'insert-headers-and-footers' ) . '</option>';
 		$screen_settings .= '<option value="last_updated" ' . selected( $order_by, 'last_updated', false ) . '>' . esc_html__( 'Last Updated', 'insert-headers-and-footers' ) . '</option>';
+		$screen_settings .= '<option value="priority" ' . selected( $order_by, 'priority', false ) . '>' . esc_html__( 'Priority', 'insert-headers-and-footers' ) . '</option>';
 		$screen_settings .= '</select>';
 		$screen_settings .= '</label>';
 		// Display a dropdown to choose the order.

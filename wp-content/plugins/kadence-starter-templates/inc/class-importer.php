@@ -258,7 +258,7 @@ class Importer {
 			if ( ! empty( $all_links ) ) {
 				// Extract normal and image links.
 				foreach ( $all_links as $key => $link ) {
-					if ( ! preg_match( '/^((https?:\/\/)|(www\.))([a-z0-9-].?)+(:[0-9]+)?\/[\w\-]+\.(jpg|png|gif|jpeg|svg)\/?$/i', $link ) )  {
+					if ( ! preg_match( '/^((https?:\/\/)|(www\.))([a-z0-9-].?)+(:[0-9]+)?\/[\w\-]+\.(jpg|png|gif|jpeg|webp|svg)\/?$/i', $link ) )  {
 						$page_links[] = $link;
 					}
 				}

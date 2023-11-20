@@ -271,6 +271,12 @@ article.sticky {
 		width: 100%;
 	}
 }
+.wp-block-newspack-blocks-homepage-articles .post-thumbnail {
+	&:not(.kadence-thumbnail-ratio-inherit) img {
+		height: auto;
+		width: 100%;
+	}
+}
 .archive.content-style-unboxed .wp-site-blocks .post-thumbnail, .blog.content-style-unboxed .wp-site-blocks .post-thumbnail, .post-type-archive.content-style-unboxed .wp-site-blocks .post-thumbnail, .search-results.content-style-unboxed .wp-site-blocks .post-thumbnail {
     margin-bottom: 1em;
 }

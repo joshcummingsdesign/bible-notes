@@ -2,8 +2,8 @@
 Contributors: britner
 Tags: templates, gutenberg
 Requires at least: 5.6
-Tested up to: 6.2
-Stable tag: 1.2.21
+Tested up to: 6.3
+Stable tag: 1.2.22
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -96,6 +96,14 @@ We will be adding 1 - 2 new site templates each month.
 
 Absolutely not.  
 
+= Where do I report security bugs found in this plugin? =
+
+Please report security bugs found in the source code of the
+Kadence Starter Templates plugin through the Patchstack
+Vulnerability Disclosure Program https://patchstack.com/database/vdp/kadence-starter-templates. The
+Patchstack team will assist you with verification, CVE assignment, and
+notify the developers of this plugin.
+
 == Screenshots ==
 
 1. Choose a starter template.
@@ -105,8 +113,22 @@ Absolutely not.
 5. Choose a color palette while previewing.
 6. Choose a color palette while previewing.
 
+== Security Policy ==
+
+= Reporting Security Bugs =
+
+Please report security bugs found in the
+Kadence Starter Templates plugin's source code through the
+Patchstack Vulnerability Disclosure
+Program https://patchstack.com/database/vdp/kadence-starter-templates. The Patchstack team will
+assist you with verification, CVE assignment, and notify the
+developers of this plugin.
 
 == Changelog ==
+
+= 1.2.22 =
+* Add: Import webp images support.
+* Update: Fix PHP 8.2 deprecation notices
 
 = 1.2.21 =
 * Add: Support for depicter.

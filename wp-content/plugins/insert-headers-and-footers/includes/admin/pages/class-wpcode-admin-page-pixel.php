@@ -62,24 +62,24 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 
 		$text = sprintf(
 		// translators: %1$s and %2$s are <u> tags.
-			'<p>' . __( 'While you can always add pixels manually using code snippets, our Conversion Pixels addon helps you %1$ssave time%2$s while %1$sreducing errors%2$s. It lets you properly implement Facebook, Google, Pinterest, TikTok and Snapchat ads tracking with deep integrations for eCommerce events, interaction measurement, and more. This addon is available on WPCode Plus plan or higher.', 'insert-headers-and-footers' ) . '</p>',
+			'<p>' . esc_html__( 'While you can always add pixels manually using code snippets, our Conversion Pixels addon helps you %1$ssave time%2$s while %1$sreducing errors%2$s. It lets you properly implement Facebook, Google, Pinterest, TikTok and Snapchat ads tracking with deep integrations for eCommerce events, interaction measurement, and more. This addon is available on WPCode Plus plan or higher.', 'insert-headers-and-footers' ) . '</p>',
 			'<u>',
 			'</u>'
 		);
 
 		return self::get_upsell_box(
-			__( 'Conversion Pixels Addon is a PRO Feature', 'insert-headers-and-footers' ),
+			esc_html__( 'Conversion Pixels Addon is a PRO Feature', 'insert-headers-and-footers' ),
 			$text,
 			array(
-				'text' => __( 'Upgrade to WPCode PRO', 'insert-headers-and-footers' ),
-				'url'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'conversion-pixels', 'tab-' . $this->view, 'upgrade-to-pro' ),
+				'text' => esc_html__( 'Upgrade to WPCode PRO', 'insert-headers-and-footers' ),
+				'url'  => esc_url( wpcode_utm_url( 'https://wpcode.com/lite/', 'conversion-pixels', 'tab-' . $this->view, 'upgrade-to-pro' ) ),
 			),
 			array(),
 			array(
-				__( 'Seamless integration with WooCommerce, Easy Digital Downloads and MemberPress', 'insert-headers-and-footers' ),
-				__( 'Works with Facebook, Google Ads, Pinterest, TikTok and Snapchat', 'insert-headers-and-footers' ),
-				__( 'No coding required', 'insert-headers-and-footers' ),
-				__( '1-click setup for conversion tracking', 'insert-headers-and-footers' ),
+				esc_html__( 'Seamless integration with WooCommerce, Easy Digital Downloads and MemberPress', 'insert-headers-and-footers' ),
+				esc_html__( 'Works with Facebook, Google Ads, Pinterest, TikTok and Snapchat', 'insert-headers-and-footers' ),
+				esc_html__( 'No coding required', 'insert-headers-and-footers' ),
+				esc_html__( '1-click setup for conversion tracking', 'insert-headers-and-footers' ),
 			)
 		);
 	}

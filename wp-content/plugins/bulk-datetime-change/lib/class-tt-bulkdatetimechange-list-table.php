@@ -23,10 +23,10 @@
  */
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
-	require_once( ABSPATH . 'wp-admin/includes/class-wp-screen.php' );
-	require_once( ABSPATH . 'wp-admin/includes/screen.php' );
-	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
-	require_once( ABSPATH . 'wp-admin/includes/template.php' );
+	require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
+	require_once ABSPATH . 'wp-admin/includes/screen.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	require_once ABSPATH . 'wp-admin/includes/template.php';
 }
 
 /** ==================================================
@@ -56,7 +56,6 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 				'ajax'      => false,
 			)
 		);
-
 	}
 
 	/** ==================================================
@@ -133,12 +132,10 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 			foreach ( $posts as $post ) {
 				if ( empty( $monthly_archive ) ) {
 					$monthly = true;
-				} else {
-					if ( in_array( $post->ID, $monthly_archive ) ) {
+				} elseif ( in_array( $post->ID, $monthly_archive ) ) {
 						$monthly = true;
-					} else {
-						$monthly = false;
-					}
+				} else {
+					$monthly = false;
 				}
 				if ( $monthly ) {
 					$categories = get_the_terms( $post->ID, 'category' );
@@ -195,7 +192,6 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 		}
 
 		return $listtable_array;
-
 	}
 
 	/** ==================================================
@@ -312,7 +308,6 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 		);
 
 		return $columns;
-
 	}
 
 	/** ==================================================
@@ -468,7 +463,4 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 			)
 		);
 	}
-
 }
-
-

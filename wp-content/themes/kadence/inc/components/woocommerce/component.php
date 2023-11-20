@@ -8,6 +8,8 @@
 namespace Kadence\Woocommerce;
 
 use Kadence\Component_Interface;
+use Kadence\Kadence_CSS;
+use Kadence_Blocks_Frontend;
 use ElementorPro;
 use function Kadence\kadence;
 use function add_action;
@@ -25,6 +27,15 @@ use WPSEO_Primary_Term;
  * Class for adding Woocommerce plugin support.
  */
 class Component implements Component_Interface {
+
+	/**
+	 * Associative array of Google Fonts to load.
+	 *
+	 * Do not access this property directly, instead use the `get_google_fonts()` method.
+	 *
+	 * @var array
+	 */
+	protected static $google_fonts = array();
 
 	/**
 	 * Holds the bool for cart in header.
@@ -60,6 +71,9 @@ class Component implements Component_Interface {
 	 * Adds the action and filter hooks to integrate with WordPress.
 	 */
 	public function initialize() {
+
+		add_filter( 'kadence_dynamic_css', array( $this, 'dynamic_css' ), 20 );
+		add_action( 'wp_head', array( $this, 'frontend_gfonts' ), 80 );
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'action_enqueue_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'action_enqueue_product_scripts' ), 1 );
@@ -180,6 +194,61 @@ class Component implements Component_Interface {
 		// Shopkit Add filter for block classes.
 		add_filter( 'kadence_shop_kit_product_loop_classes', array( $this, 'add_product_archive_loop_classes_shopkit' ), 10 );
 
+	}
+	/**
+	 * Enqueue Frontend Fonts
+	 */
+	public function frontend_gfonts() {
+		if ( empty( self::$google_fonts ) ) {
+			return;
+		}
+		if ( class_exists( 'Kadence_Blocks_Frontend' ) ) {
+			$ktblocks_instance = Kadence_Blocks_Frontend::get_instance();
+			foreach ( self::$google_fonts as $key => $font ) {
+				if ( ! array_key_exists( $key, $ktblocks_instance::$gfonts ) ) {
+					$add_font = array(
+						'fontfamily'   => $font['fontfamily'],
+						'fontvariants' => ( isset( $font['fontvariants'] ) && ! empty( $font['fontvariants'] ) && is_array( $font['fontvariants'] ) ? $font['fontvariants'] : array() ),
+						'fontsubsets'  => ( isset( $font['fontsubsets'] ) && ! empty( $font['fontsubsets'] ) && is_array( $font['fontsubsets'] ) ? $font['fontsubsets'] : array() ),
+					);
+					$ktblocks_instance::$gfonts[ $key ] = $add_font;
+				} else {
+					foreach ( $font['fontvariants'] as $variant ) {
+						if ( ! in_array( $variant, $ktblocks_instance::$gfonts[ $key ]['fontvariants'], true ) ) {
+							array_push( $ktblocks_instance::$gfonts[ $key ]['fontvariants'], $variant );
+						}
+					}
+				}
+			}
+		} else {
+			add_filter( 'kadence_theme_google_fonts_array', array( $this, 'filter_in_fonts' ) );
+		}
+	}
+	/**
+	 * Filters in pro fronts for output with free.
+	 *
+	 * @param array $font_array any custom css.
+	 * @return array
+	 */
+	public function filter_in_fonts( $font_array ) {
+		// Enqueue Google Fonts.
+		foreach ( self::$google_fonts as $key => $font ) {
+			if ( ! array_key_exists( $key, $font_array ) ) {
+				$add_font = array(
+					'fontfamily'   => $font['fontfamily'],
+					'fontvariants' => ( isset( $font['fontvariants'] ) && ! empty( $font['fontvariants'] ) && is_array( $font['fontvariants'] ) ? $font['fontvariants'] : array() ),
+					'fontsubsets'  => ( isset( $font['fontsubsets'] ) && ! empty( $font['fontsubsets'] ) && is_array( $font['fontsubsets'] ) ? $font['fontsubsets'] : array() ),
+				);
+				$font_array[ $key ] = $add_font;
+			} else {
+				foreach ( $font['fontvariants'] as $variant ) {
+					if ( ! in_array( $variant, $font_array[ $key ]['fontvariants'], true ) ) {
+						array_push( $font_array[ $key ]['fontvariants'], $variant );
+					}
+				}
+			}
+		}
+		return $font_array;
 	}
 	/**
 	 * Add filters for element content output.
@@ -1377,5 +1446,304 @@ class Component implements Component_Interface {
 		echo '</main>';
 		get_sidebar();
 		echo '</div></div>';
+	}
+	/**
+	 * Generates the dynamic css based on customizer options.
+	 *
+	 * @param string $css any custom css.
+	 * @return string
+	 */
+	public function dynamic_css( $css ) {
+		$generated_css = $this->generate_woo_css();
+		if ( ! empty( $generated_css ) ) {
+			$css .= "\n/* Kadence Woo CSS */\n" . $generated_css;
+		}
+		return $css;
+	}
+	/**
+	 * Generates the dynamic css based on page options.
+	 *
+	 * @return string
+	 */
+	public function generate_woo_css() {
+		$css                    = new Kadence_CSS();
+		$media_query            = array();
+		$media_query['mobile']  = apply_filters( 'kadence_mobile_media_query', '(max-width: 767px)' );
+		$media_query['tablet']  = apply_filters( 'kadence_tablet_media_query', '(max-width: 1024px)' );
+		$media_query['desktop'] = apply_filters( 'kadence_desktop_media_query', '(min-width: 1025px)' );
+
+		if ( kadence()->option( 'custom_quantity' ) ) {
+			$css->set_selector( '.woocommerce table.shop_table td.product-quantity' );
+			$css->add_property( 'min-width', '130px' );
+		}
+		// Shop Notice.
+		$css->set_selector( '.woocommerce-demo-store .woocommerce-store-notice' );
+		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'woo_store_notice_background', 'color' ) ) );
+		$css->set_selector( '.woocommerce-demo-store .woocommerce-store-notice a, .woocommerce-demo-store .woocommerce-store-notice' );
+		$css->render_font( kadence()->option( 'woo_store_notice_font' ), $css );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.woocommerce-demo-store .woocommerce-store-notice a, .woocommerce-demo-store .woocommerce-store-notice' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_title_breadcrumb_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_title_breadcrumb_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_title_breadcrumb_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.woocommerce-demo-store .woocommerce-store-notice a, .woocommerce-demo-store .woocommerce-store-notice' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_title_breadcrumb_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_title_breadcrumb_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_title_breadcrumb_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		// Above Product Title.
+		$css->set_selector( '.product-hero-section .entry-hero-container-inner' );
+		$css->render_background( kadence()->sub_option( 'product_title_background', 'desktop' ), $css );
+		$css->add_property( 'border-top', $css->render_border( kadence()->sub_option( 'product_title_top_border', 'desktop' ) ) );
+		$css->add_property( 'border-bottom', $css->render_border( kadence()->sub_option( 'product_title_bottom_border', 'desktop' ) ) );
+		$css->set_selector( '.entry-hero.product-hero-section .entry-header' );
+		$css->add_property( 'min-height', $css->render_range( kadence()->option( 'product_title_height' ), 'desktop' ) );
+		$css->set_selector( '.product-hero-section .hero-section-overlay' );
+		$css->add_property( 'background', $css->render_color_or_gradient( kadence()->sub_option( 'product_title_overlay_color', 'color' ) ) );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.product-hero-section .entry-hero-container-inner' );
+		$css->render_background( kadence()->sub_option( 'product_title_background', 'tablet' ), $css );
+		$css->add_property( 'border-top', $css->render_border( kadence()->sub_option( 'product_title_top_border', 'tablet' ) ) );
+		$css->add_property( 'border-bottom', $css->render_border( kadence()->sub_option( 'product_title_bottom_border', 'tablet' ) ) );
+		$css->set_selector( '.entry-hero.product-hero-section .entry-header' );
+		$css->add_property( 'min-height', $css->render_range( kadence()->option( 'product_title_height' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.product-hero-section .entry-hero-container-inner' );
+		$css->render_background( kadence()->sub_option( 'product_title_background', 'mobile' ), $css );
+		$css->add_property( 'border-top', $css->render_border( kadence()->sub_option( 'product_title_top_border', 'mobile' ) ) );
+		$css->add_property( 'border-bottom', $css->render_border( kadence()->sub_option( 'product_title_bottom_border', 'mobile' ) ) );
+		$css->set_selector( '.entry-hero.product-hero-section .entry-header' );
+		$css->add_property( 'min-height', $css->render_range( kadence()->option( 'product_title_height' ), 'mobile' ) );
+		$css->stop_media_query();
+		// Product Breadcrumbs.
+		$css->set_selector( '.product-title .kadence-breadcrumbs' );
+		$css->render_font( kadence()->option( 'product_title_breadcrumb_font' ), $css );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_title_breadcrumb_color', 'color' ) ) );
+		$css->set_selector( '.product-title .kadence-breadcrumbs a:hover' );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_title_breadcrumb_color', 'hover' ) ) );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.product-title .kadence-breadcrumbs' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_title_breadcrumb_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_title_breadcrumb_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_title_breadcrumb_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.product-title .kadence-breadcrumbs' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_title_breadcrumb_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_title_breadcrumb_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_title_breadcrumb_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		// Product Title Category.
+		$css->set_selector( '.product-title .single-category' );
+		$css->render_font( kadence()->option( 'product_above_category_font' ), $css );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.product-title .single-category' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_above_category_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_above_category_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_above_category_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.product-title .single-category' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_above_category_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_above_category_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_above_category_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		// Product Above Extra Title.
+		$css->set_selector( '.wp-site-blocks .product-hero-section .extra-title' );
+		$css->render_font( kadence()->option( 'product_above_title_font' ), $css, 'heading' );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.wp-site-blocks .product-hero-section .extra-title' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_above_title_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_above_title_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_above_title_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.wp-site-blocks .product-hero-section .extra-title' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_above_title_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_above_title_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_above_title_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		// Product Title.
+		$css->set_selector( '.woocommerce div.product .product_title' );
+		$css->render_font( kadence()->option( 'product_title_font' ), $css, 'heading' );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.woocommerce div.product .product_title' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_title_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_title_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_title_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.woocommerce div.product .product_title' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_title_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_title_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_title_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		$css->set_selector( '.woocommerce div.product .product-single-category' );
+		$css->render_font( kadence()->option( 'product_single_category_font' ), $css );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.woocommerce div.product .product-single-category' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_single_category_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_single_category_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_single_category_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.woocommerce div.product .product-single-category' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_single_category_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_single_category_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_single_category_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		// Product Single Backgrounds.
+		$css->set_selector( 'body.single-product' );
+		$css->render_background( kadence()->sub_option( 'product_background', 'desktop' ), $css );
+		$css->set_selector( 'body.single-product .content-bg, body.content-style-unboxed.single-product .site' );
+		$css->render_background( kadence()->sub_option( 'product_content_background', 'desktop' ), $css );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( 'body.single-product' );
+		$css->render_background( kadence()->sub_option( 'product_background', 'tablet' ), $css );
+		$css->set_selector( 'body.single-product .content-bg, body.content-style-unboxed.single-product .site' );
+		$css->render_background( kadence()->sub_option( 'product_content_background', 'tablet' ), $css );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( 'body.single-product' );
+		$css->render_background( kadence()->sub_option( 'product_background', 'mobile' ), $css );
+		$css->set_selector( 'body.single-product .content-bg, body.content-style-unboxed.single-product .site' );
+		$css->render_background( kadence()->sub_option( 'product_content_background', 'mobile' ), $css );
+		$css->stop_media_query();
+		// Product Archive Backgrounds.
+		$css->set_selector( 'body.archive.tax-woo-product, body.post-type-archive-product' );
+		$css->render_background( kadence()->sub_option( 'product_archive_background', 'desktop' ), $css );
+		$css->set_selector( 'body.archive.tax-woo-product .content-bg, body.content-style-unboxed.archive.tax-woo-product .site, body.post-type-archive-product .content-bg, body.content-style-unboxed.archive.post-type-archive-product .site, body.content-style-unboxed.archive.tax-woo-product .content-bg.loop-entry .content-bg:not(.loop-entry), body.content-style-unboxed.post-type-archive-product .content-bg.loop-entry .content-bg:not(.loop-entry)' );
+		$css->render_background( kadence()->sub_option( 'product_archive_content_background', 'desktop' ), $css );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( 'body.archive.tax-woo-product, body.post-type-archive-product' );
+		$css->render_background( kadence()->sub_option( 'product_archive_background', 'tablet' ), $css );
+		$css->set_selector( 'body.archive.tax-woo-product .content-bg, body.content-style-unboxed.archive.tax-woo-product .site, body.post-type-archive-product .content-bg, body.content-style-unboxed.archive.post-type-archive-product .site, body.content-style-unboxed.archive.tax-woo-product .content-bg.loop-entry .content-bg:not(.loop-entry), body.content-style-unboxed.post-type-archive-product .content-bg.loop-entry .content-bg:not(.loop-entry)' );
+		$css->render_background( kadence()->sub_option( 'product_archive_content_background', 'tablet' ), $css );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( 'body.archive.tax-woo-product, body.post-type-archive-product' );
+		$css->render_background( kadence()->sub_option( 'product_archive_background', 'mobile' ), $css );
+		$css->set_selector( 'body.archive.tax-woo-product .content-bg, body.content-style-unboxed.archive.tax-woo-product .site, body.post-type-archive-product .content-bg, body.content-style-unboxed.archive.post-type-archive-product .site, body.content-style-unboxed.archive.tax-woo-product .content-bg.loop-entry .content-bg:not(.loop-entry), body.content-style-unboxed.post-type-archive-product .content-bg.loop-entry .content-bg:not(.loop-entry)' );
+		$css->render_background( kadence()->sub_option( 'product_archive_content_background', 'mobile' ), $css );
+		$css->stop_media_query();
+		// Product Archive Columns Mobile.
+		if ( 'twocolumn' === kadence()->option( 'product_archive_mobile_columns' ) ) {
+			$css->start_media_query( $media_query['mobile'] );
+			$css->set_selector( '.woocommerce ul.products:not(.products-list-view), .wp-site-blocks .wc-block-grid:not(.has-2-columns):not(has-1-columns) .wc-block-grid__products' );
+			$css->add_property( 'grid-template-columns', 'repeat(2, minmax(0, 1fr))' );
+			$css->add_property( 'column-gap', '0.5rem' );
+			$css->add_property( 'grid-row-gap', '0.5rem' );
+			$css->stop_media_query();
+		}
+		// Product Archive Title.
+		$css->set_selector( '.product-archive-hero-section .entry-hero-container-inner' );
+		$css->render_background( kadence()->sub_option( 'product_archive_title_background', 'desktop' ), $css );
+		$css->add_property( 'border-top', $css->render_border( kadence()->sub_option( 'product_archive_title_top_border', 'desktop' ) ) );
+		$css->add_property( 'border-bottom', $css->render_border( kadence()->sub_option( 'product_archive_title_bottom_border', 'desktop' ) ) );
+		$css->set_selector( '.entry-hero.product-archive-hero-section .entry-header' );
+		$css->add_property( 'min-height', $css->render_range( kadence()->option( 'product_archive_title_height' ), 'desktop' ) );
+		$css->set_selector( '.product-archive-hero-section .hero-section-overlay' );
+		$css->add_property( 'background', $css->render_color_or_gradient( kadence()->sub_option( 'product_archive_title_overlay_color', 'color' ) ) );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.product-archive-hero-section .entry-hero-container-inner' );
+		$css->render_background( kadence()->sub_option( 'product_archive_title_background', 'tablet' ), $css );
+		$css->add_property( 'border-top', $css->render_border( kadence()->sub_option( 'product_archive_title_top_border', 'tablet' ) ) );
+		$css->add_property( 'border-bottom', $css->render_border( kadence()->sub_option( 'product_archive_title_bottom_border', 'tablet' ) ) );
+		$css->set_selector( '.entry-hero.product-archive-hero-section .entry-header' );
+		$css->add_property( 'min-height', $css->render_range( kadence()->option( 'product_archive_title_height' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.product-archive-hero-section .entry-hero-container-inner' );
+		$css->render_background( kadence()->sub_option( 'product_archive_title_background', 'mobile' ), $css );
+		$css->add_property( 'border-top', $css->render_border( kadence()->sub_option( 'product_archive_title_top_border', 'mobile' ) ) );
+		$css->add_property( 'border-bottom', $css->render_border( kadence()->sub_option( 'product_archive_title_bottom_border', 'mobile' ) ) );
+		$css->set_selector( '.entry-hero.product-archive-hero-section .entry-header' );
+		$css->add_property( 'min-height', $css->render_range( kadence()->option( 'product_archive_title_height' ), 'mobile' ) );
+		$css->stop_media_query();
+		$css->set_selector( '.wp-site-blocks .product-archive-title h1' );
+		$css->render_font( kadence()->option( 'product_archive_title_heading_font' ), $css, 'heading' );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_archive_title_color', 'color' ) ) );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.wp-site-blocks .product-archive-title h1' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_archive_title_heading_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_archive_title_heading_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_archive_title_heading_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.wp-site-blocks .product-archive-title h1' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_archive_title_heading_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_archive_title_heading_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_archive_title_heading_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		$css->set_selector( '.product-archive-title .kadence-breadcrumbs' );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_archive_title_breadcrumb_color', 'color' ) ) );
+		$css->set_selector( '.product-archive-title .kadence-breadcrumbs a:hover' );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_archive_title_breadcrumb_color', 'hover' ) ) );
+		$css->set_selector( '.product-archive-title .archive-description' );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_archive_title_description_color', 'color' ) ) );
+		$css->set_selector( '.product-archive-title .archive-description a:hover' );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_archive_title_description_color', 'hover' ) ) );
+		// Product Archive Title Font.
+		$css->set_selector( '.woocommerce ul.products li.product h3, .woocommerce ul.products li.product .product-details .woocommerce-loop-product__title, .woocommerce ul.products li.product .product-details .woocommerce-loop-category__title, .wc-block-grid__products .wc-block-grid__product .wc-block-grid__product-title' );
+		$css->render_font( kadence()->option( 'product_archive_title_font' ), $css );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.woocommerce ul.products li.product h3, .woocommerce ul.products li.product .product-details .woocommerce-loop-product__title, .woocommerce ul.products li.product .product-details .woocommerce-loop-category__title, .wc-block-grid__products .wc-block-grid__product .wc-block-grid__product-title' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_archive_title_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_archive_title_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_archive_title_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.woocommerce ul.products li.product h3, .woocommerce ul.products li.product .product-details .woocommerce-loop-product__title, .woocommerce ul.products li.product .product-details .woocommerce-loop-category__title, .wc-block-grid__products .wc-block-grid__product .wc-block-grid__product-title' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_archive_title_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_archive_title_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_archive_title_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		// Product Archive Price Font.
+		$css->set_selector( '.woocommerce ul.products li.product .product-details .price, .wc-block-grid__products .wc-block-grid__product .wc-block-grid__product-price' );
+		$css->render_font( kadence()->option( 'product_archive_price_font' ), $css );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.woocommerce ul.products li.product .product-details .price, .wc-block-grid__products .wc-block-grid__product .wc-block-grid__product-price' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_archive_price_font' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_archive_price_font' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_archive_price_font' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.woocommerce ul.products li.product .product-details .price, .wc-block-grid__products .wc-block-grid__product .wc-block-grid__product-price' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_archive_price_font' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_archive_price_font' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_archive_price_font' ), 'mobile' ) );
+		$css->stop_media_query();
+		// Product Archive Button Font.
+		$css->set_selector( '.woocommerce ul.products.woo-archive-btn-button .product-action-wrap .button:not(.kb-button), .woocommerce ul.products li.woo-archive-btn-button .button:not(.kb-button), .wc-block-grid__product.woo-archive-btn-button .product-details .wc-block-grid__product-add-to-cart .wp-block-button__link' );
+		$css->add_property( 'border-radius', $css->render_measure( kadence()->option( 'product_archive_button_radius' ) ) );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_archive_button_color', 'color' ) ) );
+		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'product_archive_button_background', 'color' ) ) );
+		$css->add_property( 'border', $css->render_border( kadence()->option( 'product_archive_button_border' ) ) );
+		$css->add_property( 'border-color', $css->render_color( kadence()->sub_option( 'product_archive_button_border_colors', 'color' ) ) );
+		$css->add_property( 'box-shadow', $css->render_shadow( kadence()->option( 'product_archive_button_shadow' ), kadence()->default( 'product_archive_button_shadow' ) ) );
+		$css->render_font( kadence()->option( 'product_archive_button_typography' ), $css );
+		$css->set_selector( '.woocommerce ul.products.woo-archive-btn-button .product-action-wrap .button:not(.kb-button):hover, .woocommerce ul.products li.woo-archive-btn-button .button:not(.kb-button):hover, .wc-block-grid__product.woo-archive-btn-button .product-details .wc-block-grid__product-add-to-cart .wp-block-button__link:hover' );
+		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'product_archive_button_color', 'hover' ) ) );
+		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'product_archive_button_background', 'hover' ) ) );
+		$css->add_property( 'border-color', $css->render_color( kadence()->sub_option( 'product_archive_button_border_colors', 'hover' ) ) );
+		$css->add_property( 'box-shadow', $css->render_shadow( kadence()->option( 'product_archive_button_shadow_hover' ), kadence()->default( 'product_archive_button_shadow_hover' ) ) );
+		$css->start_media_query( $media_query['tablet'] );
+		$css->set_selector( '.woocommerce ul.products.woo-archive-btn-button .product-action-wrap .button:not(.kb-button), .woocommerce ul.products li.woo-archive-btn-button .button:not(.kb-button), .wc-block-grid__product.woo-archive-btn-button .product-details .wc-block-grid__product-add-to-cart .wp-block-button__link' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_archive_button_typography' ), 'tablet' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_archive_button_typography' ), 'tablet' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_archive_button_typography' ), 'tablet' ) );
+		$css->stop_media_query();
+		$css->start_media_query( $media_query['mobile'] );
+		$css->set_selector( '.woocommerce ul.products.woo-archive-btn-button .product-action-wrap .button:not(.kb-button), .woocommerce ul.products li.woo-archive-btn-button .button:not(.kb-button), .wc-block-grid__product.woo-archive-btn-button .product-details .wc-block-grid__product-add-to-cart .wp-block-button__link' );
+		$css->add_property( 'font-size', $css->render_font_size( kadence()->option( 'product_archive_button_typography' ), 'mobile' ) );
+		$css->add_property( 'line-height', $css->render_font_height( kadence()->option( 'product_archive_button_typography' ), 'mobile' ) );
+		$css->add_property( 'letter-spacing', $css->render_font_spacing( kadence()->option( 'product_archive_button_typography' ), 'mobile' ) );
+		$css->stop_media_query();
+
+		self::$google_fonts = $css->fonts_output();
+		return $css->css_output();
 	}
 }

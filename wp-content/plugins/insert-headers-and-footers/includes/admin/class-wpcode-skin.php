@@ -87,8 +87,8 @@ class WPCode_Skin extends WP_Upgrader_Skin {
 	function error( $errors ) {
 
 		if ( ! empty( $errors ) ) {
-			// Translators: Support link tag starts with url and Support link tag ends.
 			$error_message = sprintf(
+			// Translators: Support link tag starts with url and Support link tag ends.
 				esc_html__( 'There was an error installing the addon. Please try again. If you are still having issues, please %1$scontact our support%2$s team.', 'insert-headers-and-footers' ),
 				'<a target="_blank" href="' . wpcode_utm_url( 'https://library.wpcode.com/account/support/', 'notice', 'error-installing-addons' ) . '">',
 				'</a>'
@@ -102,6 +102,7 @@ class WPCode_Skin extends WP_Upgrader_Skin {
 				if ( ! empty( $message ) ) {
 					// Translators: The name of the addon that can't be installed, Support link tag starts with url and Support link tag ends.
 					$error_message = sprintf(
+					// Translators: The name of the addon that can't be installed, Support link tag starts with url and Support link tag ends.
 						esc_html__( 'There was an error installing the addon, %1$s. Please try again. If you are still having issues, please %2$scontact our support%3$s team. ', 'insert-headers-and-footers' ),
 						esc_html( $message ),
 						'<a target="_blank" href="' . wpcode_utm_url( 'https://library.wpcode.com/account/support/', 'notice', 'error-installing-addons' ) . '">',

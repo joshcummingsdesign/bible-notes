@@ -94,6 +94,14 @@ class WPCode_Install {
 			return;
 		}
 
+		if ( isset( $activated['version'] ) && version_compare( $activated['version'], '2.1.4', '<' ) ) {
+			$this->update_2_1_4();
+		}
+
+		if ( isset( $activated['version'] ) && version_compare( $activated['version'], '2.1.5', '<' ) ) {
+			$this->update_2_1_5();
+		}
+
 		// Give other plugins a chance to run an upgrade routine.
 		do_action( 'wpcode_before_version_update', $activated );
 
@@ -110,6 +118,90 @@ class WPCode_Install {
 	public function update_2_1_0() {
 		if ( isset( wpcode()->library ) ) {
 			wpcode()->library->delete_cache();
+		}
+	}
+
+	/**
+	 * Upgrade routine for 2.1.4.
+	 * Convert recently deactivated to the new error system.
+	 *
+	 * @return void
+	 */
+	public function update_2_1_4() {
+		// Let's find all the snippets with the _wpcode_recently_deactivated meta key set.
+		$snippets = get_posts(
+			array(
+				'post_type'      => 'wpcode',
+				'posts_per_page' => - 1,
+				'post_status'    => 'any',
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_wpcode_recently_deactivated',
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+		// Let's loop through the snippets and convert them to the new error system.
+		foreach ( $snippets as $snippet ) {
+			$snippet    = new WPCode_Snippet( $snippet->ID );
+			$error      = array(
+				'message'  => esc_html__( 'Snippet was deactivated due to an error.', 'insert-headers-and-footers' ),
+				'time'     => get_post_meta( $snippet->get_id(), '_wpcode_recently_deactivated', true ),
+				'wpc_type' => 'deactivated',
+			);
+			$error_line = get_post_meta( $snippet->get_id(), '_wpcode_recently_deactivated_error_line', true );
+			if ( ! empty( $error_line ) ) {
+				$error['error_line'] = $error_line;
+			}
+			$snippet->set_last_error( $error );
+
+			// Remove the old meta keys.
+			delete_post_meta( $snippet->get_id(), '_wpcode_recently_deactivated' );
+			delete_post_meta( $snippet->get_id(), '_wpcode_recently_deactivated_error_line' );
+
+			wpcode()->error->clear_snippets_errors();
+		}
+
+		$this->add_columns_to_hidden( array( 'id', 'code_type', 'shortcode' ) );
+	}
+
+	/**
+	 * Upgrade routine for 2.1.5.
+	 * Add the priority column to the hidden columns.
+	 *
+	 * @return void
+	 */
+	public function update_2_1_5() {
+		$this->add_columns_to_hidden( array( 'priority' ) );
+	}
+
+	/**
+	 * Add columns to the hidden columns for users that set their screen settings.
+	 *
+	 * @param array $new_columns The columns to add.
+	 *
+	 * @return void
+	 */
+	public function add_columns_to_hidden( $new_columns ) {
+		// Let's add the new columns to the hidden array for users that set their screen settings.
+		$meta_key = 'managetoplevel_page_wpcodecolumnshidden';
+
+		$users = get_users(
+			array(
+				'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_compare' => 'EXISTS',
+				'fields'       => 'ID',
+			)
+		);
+
+		foreach ( $users as $user_id ) {
+			$columns = get_user_meta( $user_id, $meta_key, true );
+			if ( ! is_array( $columns ) ) {
+				$columns = array();
+			}
+			$columns = array_merge( $columns, $new_columns );
+			update_user_meta( $user_id, $meta_key, $columns );
 		}
 	}
 

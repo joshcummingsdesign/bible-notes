@@ -51,7 +51,6 @@ class BulkDatetimeChange {
 		add_action( 'bdtc_update', array( $this, 'datetime_update' ), 10, 3 );
 		add_action( 'bdtc_bulk_input', array( $this, 'bulk_input' ) );
 		add_action( 'bdtc_per_page_set', array( $this, 'per_page_set' ), 10, 1 );
-
 	}
 
 	/** ==================================================
@@ -91,7 +90,6 @@ class BulkDatetimeChange {
 		$id_array = array( 'ID' => $pid );
 		$wpdb->show_errors();
 		$wpdb->update( $wpdb->prefix . 'posts', $update_array, $id_array, array( '%s' ), array( '%d' ) );
-
 	}
 
 	/** ==================================================
@@ -385,7 +383,6 @@ class BulkDatetimeChange {
 		?>
 		</form>
 		<?php
-
 	}
 
 	/** ==================================================
@@ -410,7 +407,6 @@ class BulkDatetimeChange {
 			</div>
 		</div>
 		<?php
-
 	}
 
 	/** ==================================================
@@ -427,9 +423,7 @@ class BulkDatetimeChange {
 			<?php submit_button( __( 'Change' ), 'large', 'per_page_change', false, array( 'form' => 'bulkdatetimechange_forms' ) ); ?>
 		</div>
 		<?php
-
 	}
-
 }
 
 

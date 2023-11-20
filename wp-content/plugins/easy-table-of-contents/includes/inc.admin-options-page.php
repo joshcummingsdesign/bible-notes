@@ -80,7 +80,7 @@
     </div>
     <div class="eztoc-tabcontent" id="general">
         <div id="eztoc-tabs" style="margin-top: 10px;">
-            <a href="#eztoc-general" id="eztoc-link-general" class="active"><?= esc_html_e( 'General', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-appearance" id="eztoc-link-appearance"><?= esc_html_e( 'Appearance', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-advanced" id="eztoc-link-advanced"><?= esc_html_e( 'Advanced', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-shortcode" id="eztoc-link-shortcode"><?= esc_html_e( 'Shortcode', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-compatibility" id="eztoc-link-compatibility"><?= esc_html_e( 'Compatibility', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-iesettings" id="eztoc-link-iesettings"><?= esc_html_e( 'Import/Export', 'easy-table-of-contents' ) ?></a>
+            <a href="#eztoc-general" id="eztoc-link-general" class="active"><?= esc_html_e( 'General', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-appearance" id="eztoc-link-appearance"><?= esc_html_e( 'Appearance', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-advanced" id="eztoc-link-advanced"><?= esc_html_e( 'Advanced', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-shortcode" id="eztoc-link-shortcode"><?= esc_html_e( 'Shortcode', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-sticky" id="eztoc-link-sticky"><?= esc_html_e( 'Sticky TOC', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-compatibility" id="eztoc-link-compatibility"><?= esc_html_e( 'Compatibility', 'easy-table-of-contents' ) ?></a> | <a href="#eztoc-iesettings" id="eztoc-link-iesettings"><?= esc_html_e( 'Import/Export', 'easy-table-of-contents' ) ?></a>
         </div>
         <form method="post" action="<?php echo esc_url(self_admin_url('options.php')); ?>" enctype="multipart/form-data">
 
@@ -153,6 +153,22 @@
 
                     </div><!-- /.inside -->
                 </div><!-- /.postbox -->
+
+            </div><!-- /.metabox-holder -->
+
+            <div class="metabox-holder">
+
+            <div class="postbox" id="eztoc-sticky">
+                <br />
+                <h3><span><?= esc_html_e('Sticky TOC', 'easy-table-of-contents'); ?></span></h3>
+                <div class="inside">
+
+                    <table class="form-table">
+                        <?php do_settings_fields('ez_toc_settings_sticky', 'ez_toc_settings_sticky'); ?>
+                    </table>
+
+                </div><!-- /.inside -->
+            </div><!-- /.postbox -->
 
             </div><!-- /.metabox-holder -->
 
@@ -512,7 +528,7 @@ function addCustomSpan()
                                                     dirname(__FILE__)) ?>" alt="right-tick"/>
                                                 <h4><?= esc_html_e('Fixed/Sticky TOC', 'easy-table-of-contents'); ?></h4>
                                             </div>
-                                            <p><?= esc_html_e('Users can faster find the content they want with sticky', 'easy-table-of-contents'); ?></p>
+                                            <p><?= esc_html_e('Users can faster find the content they want with sticky. Also customize the appearance of Sticky TOC with different options.', 'easy-table-of-contents'); ?></p>
                                         </div>
 
 
@@ -539,6 +555,14 @@ function addCustomSpan()
                                                 <h4><?= esc_html_e("Documentation", 'easy-table-of-contents'); ?></h4>
                                             </div>
                                             <p><?= esc_html_e("We create tutorials for every possible feature and keep it updated for you.", 'easy-table-of-contents'); ?></p>
+                                        </div>
+                                        <div class="fe-2">
+                                            <div class="fe-t">
+                                                <img src="<?php echo plugins_url('assets/right-tick.png',
+                                                    dirname(__FILE__)) ?>" alt="right-tick"/>
+                                                <h4><?= esc_html_e("ACF Support", 'easy-table-of-contents'); ?></h4>
+                                            </div>
+                                            <p><?= esc_html_e("Easily create TOC with your custom ACF fields.", 'easy-table-of-contents'); ?></p>
                                         </div>
                                     </div><!-- /. fet -->
                                     <div class="pr-btn">

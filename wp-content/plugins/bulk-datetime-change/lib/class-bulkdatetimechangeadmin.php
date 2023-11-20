@@ -40,9 +40,8 @@ class BulkDatetimeChangeAdmin {
 		add_filter( 'plugin_action_links', array( $this, 'settings_link' ), 10, 2 );
 
 		if ( ! class_exists( 'TT_BulkDatetimeChange_List_Table' ) ) {
-			require_once dirname( __FILE__ ) . '/class-tt-bulkdatetimechange-list-table.php';
+			require_once __DIR__ . '/class-tt-bulkdatetimechange-list-table.php';
 		}
-
 	}
 
 	/** ==================================================
@@ -87,7 +86,6 @@ class BulkDatetimeChangeAdmin {
 			'bulkdatetimechange-settings',
 			array( $this, 'settings_page' )
 		);
-
 	}
 
 	/** ==================================================
@@ -156,7 +154,7 @@ class BulkDatetimeChangeAdmin {
 						wp_unslash( $_POST['bulk_date_check'] ),
 						FILTER_CALLBACK,
 						array(
-							'options' => function( $value ) {
+							'options' => function ( $value ) {
 								return absint( $value );
 							},
 						)
@@ -168,7 +166,7 @@ class BulkDatetimeChangeAdmin {
 						wp_unslash( $_POST['bulk_date_update'] ),
 						FILTER_CALLBACK,
 						array(
-							'options' => function( $value ) {
+							'options' => function ( $value ) {
 								return sanitize_text_field( $value );
 							},
 						)
@@ -253,7 +251,6 @@ class BulkDatetimeChangeAdmin {
 
 		</div>
 		<?php
-
 	}
 
 	/** ==================================================
@@ -504,7 +501,6 @@ class BulkDatetimeChangeAdmin {
 		</div>
 
 		<?php
-
 	}
 
 	/** ==================================================
@@ -535,7 +531,6 @@ class BulkDatetimeChangeAdmin {
 				echo '<div class="notice notice-success is-dismissible"><ul><li>' . esc_html( __( 'Settings' ) . ' --> ' . __( 'Changes saved.' ) ) . '</li></ul></div>';
 			}
 		}
-
 	}
 
 	/** ==================================================
@@ -617,9 +612,7 @@ class BulkDatetimeChangeAdmin {
 		if ( ! get_user_option( 'bulkdatetimechange_filter_mime_type', get_current_user_id() ) ) {
 			update_user_option( get_current_user_id(), 'bulkdatetimechange_filter_mime_type', null );
 		}
-
 	}
-
 }
 
 

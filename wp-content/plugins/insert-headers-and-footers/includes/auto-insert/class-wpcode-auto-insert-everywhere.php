@@ -61,14 +61,45 @@ class WPCode_Auto_Insert_Everywhere extends WPCode_Auto_Insert_Type {
 	 * @return void
 	 */
 	public function run_snippets() {
-		$snippets = $this->get_snippets_for_location( 'everywhere' );
-		foreach ( $snippets as $snippet ) {
-			wpcode()->execute->get_snippet_output( $snippet );
+		$snippets       = $this->get_snippets_for_location( 'everywhere' );
+		$line_reference = array();
+		$code           = array();
+		$last_line      = 0;
+		$last_snippet   = null;
+
+		if ( is_admin() ) {
+			$snippets = array_merge( $snippets, $this->get_snippets_for_location( 'admin_only' ) );
 		}
-		$location = is_admin() ? 'admin_only' : 'frontend_only';
-		$snippets = $this->get_snippets_for_location( $location );
+
+		// Merge all the code into 1, so we can track on which line the error occurs, if any.
 		foreach ( $snippets as $snippet ) {
-			wpcode()->execute->get_snippet_output( $snippet );
+			// Use the WPCode_Snippet_Execute_Type filters here for compatibility with class even thought we're skipping it for these particular locations.
+			$snippet_code = apply_filters( 'wpcode_snippet_output_php', $snippet->get_code(), $snippet );
+			$snippet_code = apply_filters( 'wpcode_snippet_output', $snippet_code, $snippet );
+			// Let's see how many lines the code has.
+			$lines = substr_count( $snippet_code, PHP_EOL );
+			// Let's keep a record of the start and end line of each snippet.
+			$last_line ++;
+			$line_reference[ $snippet->get_id() ] = array(
+				'start' => $last_line,
+				'end'   => $last_line + $lines,
+			);
+			$last_line                            = $last_line + $lines;
+			$code[]                               = $snippet_code;
+			$last_snippet                         = $snippet;
+		}
+		if ( ! empty( $code ) ) {
+			// Implode all the code and execute it.
+			$code = implode( PHP_EOL, $code );
+			// Execute the code.
+			wpcode()->execute->safe_execute_php( $code, $last_snippet, $line_reference );
+		}
+
+		if ( ! is_admin() ) {
+			$snippets = $this->get_snippets_for_location( 'frontend_only' );
+			foreach ( $snippets as $snippet ) {
+				wpcode()->execute->get_snippet_output( $snippet );
+			}
 		}
 	}
 

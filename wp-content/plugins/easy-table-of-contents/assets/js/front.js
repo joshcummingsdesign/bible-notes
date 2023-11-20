@@ -65,7 +65,7 @@ jQuery( function( $ ) {
                             $(toggle).addClass('ez-toc-loaded'); // Attach loaded class.
                             var toc = $( toggle ).parents('#ez-toc-container,#ez-toc-widget-container,#ez-toc-widget-sticky-container').find( 'ul.ez-toc-list,ul.ez-toc-widget-sticky-list' );
                             if($(toc).hasClass('eztoc-toggle-hide-by-default')){
-                                var invert = 1;
+                                invert = 1;
                             }                                
                             if ( Cookies ) {
 
@@ -262,8 +262,7 @@ jQuery( function( $ ) {
             $( '#ez-toc-container .ez-toc-toggle label').html(ezTOC.fallbackIcon);
         }
     }
-    
-
+        
     	/**
 		 * Attach global init handler to ezTOC window object.
 		 */
@@ -272,5 +271,17 @@ jQuery( function( $ ) {
 		}
 		// Start EZ TOC on page load.
 		ezTOCInit();
+
+        
 	}
+    $("#ez-toc-more-links-enabler").click(function () { 
+        $(".ez-toc-more-link").show();
+        $("#ez-toc-more-links-enabler").hide();
+        $("#ez-toc-more-links-disabler").attr("style","display:inline-block");
+    });
+    $("#ez-toc-more-links-disabler").click(function () { 
+        $(".ez-toc-more-link").hide();
+        $("#ez-toc-more-links-enabler").show();
+        $("#ez-toc-more-links-disabler").hide();
+    });
 } );

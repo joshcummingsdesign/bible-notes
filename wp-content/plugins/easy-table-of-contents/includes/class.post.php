@@ -107,6 +107,7 @@ class ezTOC_Post {
                 'divi-bodycommerce/divi-bodyshop-woocommerce.php',
                 'social-pug/index.php',
 				'fusion-builder/fusion-builder.php',
+				'modern-footnotes/modern-footnotes.php',
             )
         );
 
@@ -173,6 +174,13 @@ class ezTOC_Post {
 			$this->post->post_content = do_blocks($this->post->post_content);
 		}else{
 			$this->post->post_content = $this->post->post_content;
+		}
+		
+		if( defined('EASY_TOC_AMP_VERSION') && function_exists('ampforwp_is_amp_endpoint') && ampforwp_is_amp_endpoint() ){
+			$ampforwp_pagebuilder_enable = get_post_meta(get_the_ID(),'ampforwp_page_builder_enable', true);
+			if($ampforwp_pagebuilder_enable=='yes' && function_exists('ampforwp_eztoc_PageBuilder_content')){
+				$this->post->post_content = ampforwp_eztoc_PageBuilder_content();
+			}
 		}
 
 		add_filter( 'strip_shortcodes_tagnames', array( __CLASS__, 'stripShortcodes' ), 10, 2 );
@@ -882,8 +890,9 @@ class ezTOC_Post {
 
 			// Special Characters.
 			// $ - _ . + ! * ' ( ) ,
+			// Special case for Apostrophes (’) which is causing TOC link to break in Block themes and CM Tooltip Glossary plugin #556
 			$return = str_replace(
-				array( '$', '.', '+', '!', '*', '\'', '(', ')', ',' ),
+				array( '$', '.', '+', '!', '*', '\'', '(', ')', ',', '’' ),
 				'',
 				$return
 			);
@@ -1055,6 +1064,30 @@ class ezTOC_Post {
 
 		return $headings;
 	}
+	/**
+	 * Get the heading title id.
+	 *
+	 * @access public
+	 * @since  2.0.58
+	 *
+	 * @param int|null $page
+	 *
+	 * @return array
+	 */
+	public function getTocTitleId( $page = null ) {
+		$nav_data = array();
+		if ( is_null( $page ) ) {
+			$page = $this->getCurrentPage();
+		}
+		if ( !empty( $this->pages ) || isset( $this->pages[ $page ] ) ) {
+			$matches = $this->getHeadingsfromPageContents( $page );
+			foreach ( $matches as $i => $match ) {
+				$nav_data[$i]['title'] = strip_tags( $matches[ $i ][0] );
+				$nav_data[ $i ]['id'] = strtolower(str_replace( '_', '-', $matches[ $i ]['id'] ));
+			}
+		}
+		return $nav_data;
+	}
 
 	/**
 	 * Get the heading with in page anchors of the current page of the post.
@@ -1131,7 +1164,7 @@ class ezTOC_Post {
 	 * @param string $prefix
 	 * @return void|mixed|string|null
 	 */
-	private function createTOCParent( $prefix = "ez-toc" )
+	private function createTOCParent( $prefix = "ez-toc", $toc_more = array() )
 	{
 		$html = ''; 
 		$first_page = 1;
@@ -1143,7 +1176,7 @@ class ezTOC_Post {
 
 		if( !empty( $headings ) )
 		{
-			$html .= $this->createTOC( $first_page, $headings, $prefix );
+			$html .= $this->createTOC( $first_page, $headings, $prefix, $toc_more );
 		}
 
 		return $html;
@@ -1161,19 +1194,21 @@ class ezTOC_Post {
 
 		$html = '';
 
+		$toc_more = isset($options['view_more']) ? array( 'view_more' => $options['view_more'] )  : array();
+
 		if ( $this->hasTOCItems ) {
 			
-			$html = $this->createTOCParent();
+			$html = $this->createTOCParent($prefix, $toc_more);
 			$visiblityClass = '';
-			if( ezTOC_Option::get( 'visibility_hide_by_default' ) && 'js' == ezTOC_Option::get( 'toc_loading' ) )
+			if( ezTOC_Option::get( 'visibility_hide_by_default' ) && 'js' == ezTOC_Option::get( 'toc_loading' ) &&  ezTOC_Option::get( 'visibility' ))
 			{
 				$visiblityClass = "eztoc-toggle-hide-by-default";
 			}
-			if( get_post_meta( $this->post->ID, '_ez-toc-visibility_hide_by_default', true ) && 'js' == ezTOC_Option::get( 'toc_loading' ) )
+			if( get_post_meta( $this->post->ID, '_ez-toc-visibility_hide_by_default', true ) && 'js' == ezTOC_Option::get( 'toc_loading' ) && ezTOC_Option::get( 'visibility' ))
 			{
 				$visiblityClass = "eztoc-toggle-hide-by-default";
 			}
-			if(is_array($options) && key_exists( 'visibility_hide_by_default', $options ) && $options['visibility_hide_by_default'] == true && 'js' == ezTOC_Option::get( 'toc_loading' ) ){
+			if(is_array($options) && key_exists( 'visibility_hide_by_default', $options ) && $options['visibility_hide_by_default'] == true && 'js' == ezTOC_Option::get( 'toc_loading' ) && ezTOC_Option::get( 'visibility' )){
 				$visiblityClass = "eztoc-toggle-hide-by-default";
 			}			
 			$html  = "<ul class='{$prefix}-list {$prefix}-list-level-1 $visiblityClass' >" . $html . "</ul>";
@@ -1286,7 +1321,7 @@ class ezTOC_Post {
 
 			} else {
 
-				$class[] .= 'counter-flat';
+				$class[] = 'counter-flat';
 			}
 
             if( ezTOC_Option::get( 'heading-text-direction', 'ltr' ) == 'ltr' ) {
@@ -1311,11 +1346,15 @@ class ezTOC_Post {
 					break;
 
 				case 'transparent':
-					$class[] .= 'ez-toc-transparent';
+					$class[] = 'ez-toc-transparent';
 					break;
 
 				case 'grey':
 					$class[] = 'ez-toc-grey';
+					break;
+
+				case 'custom':
+					$class[] = 'ez-toc-custom';
 					break;
 			}
 
@@ -1406,14 +1445,17 @@ class ezTOC_Post {
 		}
 		
 		$icon = ezTOC::getTOCToggleIcon();
+		$label_below_html = '';
 		if( function_exists( 'ez_toc_pro_activation_link' ) ) {
 				$icon = apply_filters('ez_toc_modify_icon',$icon);
+				$label_below_html = apply_filters('ez_toc_label_below_html',$label_below_html);
 		}							   
 		$html .= '<a href="#" class="ez-toc-pull-right ez-toc-btn ez-toc-btn-xs ez-toc-btn-default ez-toc-toggle" aria-label="Toggle Table of Content" role="button"><label for="item-' . $cssIconID . '" >'.$icon.'</label><input aria-label="Toggle" aria-label="item-' . $cssIconID . '" ' . $inputCheckboxExludeStyle . ' type="checkbox" id="item-' . $cssIconID . '"></a>';
 		 
 	}
 			$html .= '</span>';
 			$html .= '</div>' . PHP_EOL;
+			$html .= $label_below_html;
 	
 	
 		
@@ -1443,7 +1485,7 @@ class ezTOC_Post {
 								
 		$header_label = '<'.esc_attr($toc_title_tag).' class="ez-toc-title">' . esc_html__( htmlentities( $toc_title, ENT_COMPAT, 'UTF-8' ), 'easy-table-of-contents' ). '</'.esc_attr($toc_title_tag).'>' . PHP_EOL;
 		if (!ezTOC_Option::get( 'visibility' ) ) {
-			$html .= $header_label;
+			$html .='<div class="ez-toc-title-container">'.$header_label.'</div>';
 		}															
 	} 
 	
@@ -1465,15 +1507,25 @@ class ezTOC_Post {
 			if( $options !== null && !empty( $options ) && is_array( $options ) && key_exists( 'visibility_hide_by_default', $options ) && true == $options['visibility_hide_by_default'] ) {
 					$toggle_view= "checked";
 			}
-						
+			$toc_icon = ezTOC::getTOCToggleIcon();
+		    $label_below_html = '';
+			if( function_exists( 'ez_toc_pro_activation_link' ) ) {
+				$toc_icon = apply_filters('ez_toc_modify_icon',$toc_icon);
+				$label_below_html = apply_filters('ez_toc_label_below_html',$label_below_html);
+		     }				
 			if ( ezTOC_Option::get( 'visibility_on_header_text' ) ) {		
-				$html .= '<label for="ez-toc-cssicon-toggle-item-' . $cssIconID . '">' .$header_label. ezTOC::getTOCToggleIcon() . '</label><input type="checkbox" ' . $inputCheckboxExludeStyle . ' id="ez-toc-cssicon-toggle-item-' . $cssIconID . '" '.$toggle_view.' />';
+				$html .= '<label for="ez-toc-cssicon-toggle-item-' . $cssIconID . '" class="ez-toc-cssicon-toggle-label">' .$header_label. $toc_icon . '</label>'.$label_below_html.'<input type="checkbox" ' . $inputCheckboxExludeStyle . ' id="ez-toc-cssicon-toggle-item-' . $cssIconID . '" '.$toggle_view.' />';
 			}else{
-				$html .= $header_label.'<label for="ez-toc-cssicon-toggle-item-' . $cssIconID . '">' . ezTOC::getTOCToggleIcon() . '</label><input type="checkbox" ' . $inputCheckboxExludeStyle . ' id="ez-toc-cssicon-toggle-item-' . $cssIconID . '" '.$toggle_view.' aria-label="Toggle" />';
+				if(function_exists('ez_toc_pro_inline_css_func')){
+					$html .= '<div class="ez-toc-cssicon-toggle-label">'.$header_label.'<label for="ez-toc-cssicon-toggle-item-' . $cssIconID . '">' . $toc_icon . '</label></div>'.$label_below_html.'<input type="checkbox" ' . $inputCheckboxExludeStyle . ' id="ez-toc-cssicon-toggle-item-' . $cssIconID . '" '.$toggle_view.' aria-label="Toggle" />';
+				}else{
+					$html .= $header_label.'<label for="ez-toc-cssicon-toggle-item-' . $cssIconID . '" class="ez-toc-cssicon-toggle-label">' . $toc_icon . '</label>'.$label_below_html.'<input type="checkbox" ' . $inputCheckboxExludeStyle . ' id="ez-toc-cssicon-toggle-item-' . $cssIconID . '" '.$toggle_view.' aria-label="Toggle" />';
+				}
+				
+				
 			}
 					
-		}		
-
+		}
 		return $html;
 	}
         
@@ -1499,13 +1551,19 @@ class ezTOC_Post {
 	 *
 	 * @return string The HTML list of TOC items.
 	 */
-	private function createTOC( $page, $matches, $prefix = "ez-toc" ) {
+	private function createTOC( $page, $matches, $prefix = "ez-toc", $toc_more = array() ) {
 
 		// Whether or not the TOC should be built flat or hierarchical.
 		$hierarchical = ezTOC_Option::get( 'show_hierarchy' );
-		$html         = '';
+
+		$html = $toc_type = '';
+
+		$count_matches = is_array($matches) ? count($matches) : '';
 
 		if ( $hierarchical ) {
+
+			//To not show view more in Hierarchy
+			unset($toc_more['view_more']);
 
 			$current_depth      = 100;    // headings can't be larger than h6 but 100 as a default to be sure
 			$numbered_items     = array();
@@ -1579,21 +1637,53 @@ class ezTOC_Post {
 			}
 
 		} else {
-
-			foreach ( $matches as $i => $match ) {
-
-				$count = $i + 1;
-
-				$title = isset( $matches[ $i ]['alternate'] ) ? $matches[ $i ]['alternate'] : $matches[ $i ][0];
-				$title = strip_tags( apply_filters( 'ez_toc_title', $title ), apply_filters( 'ez_toc_title_allowable_tags', '' ) );
-
-				$html .= "<li class='{$prefix}-page-" . $page . "'>";
-
-				$html .= $this->createTOCItemAnchor( $matches[ $i ]['page'], $matches[ $i ]['id'], $title, $count );
-
-				$html .= '</li>';
+			if(isset($toc_more['view_more']) && $toc_more['view_more']>0){
+				//No. of Headings
+				$no_of_headings = $toc_more['view_more'];
+				if(is_array($matches)){
+					$toc_type = ezTOC_Option::get( 'toc_loading' );
+					foreach ( $matches as $i => $match ) {
+						$count = $i + 1;
+						$title = isset( $matches[ $i ]['alternate'] ) ? $matches[ $i ]['alternate'] : $matches[ $i ][0];
+						$title = strip_tags( apply_filters( 'ez_toc_title', $title ), apply_filters( 'ez_toc_title_allowable_tags', '' ) );
+						if($count <= $no_of_headings){
+							$html .= "<li class='{$prefix}-page-" . $page . "'>";
+							$html .= $this->createTOCItemAnchor( $matches[ $i ]['page'], $matches[ $i ]['id'], $title, $count );
+							$html .= '</li>';
+						}else{
+							$detect = '';
+							$is_more_last = false;
+							if('css' == $toc_type && $i == $no_of_headings && function_exists('ez_toc_non_amp') && ez_toc_non_amp()){
+								$html .= '</ul><input type="checkbox" id="ez-toc-more-toggle-css"/><ul class="ez-toc-more-wrp" style="--start: '.$i.'">';
+							}
+							if($i == count($matches)-1){
+								$detect = 'm-last';
+								$is_more_last = true;
+							}
+							$html .= "<li class='{$prefix}-page-" . $page . " ez-toc-more-link " . $detect . "'>";
+							$html .= $this->createTOCItemAnchor( $matches[ $i ]['page'], $matches[ $i ]['id'], $title, $count );
+							$html .= '</li>';
+							if($is_more_last && 'css' == $toc_type && function_exists('ez_toc_non_amp') && ez_toc_non_amp()){
+								$html .= '</ul>';
+							}
+						}
+					}
+				}
+			}else{
+				if(is_array($matches)){
+					foreach ( $matches as $i => $match ) {
+						$count = $i + 1;
+						$title = isset( $matches[ $i ]['alternate'] ) ? $matches[ $i ]['alternate'] : $matches[ $i ][0];
+						$title = strip_tags( apply_filters( 'ez_toc_title', $title ), apply_filters( 'ez_toc_title_allowable_tags', '' ) );
+						$html .= "<li class='{$prefix}-page-" . $page . "'>";
+						$html .= $this->createTOCItemAnchor( $matches[ $i ]['page'], $matches[ $i ]['id'], $title, $count );
+						$html .= '</li>';
+					}
+				}
 			}
 		}
+
+		$html = apply_filters('ez_toc_pro_html_modifier', $html, $toc_more, $count_matches, $toc_type);
 
 		return do_shortcode($html);
 	}

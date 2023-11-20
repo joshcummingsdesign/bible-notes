@@ -174,7 +174,11 @@ final class WPEL_Settings_Page extends WPRun_Base_1x0x0
             return @$option_values[$key];
         }
 
-        trigger_error('Option value "' . esc_html($key) . '" cannot be found.');
+        if($key == 'icon_type'){
+            return false;
+        }
+
+        trigger_error('Option value "' . ( $type !== null?esc_html($type) . '=>' : '' ) . esc_html($key) . '" cannot be found.');
     }
 
     /**

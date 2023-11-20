@@ -3,7 +3,7 @@
  * Plugin Name: Bulk Datetime Change
  * Plugin URI:  https://wordpress.org/plugins/bulk-datetime-change/
  * Description: Bulk change date/time for posts.
- * Version:     1.15
+ * Version:     1.16
  * Author:      Katsushi Kawamori
  * Author URI:  https://riverforest-wp.info/
  * License:     GPLv2 or later
@@ -30,10 +30,8 @@
  */
 
 if ( ! class_exists( 'BulkDatetimeChange' ) ) {
-	require_once dirname( __FILE__ ) . '/lib/class-bulkdatetimechange.php';
+	require_once __DIR__ . '/lib/class-bulkdatetimechange.php';
 }
 if ( ! class_exists( 'BulkDatetimeChangeAdmin' ) ) {
-	require_once dirname( __FILE__ ) . '/lib/class-bulkdatetimechangeadmin.php';
+	require_once __DIR__ . '/lib/class-bulkdatetimechangeadmin.php';
 }
-
-

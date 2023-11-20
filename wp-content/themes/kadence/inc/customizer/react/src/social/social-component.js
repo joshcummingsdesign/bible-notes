@@ -298,7 +298,7 @@ class SocialComponent extends Component {
 							} }
 						/> */}
 						{ this.state.isVisible && (
-							<Popover position="top right" className="kadence-popover-color kadence-popover-social kadence-customizer-popover" onClose={ toggleClose }>
+							<Popover position="top right" inline={true} className="kadence-popover-color kadence-popover-social kadence-customizer-popover" onClose={ toggleClose }>
 								<div className="kadence-popover-social-list">
 									<ButtonGroup className="kadence-radio-container-control">
 										{ availableSocialOptions.map( ( item, index ) => {

@@ -550,6 +550,9 @@
       "type": "boolean",
       "default": false
     },
+    "textUnderline": {
+      "type": "string"
+    },
     "anchor": {
       "type": "string"
     },
@@ -575,6 +578,9 @@
   },
   "usesContext": [
     "postId",
-    "queryId"
+    "queryId",
+    "kadence/dynamicSource",
+    "kadence/repeaterRowData",
+    "kadence/repeaterRow"
   ]
 }

@@ -2,8 +2,8 @@
 /**
 Plugin Name: WP-Optimize - Clean, Compress, Cache
 Plugin URI: https://getwpo.com
-Description: WP-Optimize makes your site fast and efficient. It cleans the database, compresses images and caches pages. Fast sites attract moretraffic and users.
-Version: 3.2.18
+Description: WP-Optimize makes your site fast and efficient. It cleans the database, compresses images and caches pages. Fast sites attract more traffic and users.
+Version: 3.2.21
 Update URI: https://wordpress.org/plugins/wp-optimize/
 Author: David Anderson, Ruhani Rabin, Team Updraft
 Author URI: https://updraftplus.com
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) die('No direct access allowed');
 
 // Check to make sure if WP_Optimize is already call and returns.
 if (!class_exists('WP_Optimize')) :
-define('WPO_VERSION', '3.2.18');
+define('WPO_VERSION', '3.2.21');
 define('WPO_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WPO_PLUGIN_MAIN_PATH', plugin_dir_path(__FILE__));
 define('WPO_PLUGIN_SLUG', plugin_basename(__FILE__));
@@ -171,7 +171,7 @@ class WP_Optimize {
 			$active_theme = get_stylesheet();
 			$parent_theme = get_template();
 			// A theme is updated using the upload system
-			if (isset($options['action']) && 'install' === $options['action'] && 'update-theme' === $skin->options['overwrite']) {
+			if (isset($options['action']) && 'install' === $options['action'] && isset($skin->options['overwrite']) && 'update-theme' === $skin->options['overwrite']) {
 				$updated_theme = $upgrader_object->result['destination_name'];
 				// Check if the theme is in use
 				if ($active_theme == $updated_theme || $parent_theme == $updated_theme) {
@@ -204,7 +204,7 @@ class WP_Optimize {
 			
 	public function admin_page_wpo_images_smush() {
 		$options = Updraft_Smush_Manager()->get_smush_options();
-		$custom = 100 != $options['image_quality'] && 60 != $options['image_quality'] ? true : false;
+		$custom = 90 >= $options['image_quality'] && 65 <= $options['image_quality'];
 		$sites = WP_Optimize()->get_sites();
 		$this->include_template('images/smush.php', false, array('smush_options' => $options, 'custom' => $custom, 'sites' => $sites, 'does_server_allows_local_webp_conversion' => $this->does_server_allows_local_webp_conversion()));
 	}
@@ -232,7 +232,7 @@ class WP_Optimize {
 	}
 
 	/**
-	 * Get and instanciate WP_Optimize_Minify
+	 * Get and instantiate WP_Optimize_Minify
 	 *
 	 * @return WP_Optimize_Minify
 	 */
@@ -419,12 +419,12 @@ class WP_Optimize {
 
 		Updraft_Tasks_Activation::check_updates();
 
-		include_once(WPO_PLUGIN_MAIN_PATH . '/vendor/team-updraft/common-libs/src/updraft-tasks/class-updraft-task-meta.php');
-		include_once(WPO_PLUGIN_MAIN_PATH . '/vendor/team-updraft/common-libs/src/updraft-tasks/class-updraft-task-options.php');
-		include_once(WPO_PLUGIN_MAIN_PATH . '/vendor/team-updraft/common-libs/src/updraft-tasks/class-updraft-task.php');
+		include_once(WPO_PLUGIN_MAIN_PATH . 'vendor/team-updraft/common-libs/src/updraft-tasks/class-updraft-task-meta.php');
+		include_once(WPO_PLUGIN_MAIN_PATH . 'vendor/team-updraft/common-libs/src/updraft-tasks/class-updraft-task-options.php');
+		include_once(WPO_PLUGIN_MAIN_PATH . 'vendor/team-updraft/common-libs/src/updraft-tasks/class-updraft-task.php');
 				
-		include_once(WPO_PLUGIN_MAIN_PATH . '/includes/class-updraft-smush-task.php');
-		include_once(WPO_PLUGIN_MAIN_PATH . '/includes/class-updraft-smush-manager.php');
+		include_once(WPO_PLUGIN_MAIN_PATH . 'includes/class-updraft-smush-task.php');
+		include_once(WPO_PLUGIN_MAIN_PATH . 'includes/class-updraft-smush-manager.php');
 
 		return Updraft_Smush_Manager();
 	}
@@ -561,6 +561,22 @@ class WP_Optimize {
 		if (WP_Optimize_WebP::is_shell_functions_available() && WPO_USE_WEBP_CONVERSION) {
 			$this->get_webp_instance();
 		}
+
+		// add_filter('updraftcentral_host_plugins', array($this, 'attach_updraftcentral_host'));
+		// if (file_exists(WPO_PLUGIN_MAIN_PATH.'central/factory.php')) include_once(WPO_PLUGIN_MAIN_PATH.'central/factory.php');
+	}
+
+	/**
+	 * Attach this wp-optimize plugin as host of the UpdraftCentral libraries
+	 * (e.g. "central" folder)
+	 *
+	 * @param array $hosts List of plugins having the "central" library integrated into them
+	 *
+	 * @return array
+	 */
+	public function attach_updraftcentral_host($hosts) {
+		$hosts[] = 'wp-optimize';
+		return $hosts;
 	}
 
 	/**
@@ -679,8 +695,8 @@ class WP_Optimize {
 
 			$dismissed_until = $options->get_option('dismiss_dash_notice_until', 0);
 
-			if (file_exists(WPO_PLUGIN_MAIN_PATH . '/index.html')) {
-				$installed = filemtime(WPO_PLUGIN_MAIN_PATH . '/index.html');
+			if (file_exists(WPO_PLUGIN_MAIN_PATH . 'index.html')) {
+				$installed = filemtime(WPO_PLUGIN_MAIN_PATH . 'index.html');
 				$installed_for = (time() - $installed);
 			}
 
@@ -1048,7 +1064,7 @@ class WP_Optimize {
 	}
 
 	public function get_templates_url() {
-		return apply_filters('wp_optimize_templates_url', WPO_PLUGIN_URL.'/templates');
+		return apply_filters('wp_optimize_templates_url', WPO_PLUGIN_URL.'templates');
 	}
 
 	/**
@@ -1224,7 +1240,7 @@ class WP_Optimize {
 	 *
 	 * @param String  $url					  - URL to be check to see if it an updraftplus match.
 	 * @param String  $text					  - Text to be entered within the href a tags.
-	 * @param String  $html					  - Any specific HTML to be added.
+	 * @param String  $html					  - Any specific HTML to be added. Supplied parameter will not be escaped in this function. Provide escaped, safe HTML
 	 * @param String|Array	$attrs                  - Specify the HTML attributes as an array or string. Use the array format for multiple attributes (e.g., array( "class" => "lorem-ipsum", "title" => "Highlighting text" )), and use the string format for a single attribute (e.g., 'class="lorem-ipsum"').
 	 * @param Boolean	$return_instead_of_echo - if set, then the result will be returned, not echo-ed.
 	 * @return String|void
@@ -1246,12 +1262,13 @@ class WP_Optimize {
 			// If $attrs is empty, the explode function will only return an empty array.
 			$attrs = explode('=', $attrs);
 			// Check if $attrs in positions 1 and 2 are not empty and exist; otherwise, return an empty string.
-			$str_attrs = !empty($attrs[0]) && !empty($attrs[1]) ? $attrs[0] . '=' . esc_attr($attrs[1]) : '';
+			$str_attrs = !empty($attrs[0]) && !empty($attrs[1]) ? $attrs[0] . '="' . esc_attr(str_replace('"', '', $attrs[1])) . '"' : '';
 		}
 		
 		// Check if it is necessary to add a target value if the url is external
 		$is_external_url = $this->is_external_url($url);
 		if ($is_external_url) {
+			$str_attrs = preg_replace('/\s+target="_blank"/i', '', $str_attrs);
 			$str_attrs .= ' target="_blank"';
 		}
 		

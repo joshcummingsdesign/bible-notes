@@ -19,11 +19,11 @@
  */
 
 jQuery(
-	function($){
+	function ($) {
 
 		/* Select bulk Date time */
 		$( 'input[name="all_change"]' ).click(
-			function(){
+			function () {
 				var edit_date_time_val = $( 'input[name="all_change_datetime"]' ).val();
 				$( ':input[id^=datetimepicker-bdtc]' ).val( edit_date_time_val );
 			}
@@ -31,7 +31,7 @@ jQuery(
 
 		/* Control of the Enter key */
 		$( 'input[type!="submit"][type!="button"]' ).keypress(
-			function(e){
+			function (e) {
 				if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
 					return false;
 				} else {

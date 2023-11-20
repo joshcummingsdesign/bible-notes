@@ -62,23 +62,25 @@ class Author_Meta {
 						<span class="description"><?php esc_html_e( 'Please enter your Occupation.', 'kadence' ); ?></span>
 					</td>
 				</tr>
-				<tr>
-					<th>
-						<label for="facebook">Facebook</label></th>
-					<td>
-						<input type="text" name="facebook" id="facebook" value="<?php echo esc_attr( get_the_author_meta( 'facebook', $user->ID ) ); ?>" class="regular-text" /><br />
-						<span class="description"><?php esc_html_e( 'Please enter your Facebook url. (be sure to include https://)', 'kadence' ); ?></span>
-					</td>
-				</tr>
-				<tr>
-					<th>
-						<label for="twitter">Twitter</label>
-					</th>
-					<td>
-						<input type="text" name="twitter" id="twitter" value="<?php echo esc_attr( get_the_author_meta( 'twitter', $user->ID ) ); ?>" class="regular-text" /><br />
-						<span class="description"><?php esc_html_e( 'Please enter your Twitter url. (be sure to include https://)', 'kadence' ); ?></span>
-					</td>
-				</tr>
+				<?php if ( ! defined( 'RANK_MATH_VERSION' ) ) : ?>
+					<tr>
+						<th>
+							<label for="facebook">Facebook</label></th>
+						<td>
+							<input type="text" name="facebook" id="facebook" value="<?php echo esc_attr( get_the_author_meta( 'facebook', $user->ID ) ); ?>" class="regular-text" /><br />
+							<span class="description"><?php esc_html_e( 'Please enter your Facebook url. (be sure to include https://)', 'kadence' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th>
+							<label for="twitter">Twitter</label>
+						</th>
+						<td>
+							<input type="text" name="twitter" id="twitter" value="<?php echo esc_attr( get_the_author_meta( 'twitter', $user->ID ) ); ?>" class="regular-text" /><br />
+							<span class="description"><?php esc_html_e( 'Please enter your Twitter url. (be sure to include https://)', 'kadence' ); ?></span>
+						</td>
+					</tr>
+				<?php endif; ?>
 				<tr>
 					<th>
 						<label for="instagram">Instagram</label>
@@ -197,11 +199,14 @@ class Author_Meta {
 		if ( isset( $_POST['occupation'] ) ) {
 			update_user_meta( $user_id, 'occupation', sanitize_text_field( wp_unslash( $_POST['occupation'] ) ) );
 		}
-		if ( isset( $_POST['twitter'] ) ) {
-			update_user_meta( $user_id, 'twitter', esc_url_raw( $_POST['twitter'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		}
-		if ( isset( $_POST['facebook'] ) ) {
-			update_user_meta( $user_id, 'facebook', esc_url_raw( $_POST['facebook'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		// Rank Math already has these fields on the same name, so lets not conflict.
+		if ( ! defined( 'RANK_MATH_VERSION' ) ) {
+			if ( isset( $_POST['twitter'] ) ) {
+				update_user_meta( $user_id, 'twitter', esc_url_raw( $_POST['twitter'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			}
+			if ( isset( $_POST['facebook'] ) ) {
+				update_user_meta( $user_id, 'facebook', esc_url_raw( $_POST['facebook'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			}
 		}
 		if ( isset( $_POST['youtube'] ) ) {
 			update_user_meta( $user_id, 'youtube', esc_url_raw( $_POST['youtube'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash

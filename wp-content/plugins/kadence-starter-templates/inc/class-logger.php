@@ -24,6 +24,8 @@
 namespace Kadence_Starter_Templates;
 
 class Logger {
+	public $min_level = '';
+	public $messages = array();
 	/**
 	 * System is unusable.
 	 *
