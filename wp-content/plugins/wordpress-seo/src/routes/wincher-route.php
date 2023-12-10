@@ -173,9 +173,6 @@ class Wincher_Route implements Route_Interface {
 				'permalink' => [
 					'required' => false,
 				],
-				'startAt' => [
-					'required' => false,
-				],
 			],
 		];
 
@@ -259,7 +256,7 @@ class Wincher_Route implements Route_Interface {
 	 * @return WP_REST_Response The response.
 	 */
 	public function get_tracked_keyphrases( WP_REST_Request $request ) {
-		$data = $this->keyphrases_action->get_tracked_keyphrases( $request['keyphrases'], $request['permalink'], $request['startAt'] );
+		$data = $this->keyphrases_action->get_tracked_keyphrases( $request['keyphrases'], $request['permalink'] );
 
 		return new WP_REST_Response( $data, $data->status );
 	}

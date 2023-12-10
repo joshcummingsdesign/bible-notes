@@ -10,8 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( is_admin() || defined( 'DOING_CRON' ) && DOING_CRON ) {
-	// Revisions display trait lite.
-	require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/trait-wpcode-revisions-display.php';
 	// Class used for loading the scripts metabox.
 	require_once WPCODE_PLUGIN_PATH . 'includes/lite/admin/class-wpcode-metabox-snippets-lite.php';
 	// Load lite-specific scripts.

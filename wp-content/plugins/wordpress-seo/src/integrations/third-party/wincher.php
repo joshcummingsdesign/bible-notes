@@ -9,9 +9,6 @@ use Yoast_Feature_Toggle;
 
 /**
  * Adds the Wincher integration.
- *
- * @deprecated 21.6
- * @codeCoverageIgnore
  */
 class Wincher implements Integration_Interface {
 
@@ -25,9 +22,6 @@ class Wincher implements Integration_Interface {
 	/**
 	 * The Wincher integration toggle constructor.
 	 *
-	 * @deprecated 21.6
-	 * @codeCoverageIgnore
-	 *
 	 * @param Wincher_Helper $wincher The Wincher helper instance.
 	 */
 	public function __construct( Wincher_Helper $wincher ) {
@@ -37,20 +31,22 @@ class Wincher implements Integration_Interface {
 	/**
 	 * Initializes the integration.
 	 *
-	 * @deprecated 21.6
-	 * @codeCoverageIgnore
-	 *
 	 * @return void
 	 */
 	public function register_hooks() {
-		\_deprecated_function( __METHOD__, 'Yoast SEO 21.6' );
+		/**
+		 * Called by Yoast_Integration_Toggles to add extra toggles to the ones defined there.
+		 */
+		\add_filter( 'wpseo_integration_toggles', [ $this, 'add_integration_toggle' ] );
+
+		/**
+		 * Add extra text after the network integration toggle if the toggle is disabled.
+		 */
+		\add_action( 'Yoast\WP\SEO\admin_network_integration_after', [ $this, 'after_network_integration_toggle' ] );
 	}
 
 	/**
 	 * Returns the conditionals based in which this loadable should be active.
-	 *
-	 * @deprecated 21.6
-	 * @codeCoverageIgnore
 	 *
 	 * @return array The conditionals.
 	 */
@@ -61,15 +57,25 @@ class Wincher implements Integration_Interface {
 	/**
 	 * Adds the Wincher integration toggle to the $integration_toggles array.
 	 *
-	 * @deprecated 21.6
-	 * @codeCoverageIgnore
-	 *
 	 * @param array $integration_toggles The integration toggles array.
 	 *
 	 * @return array The updated integration toggles array.
 	 */
 	public function add_integration_toggle( $integration_toggles ) {
-		\_deprecated_function( __METHOD__, 'Yoast SEO 21.6' );
+		if ( \is_array( $integration_toggles ) ) {
+			$integration_toggles[] = (object) [
+				/* translators: %s: 'Wincher' */
+				'name'     => \sprintf( \__( '%s integration', 'wordpress-seo' ), 'Wincher' ),
+				'setting'  => 'wincher_integration_active',
+				'label'    => \sprintf(
+				/* translators: %s: 'Wincher' */
+					\__( 'The %s integration offers the option to track specific keyphrases and gain insights in their positions.', 'wordpress-seo' ),
+					'Wincher'
+				),
+				'order'    => 11,
+				'disabled' => \is_multisite(),
+			];
+		}
 
 		return $integration_toggles;
 	}
@@ -77,24 +83,43 @@ class Wincher implements Integration_Interface {
 	/**
 	 * Adds the disabled note when the integration toggle is disabled.
 	 *
-	 * @deprecated 21.6
+	 * @deprecated 20.3
 	 * @codeCoverageIgnore
 	 *
 	 * @param Yoast_Feature_Toggle $integration The integration toggle class.
 	 */
 	public function after_integration_toggle( $integration ) {
-		\_deprecated_function( __METHOD__, 'Yoast SEO 21.6' );
+		\_deprecated_function( __METHOD__, 'Yoast SEO 20.3' );
+		if ( $integration->setting === 'wincher_integration_active' ) {
+			if ( \is_multisite() ) {
+				$this->get_disabled_note();
+			}
+		}
 	}
 
 	/**
 	 * Adds the disabled note to the network integration toggle.
 	 *
-	 * @deprecated 21.6
-	 * @codeCoverageIgnore
-	 *
 	 * @param Yoast_Feature_Toggle $integration The integration toggle class.
 	 */
 	public function after_network_integration_toggle( $integration ) {
-		\_deprecated_function( __METHOD__, 'Yoast SEO 21.6' );
+		if ( $integration->setting === 'wincher_integration_active' ) {
+			$this->get_disabled_note();
+		}
+	}
+
+	/**
+	 * Outputs the disabled note.
+	 *
+	 * @codeCoverageIgnore
+	 *
+	 * @return void
+	 */
+	protected function get_disabled_note() {
+		echo '<p>', \sprintf(
+		/* translators: %s expands to Wincher */
+			\esc_html__( 'Currently, the %s integration is not available for multisites.', 'wordpress-seo' ),
+			'Wincher'
+		), '</p>';
 	}
 }

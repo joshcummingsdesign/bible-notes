@@ -58,8 +58,7 @@ class WPSEO_Option_Wpseo extends WPSEO_Option {
 		'enable_xml_sitemap'                       => true,
 		'enable_text_link_counter'                 => true,
 		'enable_index_now'                         => true,
-		'enable_ai_generator'                      => true,
-		'ai_enabled_pre_default'                   => false,
+		'enable_ai_generator'                      => false,
 		'show_onboarding_notice'                   => false,
 		'first_activated_on'                       => false,
 		'myyoast-oauth'                            => [

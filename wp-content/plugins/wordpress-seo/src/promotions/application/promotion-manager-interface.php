@@ -4,6 +4,8 @@ namespace Yoast\WP\SEO\Promotions\Application;
 
 /**
  * Interface for the promotion manager.
+ *
+ * @makePublic
  */
 interface Promotion_Manager_Interface {
 
