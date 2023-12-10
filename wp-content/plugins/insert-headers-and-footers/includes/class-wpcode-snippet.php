@@ -1086,6 +1086,9 @@ class WPCode_Snippet {
 		$this->title = $this->get_title() . ' - Copy';
 		// Make sure the snippet is not active.
 		$this->post_data->post_status = 'draft';
+
+		// Let's make sure the slashes don't get removed from the code.
+		$this->code = wp_slash( $this->code );
 		/**
 		 * Fires before a snippet that is about to be duplicated is saved.
 		 *

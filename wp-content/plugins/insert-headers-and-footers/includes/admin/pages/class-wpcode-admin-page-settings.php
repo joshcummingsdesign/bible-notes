@@ -157,6 +157,8 @@ class WPCode_Admin_Page_Settings extends WPCode_Admin_Page {
 			'usage_tracking'
 		);
 
+		$this->uninstall_setting();
+
 		wp_nonce_field( $this->action, $this->nonce_name );
 
 		?>
@@ -164,6 +166,32 @@ class WPCode_Admin_Page_Settings extends WPCode_Admin_Page {
 			<?php esc_html_e( 'Save Changes', 'insert-headers-and-footers' ); ?>
 		</button>
 		<?php
+	}
+
+	/**
+	 * Output the uninstall setting.
+	 *
+	 * @return void
+	 */
+	public function uninstall_setting() {
+		$uninstall_description = esc_html__( 'Remove ALL WPCode data upon plugin deletion.', 'insert-headers-and-footers' );
+
+		$uninstall_description .= '<br />';
+		$uninstall_description .= sprintf(
+			'<strong style="color: #DF2A35">%s</strong>',
+			esc_html__( 'All WPCode snippets & scripts will be unrecoverable.', 'insert-headers-and-footers' )
+		);
+
+		$this->metabox_row(
+			__( 'Delete All Data on Uninstall', 'insert-headers-and-footers' ),
+			$this->get_checkbox_toggle(
+				wpcode()->settings->get_option( 'uninstall_data', false ),
+				'wpcode-uninstall-data',
+				$uninstall_description,
+				1
+			),
+			'wpcode-admin-bar-info'
+		);
 	}
 
 	/**
@@ -281,6 +309,7 @@ class WPCode_Admin_Page_Settings extends WPCode_Admin_Page {
 			'error_logging'        => isset( $_POST['wpcode-error-logging'] ),
 			'usage_tracking'       => isset( $_POST['usage_tracking'] ),
 			'admin_bar_info'       => isset( $_POST['wpcode-admin-bar-info'] ),
+			'uninstall_data'       => isset( $_POST['wpcode-uninstall-data'] ),
 		);
 
 		wpcode()->settings->bulk_update_options( $settings );
@@ -420,7 +449,7 @@ class WPCode_Admin_Page_Settings extends WPCode_Admin_Page {
 			);
 			?>
 		</p>
-		<hr />
+		<hr/>
 		<?php
 		$capabilities = $this->get_capabilites();
 

@@ -123,11 +123,15 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 					)
 				);
 			}
+			// Clear errors when a snippet is trashed.
+			wpcode()->error->clear_snippets_errors();
 		}
 		if ( 'delete' === $action ) {
 			foreach ( $ids as $id ) {
 				wp_delete_post( $id );
 			}
+			// Clear errors when a snippet is deleted.
+			wpcode()->error->clear_snippets_errors();
 		}
 		$failed = 0;
 		if ( 'enable' === $action ) {

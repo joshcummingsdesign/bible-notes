@@ -302,7 +302,7 @@ add_action('shutdown', function() {
     
                 $return = strtolower( $return );
             }
-            if ( ! $return ) {
+            if ( !$return || true == ezTOC_Option::get( 'all_fragment_prefix' ) ) {
     
                 $return = ( ezTOC_Option::get( 'fragment_prefix' ) ) ? ezTOC_Option::get( 'fragment_prefix' ) : '_';
             }
@@ -314,20 +314,58 @@ add_action('shutdown', function() {
         }
         return apply_filters( 'ez_toc_url_anchor_target', $return, $heading );
     }
+    
+/**
+ * Check for the enable support of sticky toc/toggle
+ * @since 2.0.60
+ */
+function ez_toc_stikcy_enable_support_status(){
 
-add_filter( 'ez_toc_sticky_visible', 'ez_toc_sticky_visible_func' ,20);
-function ez_toc_sticky_visible_func( $visible ) {
-    $sticky_include_homepage = ezTOC_Option::get('sticky_include_homepage');
-    $sticky_include_category = ezTOC_Option::get('sticky_include_category');
-    $sticky_include_product_category = ezTOC_Option::get('sticky_include_product_category');
-    if ( is_front_page() ) {
-      $visible = ($sticky_include_homepage=='1')?true:false;
-    } elseif ( is_category() ) {
-      $visible = ($sticky_include_category=='1')?true:false;
-    } elseif ( is_tax( 'product_cat' ) ) {
-      $visible = ($sticky_include_product_category=='1')?true:false;
+    $status = false;
+
+    $stickyPostTypes = apply_filters('ez_toc_sticky_post_types', ezTOC_Option::get('sticky-post-types'));
+
+    if(!empty($stickyPostTypes)){
+        if(is_singular()){
+            $postType = get_post_type();
+            if(in_array($postType,$stickyPostTypes)){
+                $status = true;
+            }
+        }										
     }
-    return $visible;
+
+    if(ezTOC_Option::get('sticky_include_homepage')){
+        if ( is_front_page() ) {
+            $status = true;
+        }
+    }
+
+    if(ezTOC_Option::get('sticky_include_category')){
+        if ( is_category() ) {
+            $status = true;
+        }
+    }
+
+    if(ezTOC_Option::get('sticky_include_tag')){
+        if ( is_tag() ) {
+            $status = true;
+        }
+    }
+    
+    if(ezTOC_Option::get('sticky_include_product_category')){
+        if ( is_tax( 'product_cat' ) ) {
+            $status = true;
+        }
+    }
+
+    if(ezTOC_Option::get('sticky_include_custom_tax')){
+        if ( is_tax() ) {
+            $status = true;
+        }
+    }
+    
+    return apply_filters('ez_toc_sticky_enable_support', $status);
+
 }
 
 /**
@@ -352,4 +390,76 @@ function ez_toc_para_blockquote_replace($blockquotes, $content, $step){
     }
     return $content;
 }
+}
+
+/**
+ * Helps allow line breaks
+ * @since 2.0.59
+ */
+add_filter('ez_toc_title_allowable_tags', 'ez_toc_link_allow_br_tag');
+function ez_toc_link_allow_br_tag($tags){
+    if(ezTOC_Option::get( 'prsrv_line_brk' )){
+        $tags = '<br>';
+    }
+    return $tags;
+}
+
+/**
+ * Check the status of shortcode enable support which is defined in shortcode attributes
+ * @since 2.0.59
+ */
+function ez_toc_shortcode_enable_support_status($atts){
+    
+    $status = true;
+
+    if(isset($atts['post_types'])){
+        $exp_post_types = explode(',', $atts['post_types']);
+        if(!empty($exp_post_types)){
+            $exp_post_types = array_map("trim",$exp_post_types);
+            if(is_singular()){
+                $curr_post_type = get_post_type();
+                if(in_array($curr_post_type, $exp_post_types )){
+                    $status = true;
+                }else{
+                    $status = false;
+                }
+            }else{
+                $status = false;
+            }       
+        }
+    }
+
+    if(isset($atts['post_in'])){
+        $exp_post_ids = explode(',', $atts['post_in']);
+        if(!empty($exp_post_ids)){
+            $exp_post_ids = array_map("trim",$exp_post_ids);
+            if(is_singular()){
+                $ID = get_the_ID();
+                if(in_array($ID, $exp_post_ids )){
+                    $status = true;
+                }else{
+                    $status = false;
+                }
+            }else{
+                $status = false;
+            }       
+        }
+    }
+            
+        
+    if(isset($atts['device_target']) && $atts['device_target'] != ''){
+        $status = false;
+        $my_device = $atts['device_target'];
+        if(function_exists('wp_is_mobile') && wp_is_mobile()){
+            if($my_device == 'mobile'){
+                $status = true;
+            }
+        }else{
+            if($my_device == 'desktop'){
+                $status = true;
+            }
+        }
+    }
+    
+    return $status;    
 }

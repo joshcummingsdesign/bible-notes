@@ -4,7 +4,7 @@ Tags: code, css, php, footer, functions, content, facebook pixel, footer code, f
 Requires at least: 4.6
 Tested up to: 6.4
 Requires PHP: 5.5
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -307,6 +307,11 @@ Thank you
 Syed Balkhi
 
 == Changelog ==
+
+= 2.1.6 =
+* New: We added the option to delete all the plugin data on uninstall.
+* Fix: The code of duplicated snippets was sometimes removing some slashes.
+* Fix: Error count was not correctly updated when snippets were trashed or deleted.
 
 = 2.1.5 =
 * New: Priority column added to the list of snippets, order by snippet priority.

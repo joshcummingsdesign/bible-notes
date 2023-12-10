@@ -321,6 +321,14 @@ class ezTOC_Post {
 			}
 		}
 
+		if(is_tax() || is_tag()){
+			global $wp_query;
+			$tax = $wp_query->get_queried_object();
+			if(is_object($tax)){
+				$content = $tax->description;
+			}
+		}
+
 		if(function_exists('is_product_category') && is_product_category()){
 			$term_object = get_queried_object();			
 			if(!empty($term_object->description)){
@@ -954,8 +962,8 @@ class ezTOC_Post {
 
 			// if blank, then prepend with the fragment prefix
 			// blank anchors normally appear on sites that don't use the latin charset
-			if ( ! $return ) {
-
+			//@since  2.0.59
+			if ( !$return || true == ezTOC_Option::get( 'all_fragment_prefix' ) ) {
 				$return = ( ezTOC_Option::get( 'fragment_prefix' ) ) ? ezTOC_Option::get( 'fragment_prefix' ) : '_';
 			}
 
@@ -1297,8 +1305,15 @@ class ezTOC_Post {
 			if(ezTOC_Option::get( 'toc_wrapping' )){
 				$wrapping_class_add='-text';
 			}
+
+			$toc_align = get_post_meta( get_the_ID(), '_ez-toc-alignment', true );
+
+			if ( !$toc_align || empty( $toc_align ) || $toc_align == 'none' ) {
+				$toc_align = ezTOC_Option::get( 'wrapping' );
+			}
+
 			// wrapping css classes
-			switch ( ezTOC_Option::get( 'wrapping' ) ) {
+			switch ( $toc_align ) {
 
 				case 'left':
 					$class[] = 'ez-toc-wrap-left'.esc_attr($wrapping_class_add);
@@ -1315,21 +1330,22 @@ class ezTOC_Post {
 					// do nothing
 			}
 
-			if ( ezTOC_Option::get( 'show_hierarchy' ) ) {
+	        $show_counter = (isset($options['no_counter']) && $options['no_counter'] == true ) ? false : true;
 
-				$class[] = 'counter-hierarchy';
+	        if( $show_counter ){
+	            if ( ezTOC_Option::get( 'show_hierarchy' ) ) {
+	            	$class[] = 'counter-hierarchy';
+	            } else {
+	            	$class[] = 'counter-flat';
+	            }
+	            if( ezTOC_Option::get( 'heading-text-direction', 'ltr' ) == 'ltr' ) {
+	                $class[] = 'ez-toc-counter';
+	            }
+	            if( ezTOC_Option::get( 'heading-text-direction', 'ltr' ) == 'rtl' ) {
+	                $class[] = 'ez-toc-counter-rtl';
+	            }
+	        }
 
-			} else {
-
-				$class[] = 'counter-flat';
-			}
-
-            if( ezTOC_Option::get( 'heading-text-direction', 'ltr' ) == 'ltr' ) {
-                $class[] = 'ez-toc-counter';
-            }
-            if( ezTOC_Option::get( 'heading-text-direction', 'ltr' ) == 'rtl' ) {
-                $class[] = 'ez-toc-counter-rtl';
-            }
 			// colour themes
 			switch ( ezTOC_Option::get( 'theme' ) ) {
 
@@ -1407,9 +1423,18 @@ class ezTOC_Post {
 		$html = '';						
 		$html .= '<div class="ez-toc-title-container">' . PHP_EOL;
 		$header_label = '';
-	if ( ezTOC_Option::get( 'show_heading_text' ) ) {
+		$show_header_text = true;
+		if(isset($options['no_label']) && $options['no_label'] == true){
+			$show_header_text = false;
+		}
+	if ( $show_header_text && ezTOC_Option::get( 'show_heading_text' ) ) {
 
-		$toc_title = ezTOC_Option::get( 'heading_text' );
+		$toc_title = get_post_meta( get_the_ID(), '_ez-toc-header-label', true );
+
+		if ( !$toc_title || empty( $toc_title ) ) {
+			$toc_title = ezTOC_Option::get( 'heading_text' );
+		}
+
 		$toc_title_tag = ezTOC_Option::get( 'heading_text_tag' );
 		$toc_title_tag = $toc_title_tag?$toc_title_tag:'p';
 
@@ -1422,7 +1447,9 @@ class ezTOC_Post {
 
 			$toc_title = str_replace( '%PAGE_NAME%', get_the_title(), $toc_title );
 		}
-		
+		if(isset($options['header_label'])){
+			$toc_title = $options['header_label'];
+		}
 		$headerTextToggleClass = '';
 		$headerTextToggleStyle = '';
 		
@@ -1436,7 +1463,12 @@ class ezTOC_Post {
 	} 
 	$html .= '<span class="ez-toc-title-toggle">';
 
-	if ( ezTOC_Option::get( 'visibility' ) ) {
+	$label_below_html = '';
+	$show_toggle_view = true;
+	if(isset($options['no_toggle']) && $options['no_toggle'] == true){
+		$show_toggle_view = false;
+	}
+	if ($show_toggle_view && ezTOC_Option::get( 'visibility' ) ) {
 		$cssIconID = uniqid();
 		
 		$inputCheckboxExludeStyle = "";
@@ -1445,7 +1477,6 @@ class ezTOC_Post {
 		}
 		
 		$icon = ezTOC::getTOCToggleIcon();
-		$label_below_html = '';
 		if( function_exists( 'ez_toc_pro_activation_link' ) ) {
 				$icon = apply_filters('ez_toc_modify_icon',$icon);
 				$label_below_html = apply_filters('ez_toc_label_below_html',$label_below_html);
@@ -1465,10 +1496,14 @@ class ezTOC_Post {
 
 	//css based heaing function
 	private function get_css_based_toc_heading($options){
-		$html = '';
-	
+
+		$html = '';	
 		$header_label = '';
-	if ( ezTOC_Option::get( 'show_heading_text' ) ) {
+		$show_header_text = true;
+		if(isset($options['no_label']) && $options['no_label'] == true){
+			$show_header_text = false;
+		}
+	if ( $show_header_text && ezTOC_Option::get( 'show_heading_text' ) ) {
 
 		$toc_title = ezTOC_Option::get( 'heading_text' );
 		$toc_title_tag = ezTOC_Option::get( 'heading_text_tag' );
@@ -1482,7 +1517,11 @@ class ezTOC_Post {
 
 			$toc_title = str_replace( '%PAGE_NAME%', get_the_title(), $toc_title );
 		}
-								
+					
+		if(isset($options['header_label'])){
+			$toc_title = $options['header_label'];
+		}
+
 		$header_label = '<'.esc_attr($toc_title_tag).' class="ez-toc-title">' . esc_html__( htmlentities( $toc_title, ENT_COMPAT, 'UTF-8' ), 'easy-table-of-contents' ). '</'.esc_attr($toc_title_tag).'>' . PHP_EOL;
 		if (!ezTOC_Option::get( 'visibility' ) ) {
 			$html .='<div class="ez-toc-title-container">'.$header_label.'</div>';
@@ -1490,7 +1529,12 @@ class ezTOC_Post {
 	} 
 	
 
-	if ( ezTOC_Option::get( 'visibility' ) ) {
+	$show_toggle_view = true;
+	if(isset($options['no_toggle']) && $options['no_toggle'] == true){
+		$show_toggle_view = false;
+	}
+
+	if ( $show_toggle_view && ezTOC_Option::get( 'visibility' ) ) {
 			$cssIconID = uniqid();
 			
 			$inputCheckboxExludeStyle = "";
@@ -1560,6 +1604,8 @@ class ezTOC_Post {
 
 		$count_matches = is_array($matches) ? count($matches) : '';
 
+		$toc_type = ezTOC_Option::get( 'toc_loading' );
+
 		if ( $hierarchical ) {
 
 			//To not show view more in Hierarchy
@@ -1595,12 +1641,20 @@ class ezTOC_Post {
 					for ( $current_depth; $current_depth < (int) $matches[ $i ][2]; $current_depth++ ) {
 
 						$numbered_items[ $current_depth + 1 ] = 0;
-						$html .= "<ul class='{$prefix}-list-level-" . $level . "'><li class='{$prefix}-heading-level-" . $level . "'>";
+						//Hide Level 4 Headings
+						$sub_active = '';
+						if($level > 3){
+							$sub_active = apply_filters('ez_toc_hierarchy_js_add_attr',$sub_active);
+						}
+						$html .= "<ul class='{$prefix}-list-level-" . $level . "' ".$sub_active."><li class='{$prefix}-heading-level-" . $level . "'>";
 					}
 				}
 
 				$title = isset( $matches[ $i ]['alternate'] ) ? $matches[ $i ]['alternate'] : $matches[ $i ][0];
-				$title = br2( $title, ' ' );
+				//check for line break
+				if(!ezTOC_Option::get( 'prsrv_line_brk' )){
+					$title = br2( $title, ' ' );
+				}
 				$title = strip_tags( apply_filters( 'ez_toc_title', $title ), apply_filters( 'ez_toc_title_allowable_tags', '' ) );
 
 				$html .= $this->createTOCItemAnchor( $matches[ $i ]['page'], $matches[ $i ]['id'], $title, $count );
@@ -1641,7 +1695,6 @@ class ezTOC_Post {
 				//No. of Headings
 				$no_of_headings = $toc_more['view_more'];
 				if(is_array($matches)){
-					$toc_type = ezTOC_Option::get( 'toc_loading' );
 					foreach ( $matches as $i => $match ) {
 						$count = $i + 1;
 						$title = isset( $matches[ $i ]['alternate'] ) ? $matches[ $i ]['alternate'] : $matches[ $i ][0];
@@ -1704,8 +1757,13 @@ class ezTOC_Post {
 			$title = str_replace(':', '', $title);
 		}
 		
+		$anch_name = 'href';
+		if(ezTOC_Option::get( 'toc_loading' ) == 'js' && ezTOC_Option::get( 'smooth_scroll' ) && ezTOC_Option::get( 'avoid_anch_jump' )){
+			$anch_name = 'href="#" data-href';
+		}
+
 		return sprintf(
-			'<a class="ez-toc-link ez-toc-heading-' . $count . '" href="%1$s" title="%2$s">%3$s</a>',
+			'<a class="ez-toc-link ez-toc-heading-' . $count . '" '.$anch_name.'="%1$s" title="%2$s">%3$s</a>',
 			esc_attr( $this->createTOCItemURL( $id, $page ) ),
 			esc_attr( strip_tags( $title ) ),
 			$title
@@ -1732,7 +1790,7 @@ class ezTOC_Post {
 
 		} elseif ( 1 === $page ) {
 			// Fix for wrong links on TOC on Wordpress category page
-			if(is_category() || (function_exists('is_product_category') && is_product_category())){
+			if(is_category() || is_tax() || is_tag() || (function_exists('is_product_category') && is_product_category())){
 				return  '#' . $id;
 			}
 			return trailingslashit( $this->permalink ) . '#' . $id;
