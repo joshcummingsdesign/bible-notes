@@ -34,4 +34,7 @@ printf "\n==> Running search replace...\n\n"
 lando wp search-replace $PROD_URL $LOCAL_URL --all-tables
 mv wp/wp-config-original.php wp/wp-config.php
 
+printf "\n==> Creating backup zip...\n\n"
+zip -r bible-notes.zip db.sql wp-content
+
 printf "\nSuccessfully pulled site!\n\n"
