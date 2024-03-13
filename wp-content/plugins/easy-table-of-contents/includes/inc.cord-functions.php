@@ -315,7 +315,8 @@ function mb_find_replace( &$find = false, &$replace = false, &$string = '' ) {
 				if ( is_int( $start ) ) {
 
 					$length = mb_strlen( $needle );
-					$string = mb_substr_replace( $string, $replace[ $i ], $start, $length );
+					$apply_new_function = apply_filters('eztoc_mb_subtr_replace',false,$string, $replace[ $i ], $start, $length);
+					$string = $apply_new_function?$apply_new_function:mb_substr_replace( $string, $replace[ $i ], $start, $length );
 				}
 
 			}
@@ -356,6 +357,24 @@ function insertElementByPTag($content, $toc)
 {
 	$find = array('</p>');
 	$replace = array('</p>' . $toc);
+	return mb_find_replace( $find, $replace, $content );
+}
+endif;
+
+if( ! function_exists( __NAMESPACE__ . '\insertElementByImgTag' ) ):
+/**
+ * insertElementByImgTag Method
+ *
+ * @since 2.0.60
+ * @param $content
+ * @param $toc
+ * @return false|string
+ * @throws \DOMException
+*/
+function insertElementByImgTag($content, $toc)
+{
+	$find = array('</figure>');
+	$replace = array('</figure>' . $toc);
 	return mb_find_replace( $find, $replace, $content );
 }
 endif;

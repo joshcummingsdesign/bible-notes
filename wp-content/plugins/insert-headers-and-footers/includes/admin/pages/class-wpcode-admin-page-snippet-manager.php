@@ -10,6 +10,8 @@
  */
 class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 
+	use WPCode_Revisions_Display_Lite;
+
 	/**
 	 * The page slug to be used when adding the submenu.
 	 *
@@ -71,6 +73,21 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	}
 
 	/**
+	 * Load the snippet if we're editing one.
+	 *
+	 * @return void
+	 */
+	public function load_snippet() {
+		if ( isset( $_GET['snippet_id'] ) ) {
+			$snippet_post = get_post( absint( $_GET['snippet_id'] ) );
+			if ( ! is_null( $snippet_post ) && $this->get_post_type() === $snippet_post->post_type ) {
+				$this->snippet_id = $snippet_post->ID;
+				$this->snippet    = wpcode_get_snippet( $snippet_post );
+			}
+		}
+	}
+
+	/**
 	 * Page-specific hooks.
 	 *
 	 * @return void
@@ -79,11 +96,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		$this->can_edit = current_user_can( 'wpcode_edit_snippets' );
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['snippet_id'] ) ) {
-			$snippet_post = get_post( absint( $_GET['snippet_id'] ) );
-			if ( ! is_null( $snippet_post ) && 'wpcode' === $snippet_post->post_type ) {
-				$this->snippet_id = $snippet_post->ID;
-				$this->snippet    = new WPCode_Snippet( $snippet_post );
-			}
+			$this->load_snippet();
 			// If the post type does not match the page will act as an add new snippet page, the id will be ignored.
 		} elseif ( ! isset( $_GET['custom'] ) ) {
 			$this->show_library = apply_filters( 'wpcode_add_snippet_show_library', true );
@@ -446,6 +459,8 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			'after_paragraph'     => __( 'after paragraph number', 'insert-headers-and-footers' ),
 			'archive_before_post' => __( 'before post number', 'insert-headers-and-footers' ),
 			'archive_after_post'  => __( 'after post number', 'insert-headers-and-footers' ),
+			'after_words'         => __( 'minimum number of words', 'insert-headers-and-footers' ),
+			'every_words'         => __( 'number of words', 'insert-headers-and-footers' ),
 		);
 		$markup       = '';
 		foreach ( $descriptions as $value => $description ) {
@@ -879,7 +894,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			return;
 		}
 		?>
-		<form action="<?php echo esc_url( $this->get_page_action_url() ); ?>" method="post" id="wpcode-snippet-manager-form">
+		<form action="<?php echo esc_url( $this->get_page_action_url() ); ?>" method="post" id="wpcode-snippet-manager-form" autocomplete="off">
 			<?php parent::output(); ?>
 		</form>
 		<?php
@@ -1009,8 +1024,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			$attributes = array();
 		}
 
-
-		$snippet = new WPCode_Snippet(
+		$snippet = wpcode_get_snippet(
 			array(
 				'id'                   => empty( $_REQUEST['id'] ) ? 0 : absint( $_REQUEST['id'] ),
 				'title'                => isset( $_POST['wpcode_snippet_title'] ) ? sanitize_text_field( wp_unslash( $_POST['wpcode_snippet_title'] ) ) : '',
@@ -1240,8 +1254,9 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 				$markup = sprintf( '<input type="text" class="wpcode-input-text wpcode-input-datetime" value="%s" />', esc_attr( $value ) );
 				break;
 			case 'ajax':
-				$options = isset( $data['labels_callback'] ) ? $data['labels_callback']( $value ) : array();
-				$markup  = '<select class="wpcode-select2-ajax" data-action="' . esc_attr( $data['options'] ) . '" multiple>';
+				$options  = isset( $data['labels_callback'] ) ? $data['labels_callback']( $value ) : array();
+				$multiple = isset( $data['multiple'] ) && $data['multiple'] ? 'multiple' : '';
+				$markup   = '<select class="wpcode-select2-ajax" data-action="' . esc_attr( $data['options'] ) . '" ' . $multiple . '>';
 				foreach ( $options as $option ) {
 					$markup .= '<option value="' . esc_attr( $option['value'] ) . '" ' . selected( true, true, false ) . '>' . esc_html( $option['label'] ) . '</option>';
 				}
@@ -1792,74 +1807,6 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	}
 
 	/**
-	 * Get a list of code revisions to use behind the notice.
-	 *
-	 * @return string
-	 */
-	public function get_code_revisions_empty_list() {
-		$list           = array();
-		$post_modified  = isset( $this->snippet ) ? strtotime( $this->snippet->get_post_data()->post_modified ) : time();
-		$snippet_author = isset( $this->snippet ) ? $this->snippet->get_snippet_author() : get_current_user_id();
-		$revisions_data = array(
-			$post_modified,
-			$post_modified - DAY_IN_SECONDS,
-			$post_modified - WEEK_IN_SECONDS,
-			$post_modified - 2 * WEEK_IN_SECONDS,
-			$post_modified - MONTH_IN_SECONDS,
-			$post_modified - 2 * MONTH_IN_SECONDS,
-		);
-
-		$compare = sprintf(
-			'<span>%s</span>',
-			esc_html__( 'Compare', 'insert-headers-and-footers' )
-		);
-		$view    = sprintf(
-			'<span>%s</a>',
-			get_wpcode_icon( 'eye', 16, 11, '0 0 16 11' )
-		);
-
-		foreach ( $revisions_data as $revisions_date ) {
-			$updated = sprintf(
-			// Translators: time since the revision has been updated.
-				esc_html__( 'Updated %s ago', 'insert-headers-and-footers' ),
-				human_time_diff( $revisions_date )
-			);
-
-			$list[] = $this->get_revision_item(
-				$snippet_author,
-				$updated,
-				array(
-					$compare,
-					$view,
-				)
-			);
-		}
-
-		$html = '<div class="wpcode-blur-area">';
-
-		$html .= sprintf(
-			'<ul class="wpcode-revisions-list">%s</ul>',
-			implode( '', $list )
-		);
-
-		$button_text = sprintf(
-		// Translators: The placeholder gets replaced with the extra number of revisions available.
-			esc_html__( '%d Other Revisions', 'insert-headers-and-footers' ),
-			3
-		);
-
-		$html .= sprintf(
-			'<button type="button" class="wpcode-button wpcode-button-secondary wpcode-button-icon" id="wpcode-show-all-snippets">%1$s %2$s</button>',
-			get_wpcode_icon( 'rewind', 16, 14 ),
-			$button_text
-		);
-
-		$html .= '</div>';// .wpcode-blur-area.
-
-		return $html;
-	}
-
-	/**
 	 * List of code revision items.
 	 *
 	 * @return string
@@ -1883,63 +1830,6 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	}
 
 	/**
-	 * Get a code revisions list with a notice on top.
-	 *
-	 * @param string $title The title for the notice.
-	 * @param string $description Description or text below the title.
-	 * @param array  $button_1 Button 1 params for the get_upsell_box method.
-	 * @param array  $button_2 Button 2 params for the get_upsell_box method.
-	 *
-	 * @return string
-	 */
-	public function code_revisions_list_with_notice( $title, $description = '', $button_1 = array(), $button_2 = array() ) {
-		$html = '<div class="wpcode-revisions-list-area">';
-
-		$html .= $this->get_code_revisions_empty_list();
-		$html .= WPCode_Admin_Page::get_upsell_box(
-			$title,
-			$description,
-			$button_1,
-			$button_2
-		);
-		$html .= '</div>';// .wpcode-revisions-list-area.
-
-		return $html;
-	}
-
-	/**
-	 * Get the markup for a revision item in the list of revisions.
-	 *
-	 * @param int    $author_id The author id to display the avatar and name for.
-	 * @param string $date The date used to display time passed.
-	 * @param array  $actions Links specific to this row.
-	 *
-	 * @return string
-	 */
-	public function get_revision_item( $author_id, $date, $actions = array() ) {
-		$list_item = '<li class="wpcode-revision-list-item">';
-
-		$list_item .= get_avatar( $author_id, 30 );
-		$list_item .= sprintf(
-			'<span class="wpcode-revision-list-author">%s</span>',
-			get_the_author_meta( 'display_name', $author_id )
-		);
-		$list_item .= sprintf(
-			'<span class="wpcode-revision-list-date">%s</span>',
-			$date
-		);
-		if ( ! empty( $actions ) ) {
-			$list_item .= sprintf(
-				'<span class="wpcode-revision-list-item-actions">%s</span>',
-				implode( '', $actions )
-			);
-		}
-		$list_item .= '</li>';
-
-		return $list_item;
-	}
-
-	/**
 	 * Display a notice if the snippet loaded for editing triggered an error.
 	 *
 	 * @return void
@@ -1952,11 +1842,9 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		if ( empty( $last_error ) ) {
 			return;
 		}
-		$error_line = isset( $last_error['error_line'] ) ? $last_error['error_line'] : false;
-		$time       = $last_error['time'];
-		// Let's show just the first line in the $last_error['message'].
-		$last_error['message'] = explode( "\n", $last_error['message'] );
-		$logging_enabled       = wpcode()->settings->get_option( 'error_logging' );
+		$error_line      = isset( $last_error['error_line'] ) ? $last_error['error_line'] : false;
+		$time            = $last_error['time'];
+		$logging_enabled = wpcode()->settings->get_option( 'error_logging' );
 		if ( $logging_enabled ) {
 			$button_text = esc_html__( 'View Error Logs', 'insert-headers-and-footers' );
 			$button_url  = add_query_arg(
@@ -1971,6 +1859,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			$button_url  = add_query_arg(
 				array(
 					'page' => 'wpcode-settings',
+					'view' => 'errors',
 				),
 				admin_url( 'admin.php' )
 			);
@@ -2008,18 +1897,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 				printf( '<strong>%s</strong>', esc_html__( 'Error message:', 'insert-headers-and-footers' ) );
 				?>
 			</p>
-			<pre class="wpcode-error-preview"><?php echo esc_html( $last_error['message'][0] ); ?></pre>
-			<?php if ( ! empty( $last_error['url'] ) ) { ?>
-				<p>
-					<?php
-					printf(
-					// Translators: The placeholder is replaced with the URL where the error happened.
-						esc_html__( 'The error was triggered at the following URL: %1$s', 'insert-headers-and-footers' ),
-						'<a href=' . esc_url( $last_error['url'] ) . ' target="_blank" rel="noopener noreferrer">' . esc_url( $last_error['url'] ) . '</a>'
-					);
-					?>
-				</p>
-			<?php } ?>
+			<pre class="wpcode-error-preview"><?php echo esc_html( wpcode()->error->get_error_message_short( $last_error['message'] ) ); ?></pre>
 			<?php if ( $error_line ) { ?>
 				<p>
 					<?php
@@ -2029,6 +1907,18 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 						'<strong>',
 						'</strong>',
 						absint( $error_line )
+					);
+					?>
+				</p>
+			<?php } ?>
+
+			<?php if ( ! empty( $last_error['url'] ) ) { ?>
+				<p>
+					<?php
+					printf(
+					// Translators: The placeholder is replaced with the URL where the error happened.
+						esc_html__( 'The error was triggered at the following URL: %1$s', 'insert-headers-and-footers' ),
+						'<a href=' . esc_url( $last_error['url'] ) . ' target="_blank" rel="noopener noreferrer">' . esc_url( $last_error['url'] ) . '</a>'
 					);
 					?>
 				</p>

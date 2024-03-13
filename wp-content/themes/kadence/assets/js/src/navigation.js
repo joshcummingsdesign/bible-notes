@@ -613,8 +613,7 @@
 							} else {
 								var totalOffsetDelay = Math.floor( activeOffsetTop - offsetTop );
 							}
-							var shrinkLogo = activeHeader.querySelector( '.custom-logo' );
-							var customShrinkLogo = activeHeader.querySelector( '.kadence-sticky-logo' );
+							var shrinkLogos = activeHeader.querySelectorAll( '.custom-logo' );
 							var shrinkHeader = activeHeader.querySelector( '.site-main-header-inner-wrap' );
 							var shrinkStartHeight = parseInt( shrinkHeader.getAttribute( 'data-start-height' ) );
 							if ( ! shrinkStartHeight ) {
@@ -625,22 +624,22 @@
 								shrinkHeader.style.height = shrinkStartHeight + 'px';
 								shrinkHeader.style.minHeight = shrinkStartHeight + 'px';
 								shrinkHeader.style.maxHeight = shrinkStartHeight + 'px';
-								if ( shrinkLogo ) {
-									shrinkLogo.style.maxHeight = '100%';
-								}
-								if ( customShrinkLogo ) {
-									customShrinkLogo.style.maxHeight = '100%';
+								if ( shrinkLogos ) {
+									for (let i = 0; i < shrinkLogos.length; i++) {
+										let shrinkLogo = shrinkLogos[i];
+										shrinkLogo.style.maxHeight = '100%';
+									}
 								}
 							} else if ( window.scrollY > totalOffsetDelay ) {
 								var shrinkingHeight = Math.max( shrinkHeight, shrinkStartHeight - ( window.scrollY - ( activeOffsetTop - offsetTop ) ) );
 								shrinkHeader.style.height = shrinkingHeight + 'px';
 								shrinkHeader.style.minHeight = shrinkingHeight + 'px';
 								shrinkHeader.style.maxHeight = shrinkingHeight + 'px';
-								if ( shrinkLogo ) {
-									shrinkLogo.style.maxHeight = shrinkingHeight + 'px';
-								}
-								if ( customShrinkLogo ) {
-									customShrinkLogo.style.maxHeight = shrinkingHeight + 'px';
+								if ( shrinkLogos ) {
+									for (let i = 0; i < shrinkLogos.length; i++) {
+										let shrinkLogo = shrinkLogos[i];
+										shrinkLogo.style.maxHeight = shrinkingHeight + 'px';
+									}
 								}
 							}
 						}

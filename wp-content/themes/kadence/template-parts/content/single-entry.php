@@ -36,6 +36,11 @@ if ( kadence()->show_feature_above() ) {
 </article><!-- #post-<?php the_ID(); ?> -->
 
 <?php
+/**
+ * Hook for anything after single content
+ */
+do_action( 'kadence_single_after_content' );
+
 if ( is_singular( get_post_type() ) ) {
 	if ( 'post' === get_post_type() && kadence()->option( 'post_author_box' ) ) {
 		get_template_part( 'template-parts/content/entry_author', get_post_type() );

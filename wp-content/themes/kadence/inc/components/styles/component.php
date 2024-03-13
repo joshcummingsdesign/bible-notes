@@ -1263,7 +1263,7 @@ class Component implements Component_Interface, Templating_Component_Interface {
 			if ( kadence()->option( 'primary_navigation_parent_active' ) ) {
 				$css->set_selector( '.header-navigation[class*="header-navigation-style-underline"] .header-menu-container.primary-menu-container>ul>li.current-menu-ancestor>a:after' );
 				$css->add_property( 'transform', 'scale(1, 1) translate(50%, 0)' );
-				$css->set_selector( '.main-navigation .primary-menu-container > ul > li.menu-item.current-menu-item > a, .main-navigation .primary-menu-container > ul > li.menu-item.current-menu-ancestor > a' );
+				$css->set_selector( '.main-navigation .primary-menu-container > ul > li.menu-item.current-menu-item > a, .main-navigation .primary-menu-container > ul > li.menu-item.current-menu-ancestor > a, .main-navigation .primary-menu-container > ul > li.menu-item.current-menu-ancestor > a' );
 			} else {
 				$css->set_selector( '.main-navigation .primary-menu-container > ul > li.menu-item.current-menu-item > a' );
 			}
@@ -1291,7 +1291,7 @@ class Component implements Component_Interface, Templating_Component_Interface {
 			$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'secondary_navigation_color', 'hover' ) ) );
 			$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'secondary_navigation_background', 'hover' ) ) );
 			if ( kadence()->option( 'secondary_navigation_parent_active' ) ) {
-				$css->set_selector( '..header-navigation[class*="header-navigation-style-underline"] .header-menu-container.secondary-menu-container>ul>li.current-menu-ancestor>a:after' );
+				$css->set_selector( '.header-navigation[class*="header-navigation-style-underline"] .header-menu-container.secondary-menu-container>ul>li.current-menu-ancestor>a:after' );
 				$css->add_property( 'transform', 'scale(1, 1) translate(50%, 0)' );
 				$css->set_selector( '.secondary-navigation .secondary-menu-container > ul > li.menu-item.current-menu-item > a, .secondary-navigation .secondary-menu-container > ul > li.menu-item.current-menu-ancestor > a' );
 			} else {
@@ -1319,7 +1319,7 @@ class Component implements Component_Interface, Templating_Component_Interface {
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'dropdown_navigation_color', 'active' ) ) );
 		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'dropdown_navigation_background', 'active' ) ) );
 		// Mobile Toggle.
-		$css->set_selector( '.mobile-toggle-open-container .menu-toggle-open' );
+		$css->set_selector( '.mobile-toggle-open-container .menu-toggle-open, .mobile-toggle-open-container .menu-toggle-open:focus' );
 		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'mobile_trigger_background', 'color' ) ) );
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'mobile_trigger_color', 'color' ) ) );
 		$css->add_property( 'padding', $this->render_measure( kadence()->option( 'mobile_trigger_padding' ) ) );
@@ -3884,7 +3884,16 @@ class Component implements Component_Interface, Templating_Component_Interface {
 		// Enqueue Google Fonts.
 		$google_fonts_url = $this->get_google_fonts_url();
 		if ( ! empty( $google_fonts_url ) ) {
-			wp_register_style( 'kadence-google-fonts', $this->get_google_fonts_url(), array(), KADENCE_VERSION  );
+			if ( kadence()->option( 'load_fonts_local' ) || class_exists( 'Extendify' ) ) {
+				wp_register_style(
+					'kadence-google-fonts',
+					get_webfont_url( $google_fonts_url ),
+					array(),
+					KADENCE_VERSION
+				);
+			} else {
+				wp_register_style( 'kadence-google-fonts', $google_fonts_url, array(), KADENCE_VERSION  );
+			}
 		}
 	}
 	/**

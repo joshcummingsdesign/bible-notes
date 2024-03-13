@@ -52,8 +52,8 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 		/* Set parent defaults */
 		parent::__construct(
 			array(
-				'singular'  => 'bulk_date_update',
-				'ajax'      => false,
+				'singular' => 'bulk_date_update',
+				'ajax'     => false,
 			)
 		);
 	}
@@ -149,6 +149,8 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 					}
 					$display_name = get_the_author_meta( 'display_name', $post->post_author );
 
+					$post_tags = get_the_tags( $post->ID );
+
 					$search = false;
 					if ( $search_text ) {
 						if ( false !== strpos( $post->post_title, $search_text ) ) {
@@ -165,6 +167,14 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 						}
 						if ( false !== strpos( $post->post_date, $search_text ) ) {
 							$search = true;
+						}
+						if ( $post_tags ) {
+							foreach ( $post_tags as $tag ) {
+								if ( false !== strpos( $tag->name, $search_text ) ) {
+									$search = true;
+									break;
+								}
+							}
 						}
 					} else {
 						$search = true;
@@ -209,7 +219,7 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 					'<input type="text" id=datetimepicker-bdtc name="%1$s[%2$s]" value="%3$s" form="bulkdatetimechange_forms" />',
 					/*%1$s*/ $this->_args['singular'],
 					/*%2$s*/ $item['ID'],
-					/*%3$s*/ $item['datetime']
+					/*%3$s*/ $item['datetime'],
 				);
 			case 'posttype':
 				$post_types = get_user_option( 'bulkdatetimechange_all_post_type', get_current_user_id() );
@@ -326,6 +336,227 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 		return $sortable_columns;
 	}
 
+	/** ==================================================
+	 * Prints column headers, accounting for hidden and sortable columns.
+	 * Override for nonce
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param bool $with_id  Whether to set the ID attribute or not.
+	 * @since 1.17
+	 */
+	public function print_column_headers( $with_id = true ) {
+
+		list( $columns, $hidden, $sortable, $primary ) = $this->get_column_info();
+
+		if ( isset( $_SERVER['HTTPS'] ) && ! empty( $_SERVER['HTTPS'] ) ) {
+			$current_http = 'https://';
+		} else {
+			$current_http = 'http://';
+		}
+		if ( isset( $_SERVER['HTTP_HOST'] ) && ! empty( $_SERVER['HTTP_HOST'] ) &&
+				isset( $_SERVER['REQUEST_URI'] ) && ! empty( $_SERVER['REQUEST_URI'] ) ) {
+			$host = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) );
+			$uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			$current_url = set_url_scheme( $current_http . $host . $uri );
+			$current_url = remove_query_arg( 'paged', $current_url );
+			/* Customize for nonce */
+			$current_url = wp_nonce_url( $current_url, 'bdtc_sort_nonce' );
+		} else {
+			wp_die();
+		}
+
+		/* Customize for nonce */
+		$current_orderby = '';
+		$current_order = 'asc';
+		$nonce = null;
+		if ( isset( $_REQUEST['_wpnonce'] ) && ! empty( $_REQUEST['_wpnonce'] ) ) {
+			$nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
+		}
+		if ( wp_verify_nonce( $nonce, 'bdtc_sort_nonce' ) ) {
+			if ( isset( $_GET['orderby'] ) ) {
+				$current_orderby = sanitize_text_field( wp_unslash( $_GET['orderby'] ) );
+			}
+			if ( isset( $_GET['order'] ) && 'desc' === $_GET['order'] ) {
+				$current_order = 'desc';
+			}
+		}
+
+		if ( ! empty( $columns['cb'] ) ) {
+			static $cb_counter = 1;
+			$columns['cb']     = '<input id="cb-select-all-' . $cb_counter . '" type="checkbox" />
+			<label for="cb-select-all-' . $cb_counter . '">' .
+				'<span class="screen-reader-text">' .
+					/* translators: Hidden accessibility text. */
+					__( 'Select All' ) .
+				'</span>' .
+				'</label>';
+			++$cb_counter;
+		}
+
+		foreach ( $columns as $column_key => $column_display_name ) {
+			$class          = array( 'manage-column', "column-$column_key" );
+			$aria_sort_attr = '';
+			$abbr_attr      = '';
+			$order_text     = '';
+
+			if ( in_array( $column_key, $hidden, true ) ) {
+				$class[] = 'hidden';
+			}
+
+			if ( 'cb' === $column_key ) {
+				$class[] = 'check-column';
+			} elseif ( in_array( $column_key, array( 'posts', 'comments', 'links' ), true ) ) {
+				$class[] = 'num';
+			}
+
+			if ( $column_key === $primary ) {
+				$class[] = 'column-primary';
+			}
+
+			if ( isset( $sortable[ $column_key ] ) ) {
+				$orderby       = isset( $sortable[ $column_key ][0] ) ? $sortable[ $column_key ][0] : '';
+				$desc_first    = isset( $sortable[ $column_key ][1] ) ? $sortable[ $column_key ][1] : false;
+				$abbr          = isset( $sortable[ $column_key ][2] ) ? $sortable[ $column_key ][2] : '';
+				$orderby_text  = isset( $sortable[ $column_key ][3] ) ? $sortable[ $column_key ][3] : '';
+				$initial_order = isset( $sortable[ $column_key ][4] ) ? $sortable[ $column_key ][4] : '';
+
+				/*
+				 * We're in the initial view and there's no $_GET['orderby'] then check if the
+				 * initial sorting information is set in the sortable columns and use that.
+				 */
+				if ( '' === $current_orderby && $initial_order ) {
+					// Use the initially sorted column $orderby as current orderby.
+					$current_orderby = $orderby;
+					// Use the initially sorted column asc/desc order as initial order.
+					$current_order = $initial_order;
+				}
+
+				/*
+				 * True in the initial view when an initial orderby is set via get_sortable_columns()
+				 * and true in the sorted views when the actual $_GET['orderby'] is equal to $orderby.
+				 */
+				if ( $current_orderby === $orderby ) {
+					// The sorted column. The `aria-sort` attribute must be set only on the sorted column.
+					if ( 'asc' === $current_order ) {
+						$order          = 'desc';
+						$aria_sort_attr = ' aria-sort="ascending"';
+					} else {
+						$order          = 'asc';
+						$aria_sort_attr = ' aria-sort="descending"';
+					}
+
+					$class[] = 'sorted';
+					$class[] = $current_order;
+				} else {
+					// The other sortable columns.
+					$order = strtolower( $desc_first );
+
+					if ( ! in_array( $order, array( 'desc', 'asc' ), true ) ) {
+						$order = $desc_first ? 'desc' : 'asc';
+					}
+
+					$class[] = 'sortable';
+					$class[] = 'desc' === $order ? 'asc' : 'desc';
+
+					/* translators: Hidden accessibility text. */
+					$asc_text = __( 'Sort ascending.' );
+					/* translators: Hidden accessibility text. */
+					$desc_text  = __( 'Sort descending.' );
+					$order_text = 'asc' === $order ? $asc_text : $desc_text;
+				}
+
+				if ( '' !== $order_text ) {
+					$order_text = ' <span class="screen-reader-text">' . $order_text . '</span>';
+				}
+
+				// Print an 'abbr' attribute if a value is provided via get_sortable_columns().
+				$abbr_attr = $abbr ? ' abbr="' . esc_attr( $abbr ) . '"' : '';
+
+				$url = add_query_arg(
+					array(
+						'orderby' => $orderby,
+						'order' => $order,
+					),
+					$current_url
+				);
+
+				/* Delete and re-add oredrby and order when they are duplicated. */
+				$fst = strpos( $url, 'orderby=' . $current_orderby );
+				if ( $fst > 0 ) {
+					$url2 = null;
+					$url2 = substr( $url, $fst + strlen( 'orderby=' . $current_orderby ) );
+					$snd = strpos( $url2, 'orderby=' . $current_orderby );
+					if ( $snd > 0 ) {
+						$url = remove_query_arg(
+							array(
+								'orderby' => $orderby,
+								'order' => $order,
+							)
+						);
+						$url = add_query_arg(
+							array(
+								'orderby' => $orderby,
+								'order' => $order,
+							),
+							$url
+						);
+					}
+				}
+
+				$column_display_name = sprintf(
+					'<a href="%1$s">' .
+						'<span>%2$s</span>' .
+						'<span class="sorting-indicators">' .
+							'<span class="sorting-indicator asc" aria-hidden="true"></span>' .
+							'<span class="sorting-indicator desc" aria-hidden="true"></span>' .
+						'</span>' .
+						'%3$s' .
+					'</a>',
+					esc_url( $url ),
+					$column_display_name,
+					$order_text
+				);
+			}
+
+			$tag   = ( 'cb' === $column_key ) ? 'td' : 'th';
+			$scope = ( 'th' === $tag ) ? 'scope="col"' : '';
+			$id    = $with_id ? "id='$column_key'" : '';
+
+			if ( ! empty( $class ) ) {
+				$class = "class='" . implode( ' ', $class ) . "'";
+			}
+
+			$allowed_html = array(
+				'a' => array(
+					'href' => array(),
+				),
+				'span' => array(
+					'class' => array(),
+					'aria-hidden' => array(),
+				),
+				'input' => array(
+					'type' => array(),
+					'id' => array(),
+				),
+				'label' => array(
+					'for' => array(),
+				),
+				'td' => array(
+					'id' => array(),
+					'class' => array(),
+				),
+				'th' => array(
+					'id' => array(),
+					'class' => array(),
+					'scope' => array(),
+				),
+			);
+
+			echo wp_kses( "<$tag $scope $id $class $aria_sort_attr $abbr_attr>$column_display_name</$tag>", $allowed_html );
+		}
+	}
+
 	/** ************************************************************************
 	 * REQUIRED! This is where you prepare your data for display. This method will
 	 * usually be used to query the database, sort and filter the data, and generally
@@ -394,19 +625,25 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 		 */
 		function usort_reorder( $a, $b ) {
 			/* If no sort, default to title */
-			if ( isset( $_REQUEST['orderby'] ) && ! empty( $_REQUEST['orderby'] ) ) {
-				$orderby = sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) );
-			} else {
-				$orderby = 'datetime';
+			$nonce = null;
+			if ( isset( $_REQUEST['_wpnonce'] ) && ! empty( $_REQUEST['_wpnonce'] ) ) {
+				$nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
 			}
-			/* If no order, default to asc */
-			if ( isset( $_REQUEST['order'] ) && ! empty( $_REQUEST['order'] ) ) {
-				$order = sanitize_text_field( wp_unslash( $_REQUEST['order'] ) );
-			} else {
-				$order = 'asc';
+			if ( wp_verify_nonce( $nonce, 'bdtc_sort_nonce' ) ) {
+				if ( isset( $_REQUEST['orderby'] ) && ! empty( $_REQUEST['orderby'] ) ) {
+					$orderby = sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) );
+				} else {
+					$orderby = 'datetime';
+				}
+				/* If no order, default to asc */
+				if ( isset( $_REQUEST['order'] ) && ! empty( $_REQUEST['order'] ) ) {
+					$order = sanitize_text_field( wp_unslash( $_REQUEST['order'] ) );
+				} else {
+					$order = 'asc';
+				}
+				$result = strcmp( $a[ $orderby ], $b[ $orderby ] ); /* Determine sort order */
+				return ( 'desc' === $order ) ? $result : -$result; /* Send final sort direction to usort */
 			}
-			$result = strcmp( $a[ $orderby ], $b[ $orderby ] ); /* Determine sort order */
-			return ( 'desc' === $order ) ? $result : -$result; /* Send final sort direction to usort */
 		}
 		usort( $data, 'usort_reorder' );
 

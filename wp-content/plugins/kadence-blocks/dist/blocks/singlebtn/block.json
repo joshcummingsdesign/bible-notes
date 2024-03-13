@@ -469,6 +469,13 @@
         ""
       ]
     },
+    "onlyText": {
+      "type": "array",
+      "default": [
+        false,
+        ""
+      ]
+    },
     "label": {
       "type": "string",
       "default": ""
@@ -563,6 +570,10 @@
     "noCustomDefaults": {
       "type": "boolean",
       "default": false
+    },
+    "iconTitle": {
+      "type": "string",
+      "default": ""
     }
   },
   "supports": {

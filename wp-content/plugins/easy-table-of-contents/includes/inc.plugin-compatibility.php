@@ -481,17 +481,17 @@ add_filter(
  */
 add_filter(
 	'fl_builder_layout_data',
-	'flBuilderLayoutDataEZTOC',
+	'ez_toc_flbuilder_layout_data',
 	12,
 	1
 );
-function flBuilderLayoutDataEZTOC( $data ) {
+function ez_toc_flbuilder_layout_data( $data ) {
 	if( has_action( 'the_content' ) ) {
-		$post = get_post( get_the_ID() );
-		foreach( $data as $nodeKey => $node )
-		{
-			$data[$nodeKey] = $node;
-		}
+		if(!empty($data)){
+			foreach( $data as $nodeKey => $node ){		
+				$data[$nodeKey] = $node;
+			}
+		}				
 	}
 	return $data;
 }
@@ -653,7 +653,7 @@ if ( in_array( 'lasso/affiliate-plugin.php', apply_filters( 'active_plugins', ge
  * in footer sections
  * @since 2.0.49
  */
-if ( 'Avada' == apply_filters( 'current_theme', get_option( 'current_theme' ) ) && in_array( 'fusion-builder/fusion-builder.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+if ( ('Avada Child' == apply_filters( 'current_theme', get_option( 'current_theme' ) ) || 'Avada' == apply_filters( 'current_theme', get_option( 'current_theme' ) )) && in_array( 'fusion-builder/fusion-builder.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 
     add_action( 'awb_remove_third_party_the_content_changes', 'ez_toc_remove_the_footer_content', 1 );
     function ez_toc_remove_the_footer_content() {
@@ -798,7 +798,7 @@ if('Chamomile' == apply_filters( 'current_theme', get_option( 'current_theme' ) 
 	function ez_toc_add_custom_script()
 	{
 		?>
-		<script type="text/javascript">
+		<script>
 			jQuery(document).ready(function($){
 				$('#ez-toc-container').find('.hamburger').remove();
 			});
@@ -938,10 +938,9 @@ if(function_exists('rest_get_url_prefix') && ezTOC_Option::get('disable_in_resta
 /**
  * Molongui Authorship plugin compatibility
  * @link https://wordpress.org/plugins/molongui-authorship/
- * @since 2.0.55
+ * @since 2.0.56
  */
-if(function_exists( 'molongui_authorship_load_plugin_textdomain' ))
-{
+if( function_exists( 'molongui_authorship_load_plugin_textdomain' ) && ezTOC_Option::get('molongui-authorship') == 1 ){
 add_filter( 'ez_toc_modify_process_page_content', 'ez_toc_content_molongui_authorship');
 	function ez_toc_content_molongui_authorship($content){
 		if(!empty($content))
@@ -1005,7 +1004,7 @@ if(function_exists('wp_get_theme')){
  */
 add_filter('eztoc_modify_the_content','eztoc_mediavine_trellis_content_improver');
 function eztoc_mediavine_trellis_content_improver($content){
-	if(class_exists('Mediavine\Trellis\Custom_Content')){
+	if(class_exists('Mediavine\Trellis\Custom_Content') && ezTOC_Option::get('mediavine-create') == 1 ){
 		$content = mb_convert_encoding( html_entity_decode($content), 'HTML-ENTITIES', 'UTF-8' );
 	}
 	return $content;
@@ -1045,7 +1044,87 @@ function ez_toc_woodmart_gallery_fix(){
 			wp_register_style( 'wd-image-gallery', WOODMART_THEME_DIR.'/css/parts/el-gallery.min.css');
 			wp_enqueue_style( 'wd-image-gallery' );
 		}
+
+		if(!wp_style_is('wd-accordion')){
+			wp_register_style( 'wd-accordion', WOODMART_THEME_DIR.'/css/parts/el-accordion.min.css');
+			wp_enqueue_style( 'wd-accordion' );
+		}
+		
+		if(!wp_style_is('wd-tabs')){
+			wp_register_style( 'wd-tabs', WOODMART_THEME_DIR.'/css/parts/el-tabs.min.css');
+			wp_enqueue_style( 'wd-tabs' );
+		}
+
+		if(!wp_style_is('wd-team-member')){
+			wp_register_style( 'wd-team-member', WOODMART_THEME_DIR.'/css/parts/el-team-member.min.css');
+			wp_enqueue_style( 'wd-team-member' );
+		}
 			
 	}	
 }
 add_action('wp_enqueue_scripts', 'ez_toc_woodmart_gallery_fix');
+
+/**
+ * Ad inserter plugin compatibility
+ * url : https://wordpress.org/plugins/ad-inserter/
+ * When toc shortcode being added inside ad inserter block, it runs infinite loop. Below code is the solution for it.
+ * @since 2.0.62
+ * return boolean
+ */
+add_filter('ez_toc_apply_filter_status_manually', 'ez_toc_adinserter_block_has_toc_shortcode',10,1);
+
+function ez_toc_adinserter_block_has_toc_shortcode($status){
+	
+	if ( in_array( 'ad-inserter/ad-inserter.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+		global $block_object;		
+		for ($block = 0; $block <= 96; $block ++) {
+			if(isset($block_object [$block])){
+				$obj = $block_object [$block];				
+				if(is_object($obj) && is_array($obj->wp_options)){
+					if(has_shortcode( $obj->wp_options['code'] , 'ez-toc' ) || has_shortcode( $obj->wp_options['code'] , 'toc' )){
+						$status = false;
+						break;			
+					}
+				}
+			}
+			
+		}
+
+	}
+	
+	return $status;
+}
+
+/**
+ * Current Year, Symbols and IP Shortcode compatibility
+ * shortcode were not being parse for heading title in elementor
+ * plugin url : https://wordpress.org/plugins/current-year-shortcode/
+ * @since 2.0.62
+ */
+add_filter('ez_toc_table_heading_title_anchor', 'ez_toc_parse_curreny_year_shortcode',10,1);
+add_filter('ez_toc_content_heading_title', 'ez_toc_parse_curreny_year_shortcode',10,1);
+add_filter('ez_toc_content_heading_title_anchor', 'ez_toc_parse_curreny_year_shortcode',10,1);
+
+function ez_toc_parse_curreny_year_shortcode($content){
+	
+	if ( in_array( 'current-year-shortcode/year-kgm.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) )) {
+			$content = do_shortcode($content);			
+	}			
+	return $content;
+}
+
+/** Pressbook theme Compatiblity
+ * @since 2.0.63
+ * @param bool $status The current status of applying the TOC filter.
+ * @return bool The updated status of applying the TOC filter.
+ */
+add_filter('ez_toc_apply_filter_status_manually', 'ez_toc_press_books_theme_compatibility',10,1);
+function ez_toc_press_books_theme_compatibility($status){
+  if(function_exists('wp_get_theme')){
+    $active_theme = wp_get_theme();
+    if(!empty($active_theme) && $active_theme->get( 'Name' ) == 'McLuhan'){
+      $status = false;
+    }
+  }
+  return $status;
+}

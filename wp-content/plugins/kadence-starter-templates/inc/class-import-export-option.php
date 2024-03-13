@@ -9,11 +9,16 @@
  * @package Kadence Starter Templates
  */
 
-namespace Kadence_Starter_Templates;
+namespace KadenceWP\KadenceStarterTemplates;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use WP_Customize_Control;
 use WP_Filesystem;
 use stdClass;
+use Kadence_Starter_Templates\Import_Option;
 use function add_action;
 use function add_filter;
 use function wp_enqueue_style;

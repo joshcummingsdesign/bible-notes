@@ -574,9 +574,18 @@ class WPCode_Snippet {
 		 */
 		do_action( 'wpcode_snippet_after_update', $this->id, $this );
 
-		wpcode()->cache->cache_all_loaded_snippets();
+		$this->rebuild_cache();
 
 		return $this->id;
+	}
+
+	/**
+	 * Method for rebuilding all snippets cache.
+	 *
+	 * @return void
+	 */
+	public function rebuild_cache() {
+		wpcode()->cache->cache_all_loaded_snippets();
 	}
 
 	/**
@@ -697,7 +706,7 @@ class WPCode_Snippet {
 
 		if ( $update ) {
 			// Rebuild cache to avoid the snippet being loaded again.
-			wpcode()->cache->cache_all_loaded_snippets();
+			$this->rebuild_cache();
 
 			wpcode()->error->add_error(
 				array(
@@ -1086,6 +1095,9 @@ class WPCode_Snippet {
 		$this->title = $this->get_title() . ' - Copy';
 		// Make sure the snippet is not active.
 		$this->post_data->post_status = 'draft';
+
+		// Let's make sure the slashes don't get removed from the code.
+		$this->code = wp_slash( $this->code );
 		/**
 		 * Fires before a snippet that is about to be duplicated is saved.
 		 *
@@ -1102,5 +1114,14 @@ class WPCode_Snippet {
 		 * @param WPCode_Snippet $snippet The snippet object.
 		 */
 		do_action( 'wpcode_after_snippet_duplicated', $this );
+	}
+
+	/**
+	 * Get the edit url for this snippet.
+	 *
+	 * @return string
+	 */
+	public function get_edit_url() {
+		return admin_url( 'admin.php?page=wpcode-snippet-manager&snippet_id=' . absint( $this->get_id() ) );
 	}
 }

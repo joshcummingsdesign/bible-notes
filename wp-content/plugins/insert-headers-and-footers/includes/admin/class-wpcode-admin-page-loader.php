@@ -57,6 +57,7 @@ class WPCode_Admin_Page_Loader {
 	 * @return void
 	 */
 	public function require_files() {
+		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/trait-wpcode-revisions-display.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-headers-footers.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-code-snippets.php';
@@ -106,16 +107,16 @@ class WPCode_Admin_Page_Loader {
 
 		do_action( 'wpcode_before_admin_pages_loaded', $this->pages );
 
-		foreach ( $this->pages as $page_class ) {
+		foreach ( $this->pages as $slug => $page_class ) {
 			if ( ! class_exists( $page_class ) ) {
 				continue;
 			}
 			/**
 			 * @var WPCode_Admin_Page $new_page
 			 */
-			$new_page = new $page_class();
-			if ( $new_page->hide_menu ) {
-				$this->hidden_pages[] = $new_page->page_slug;
+			$this->pages[ $slug ] = new $page_class();
+			if ( $this->pages[ $slug ]->hide_menu ) {
+				$this->hidden_pages[] = $this->pages[ $slug ]->page_slug;
 			}
 		}
 	}

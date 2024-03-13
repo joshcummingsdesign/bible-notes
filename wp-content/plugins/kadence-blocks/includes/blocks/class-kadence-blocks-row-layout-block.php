@@ -31,6 +31,14 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 	protected $block_name = 'rowlayout';
 
 	/**
+	 * Allowed HTML tags for front end output
+	 *
+	 * @var string[]
+	 */
+	protected $allowed_html_tags = array( 'div', 'header', 'section', 'article', 'main', 'aside', 'footer' );
+
+
+	/**
 	 * Instance Control
 	 */
 	public static function get_instance() {
@@ -87,7 +95,7 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 	 * @param int    $column2 the second column width.
 	 * @param int    $column3 the third column width.
 	 */
-	public function get_template_columns( $css, $columns, $layout, $inner_selector, $column1 = null, $column2 = null, $column3 = null ) {
+	public function get_template_columns( $css, $columns, $layout, $inner_selector, $gap = '', $column1 = null, $column2 = null, $column3 = null ) {
 		$grid_layout = 'minmax(0, 1fr)';
 		switch ( $columns ) {
 			case 1:
@@ -99,7 +107,11 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 				break;
 			case 2:
 				if ( ! empty( $column1 ) ) {
-					$grid_layout = 'minmax(0, ' . $column1 . '%) minmax(0, ' . abs( $column1 - 100 ) . '%)';
+					if ( ! empty( $gap ) ) {
+						$grid_layout = 'minmax(0, calc(' . $column1 . '% - ((' . $gap . ' * 1 )/2))) minmax(0, calc(' . abs( $column1 - 100 ) . '% - ((' . $gap . ' * 1 )/2)))';
+					} else {
+						$grid_layout = 'minmax(0, calc(' . $column1 . '% - ((var(--kb-default-row-gutter, var(--global-row-gutter-md, 2rem)) * 1 )/2))) minmax(0, calc(' . abs( $column1 - 100 ) . '% - ((var(--kb-default-row-gutter, var(--global-row-gutter-md, 2rem)) * 1 )/2)))';
+					}
 				} else {
 					switch ( $layout ) {
 						case 'left-golden':
@@ -126,7 +138,11 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 					} else if ( abs( $column1 ) === 25 && abs( $column2 ) === 25 ) {
 						$grid_layout = 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr)';
 					} else {
-						$grid_layout = 'minmax(0, ' . $column1 . '%) minmax(0, ' . $column2 . '%) minmax(0, ' . abs( ( $column1 + $column2 ) - 100 ) . '%)';
+						if ( ! empty( $gap ) ) {
+							$grid_layout = 'minmax(0, calc(' . $column1 . '% - ((' . $gap . ' * 2 )/3))) minmax(0, calc(' . $column2 . '% - ((' . $gap . ' * 2 )/3))) minmax(0, calc(' . abs( ( $column1 + $column2 ) - 100 ) . '% - ((' . $gap . ' * 2 )/3)))';
+						} else {
+							$grid_layout = 'minmax(0, calc(' . $column1 . '% - ((var(--kb-default-row-gutter, var(--global-row-gutter-md, 2rem)) * 2 )/3))) minmax(0, calc(' . $column2 . '% - ((var(--kb-default-row-gutter, var(--global-row-gutter-md, 2rem)) * 2 )/3))) minmax(0, calc(' . abs( ( $column1 + $column2 ) - 100 ) . '% - ((var(--kb-default-row-gutter, var(--global-row-gutter-md, 2rem)) * 2 )/3)))';
+						}
 					}
 				} else {
 					switch ( $layout ) {
@@ -435,9 +451,10 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 		$column1  = ( ! empty( $attributes['firstColumnWidth'] ) ? $attributes['firstColumnWidth'] : '' );
 		$column2  = ( ! empty( $attributes['secondColumnWidth'] ) ? $attributes['secondColumnWidth'] : '' );
 		$collapse_layouts = array( 'row', 'two-grid', 'three-grid', 'last-row', 'first-row' );
-		$grid_layout = $this->get_template_columns( $css, $columns, $layout, $inner_selector, $column1, $column2 );
+		$grid_layout = $this->get_template_columns( $css, $columns, $layout, $inner_selector, $css->render_row_gap_property( $attributes, array( 'columnGutter', 'tabletGutter', 'mobileGutter' ), 'desktop', 'customGutter', 'gutterType' ), $column1, $column2 );
 		$css->add_property( 'grid-template-columns', $grid_layout );
 		if ( ! empty( $attributes['collapseOrder'] ) && 'left-to-right' !== $attributes['collapseOrder'] && in_array( $layout, $collapse_layouts ) ) {
+			$css->set_media_state( 'tablet' );
 			foreach ( range( 1, $columns ) as $item_count ) {
 				$css->set_selector( $inner_selector . ' > .wp-block-kadence-column:nth-child(' . $item_count . ')' );
 				$css->add_property( 'order', ( $columns - $item_count + 1 ) );
@@ -457,11 +474,18 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 				$css->set_selector( $inner_selector . ' > .wp-block-kadence-column:nth-child(' . ( $item_count + $columns + $columns + $columns ) . ')' );
 				$css->add_property( 'order', ( $columns - $item_count + 31 ) );
 			}
+			$css->set_media_state( 'desktop' );
+		}
+		if ( empty( $attributes['tabletLayout'] ) && ! empty( $css->render_row_gap_property( $attributes, array( 'columnGutter', 'tabletGutter', 'mobileGutter' ), 'tablet', 'customGutter', 'gutterType' ) ) ) {
+			$css->set_media_state( 'tablet' );
+			$css->set_selector( $inner_selector );
+			$grid_layout = $this->get_template_columns( $css, $columns, $layout, $inner_selector, $css->render_row_gap_property( $attributes, array( 'columnGutter', 'tabletGutter', 'mobileGutter' ), 'tablet', 'customGutter', 'gutterType' ), $column1, $column2 );
+			$css->add_property( 'grid-template-columns', $grid_layout );
 		}
 		if ( ! empty( $attributes['tabletLayout'] ) ) {
 			$css->set_media_state( 'tablet' );
 			$css->set_selector( $inner_selector );
-			$grid_layout = $this->get_template_columns( $css, $columns, $attributes['tabletLayout'], $inner_selector );
+			$grid_layout = $this->get_template_columns( $css, $columns, $attributes['tabletLayout'], $inner_selector, $css->render_row_gap_property( $attributes, array( 'columnGutter', 'tabletGutter', 'mobileGutter' ), 'tablet', 'customGutter', 'gutterType' ) );
 			$css->add_property( 'grid-template-columns', $grid_layout );
 			if ( ! empty( $attributes['collapseOrder'] ) && 'left-to-right' !== $attributes['collapseOrder'] && in_array( $attributes['tabletLayout'], $collapse_layouts ) ) {
 				foreach ( range( 1, $columns ) as $item_count ) {
@@ -489,7 +513,7 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 			$collapse_tab_layout  = ( ! empty( $attributes['mobileLayout'] ) ? $attributes['mobileLayout'] : 'row' );
 			$css->set_media_state( 'tablet' );
 			$css->set_selector( $inner_selector );
-			$grid_layout = $this->get_template_columns( $css, $columns, $collapse_tab_layout, $inner_selector );
+			$grid_layout = $this->get_template_columns( $css, $columns, $collapse_tab_layout, $inner_selector, $css->render_row_gap_property( $attributes, array( 'columnGutter', 'tabletGutter', 'mobileGutter' ), 'tablet', 'customGutter', 'gutterType' ) );
 			$css->add_property( 'grid-template-columns', $grid_layout );
 			if ( ! empty( $attributes['collapseOrder'] ) && 'left-to-right' !== $attributes['collapseOrder'] && in_array( $collapse_tab_layout, $collapse_layouts ) ) {
 				foreach ( range( 1, $columns ) as $item_count ) {
@@ -517,7 +541,7 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 		$mobile_layout  = ( ! empty( $attributes['mobileLayout'] ) ? $attributes['mobileLayout'] : 'row' );
 		$css->set_media_state( 'mobile' );
 		$css->set_selector( $inner_selector );
-		$grid_layout = $this->get_template_columns( $css, $columns, $mobile_layout, $inner_selector );
+		$grid_layout = $this->get_template_columns( $css, $columns, $mobile_layout, $inner_selector, $css->render_row_gap_property( $attributes, array( 'columnGutter', 'tabletGutter', 'mobileGutter' ), 'mobile', 'customGutter', 'gutterType' ) );
 		$css->add_property( 'grid-template-columns', $grid_layout );
 		if ( ! empty( $attributes['collapseOrder'] ) && 'left-to-right' !== $attributes['collapseOrder'] && in_array( $mobile_layout, $collapse_layouts ) ) {
 			foreach ( range( 1, $columns ) as $item_count ) {
@@ -607,6 +631,15 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 					}
 					$css->set_media_state( 'desktop' );
 				}
+			} else {
+				if ( ( isset( $attributes['breakoutLeft'] ) && true === $attributes['breakoutLeft'] ) ) {
+					$css->set_selector( $inner_selector . ' > .wp-block-kadence-column:nth-child(1):not(.specificity)' );
+					$css->add_property( 'margin-left', 'var(--breakout-negative-margin-left, calc( ' . $padding_left . ' *-1 ) )' );
+				}
+				if ( ( isset( $attributes['breakoutRight'] ) && true === $attributes['breakoutRight'] ) ) {
+					$css->set_selector( $inner_selector . ' > .wp-block-kadence-column:nth-child(2):not(.specificity)' );
+					$css->add_property( 'margin-right', 'var(--breakout-negative-margin-right, calc( ' . $padding_right . ' *-1 ))' );
+				}
 			}
 			$css->set_media_state( 'tabletOnly' );
 			if ( ( isset( $attributes['breakoutLeft'] ) && true === $attributes['breakoutLeft'] ) ) {
@@ -690,6 +723,11 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 					$css->add_property( 'background-position', ( isset( $attributes['bgImgPosition'] ) ? $attributes['bgImgPosition'] : 'center center' ) );
 					$css->add_property( 'background-attachment', $bg_attach );
 					$css->add_property( 'background-repeat', ( isset( $attributes['bgImgRepeat'] ) ? $attributes['bgImgRepeat'] : 'no-repeat' ) );
+					if ( 'fixed' === $bg_attach && ! apply_filters( 'kadence_blocks_attachment_fixed_on_mobile', false ) ) {
+						$css->set_media_state( 'tabletPro' );
+						$css->add_property( 'background-attachment', 'scroll' );
+						$css->set_media_state( 'desktop' );
+					}
 				}
 				break;
 			case 'gradient':
@@ -701,7 +739,7 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 		// Tablet Background.
 		$tablet_background = ( isset( $attributes['tabletBackground'][0] ) && is_array( $attributes['tabletBackground'][0] ) ? $attributes['tabletBackground'][0] : array() );
 		if ( isset( $tablet_background['enable'] ) && $tablet_background['enable'] ) {
-			$css->set_media_state( 'tablet' );
+			$css->set_media_state( 'tabletPro' );
 			$css->set_selector( $margin_selector );
 			$tablet_background_type = ! empty( $tablet_background['type'] ) ? $tablet_background['type'] : 'normal';
 			switch ( $tablet_background_type ) {
@@ -863,6 +901,11 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 						$css->add_property( 'background-position', ( isset( $attributes['overlayBgImgPosition'] ) ? $attributes['overlayBgImgPosition'] : 'center center' ) );
 						$css->add_property( 'background-attachment', $overbg_attach );
 						$css->add_property( 'background-repeat', ( isset( $attributes['overlayBgImgRepeat'] ) ? $attributes['overlayBgImgRepeat'] : 'no-repeat' ) );
+						if ( 'fixed' === $overbg_attach && ! apply_filters( 'kadence_blocks_attachment_fixed_on_mobile', false ) ) {
+							$css->set_media_state( 'tabletPro' );
+							$css->add_property( 'background-attachment', 'scroll' );
+							$css->set_media_state( 'desktop' );
+						}
 					}
 					break;
 				case 'gradient':
@@ -1372,7 +1415,7 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 				'src' => $src_base . $video_id . $src_query_string,
 			);
 		}
-		if ( ! empty( $attributes['bgImg'] ) ) {
+		if ( ! empty( $attributes['bgImg'] ) && 'local' === $background_video_type ) {
 			$video_args['poster'] = $attributes['bgImg'];
 		}
 		if ( $prevent_preload ) {
@@ -1440,7 +1483,8 @@ class Kadence_Blocks_Rowlayout_Block extends Kadence_Blocks_Abstract_Block {
 	 */
 	public function build_html( $attributes, $unique_id, $content, $block_instance ) {
 		if ( ! empty( $attributes['kbVersion'] ) && $attributes['kbVersion'] > 1 ) {
-			$html_tag = ( ! empty( $attributes['htmlTag'] ) ? $attributes['htmlTag'] : 'div' );
+			$html_tag = $this->get_html_tag( $attributes, 'htmlTag', 'div', $this->allowed_html_tags );
+
 			$outer_classes = array( 'kb-row-layout-wrap', 'kb-row-layout-id' . $unique_id );
 			$outer_classes[] = ! empty( $attributes['align'] ) ? 'align' . $attributes['align'] : 'alignnone';
 			if ( isset( $attributes['vsdesk'] ) && $attributes['vsdesk'] ) {

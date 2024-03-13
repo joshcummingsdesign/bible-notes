@@ -5,8 +5,14 @@
  * @package Kadence Starter Templates
  */
 
-namespace Kadence_Starter_Templates;
+namespace KadenceWP\KadenceStarterTemplates;
 
+use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_license_key;
+use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_authorization_token;
+use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_disconnect_url;
+use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_license_domain;
+use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\is_authorized;
+use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\build_auth_url;
 use function activate_plugin;
 use function plugins_api;
 use function wp_send_json_error;
@@ -142,6 +148,15 @@ class Starter_Templates {
 	private $plugin_page_setup = array();
 
 	/**
+	 * Used to cache token authorization to prevent multiple
+	 * remote requests to the licensing server in the same
+	 * request lifecycle.
+	 *
+	 * @var null|bool
+	 */
+	private static $authorized_cache = null;
+
+	/**
 	 * Instance Control
 	 */
 	public static function get_instance() {
@@ -155,13 +170,14 @@ class Starter_Templates {
 	 */
 	public function __construct() {
 		// Set plugin constants.
-		$this->set_plugin_constants();
 		$this->include_plugin_files();
 		add_action( 'init', array( $this, 'init_config' ) );
-		add_action( 'init', array( $this, 'load_api_settings' ) );
+		add_action( 'init', array( $this, 'load_api_settings' ), 15 );
+		add_action( 'init', array( $this, 'register_meta' ), 20 );
 		if ( is_admin() ) {
 			// Ajax Calls.
 			add_action( 'wp_ajax_kadence_import_demo_data', array( $this, 'import_demo_data_ajax_callback' ) );
+			add_action( 'wp_ajax_kadence_import_initial', array( $this, 'initial_install_ajax_callback' ) );
 			add_action( 'wp_ajax_kadence_import_install_plugins', array( $this, 'install_plugins_ajax_callback' ) );
 			add_action( 'wp_ajax_kadence_import_customizer_data', array( $this, 'import_customizer_data_ajax_callback' ) );
 			add_action( 'wp_ajax_kadence_after_import_data', array( $this, 'after_all_import_data_ajax_callback' ) );
@@ -171,9 +187,9 @@ class Starter_Templates {
 			add_action( 'wp_ajax_kadence_check_plugin_data', array( $this, 'check_plugin_data_ajax_callback' ) );
 			add_action( 'wp_ajax_kadence_starter_dismiss_notice', array( $this, 'ajax_dismiss_starter_notice' ) );
 		}
+
 		add_action( 'init', array( $this, 'setup_plugin_with_filter_data' ) );
-		// Text Domain.
-		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+		add_action( 'rest_api_init', array( $this, 'register_api_endpoints' ) );
 		// Filters durning Import.
 		add_action( 'kadence-starter-templates/after_import', array( $this, 'kadence_kadence_theme_after_import' ), 10, 3 );
 
@@ -184,21 +200,26 @@ class Starter_Templates {
 		add_filter( 'update_post_metadata', array( $this, 'forcibly_fix_issue_with_metadata' ), 15, 5 );
 	}
 	/**
-	 * Set plugin constants.
-	 *
-	 * Path/URL to root of this plugin, with trailing slash and plugin version.
+	 * Register meta for posts.
 	 */
-	private function set_plugin_constants() {
-		// Path/URL to root of this plugin, with trailing slash.
-		if ( ! defined( 'KADENCE_STARTER_TEMPLATES_PATH' ) ) {
-			define( 'KADENCE_STARTER_TEMPLATES_PATH', plugin_dir_path( __FILE__ ) );
-		}
-		if ( ! defined( 'KADENCE_STARTER_TEMPLATES_URL' ) ) {
-			define( 'KADENCE_STARTER_TEMPLATES_URL', trailingslashit( plugin_dir_url( __FILE__ ) ) );
-		}
-		if ( ! defined( 'KADENCE_STARTER_TEMPLATES_VERSION' ) ) {
-			define( 'KADENCE_STARTER_TEMPLATES_VERSION', '1.2.21' );
-		}
+	public function register_meta() {
+		register_post_meta(
+			'', // Pass an empty string to register the meta key across all existing post types.
+			'_kadence_starter_templates_imported_post',
+			array(
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'boolean',
+				'auth_callback' => '__return_true',
+			)
+		);
+	}
+	/**
+	 * Register endpoints for the REST API.
+	 */
+	public function register_api_endpoints() {
+		$library_rest = new Library_REST_Controller();
+		$library_rest->register_routes();
 	}
 
 	/**
@@ -668,6 +689,7 @@ class Starter_Templates {
 	 * Include all plugin files.
 	 */
 	private function include_plugin_files() {
+		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-template-library-rest-api.php';
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-template-database-importer.php';
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-author-meta.php';
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-import-export-option.php';
@@ -684,6 +706,13 @@ class Starter_Templates {
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-import-elementor.php';
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-import-fluent.php';
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-import-depicter.php';
+		/**
+		 * AI-specific usage tracking. Only track if AI is opted in by user.
+		 */
+		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-starter-ai-events.php';
+		$ai_events = new \Kadence_Starter_Templates_AI_Events();
+		$ai_events->register();
+
 	}
 
 	/**
@@ -692,7 +721,8 @@ class Starter_Templates {
 	 * @param array $links holds plugin links.
 	 */
 	public function add_settings_link( $links ) {
-		$settings_link = '<a href="' . admin_url( 'themes.php?page=kadence-starter-templates' ) . '">' . __( 'View Template Library', 'kadence-starter-templates' ) . '</a>';
+		$starter_link = class_exists( '\\KadenceWP\\KadenceBlocks\\StellarWP\\Uplink\\Register' ) ? admin_url( 'admin.php?page=kadence-starter-templates' ) : admin_url( 'themes.php?page=kadence-starter-templates' );
+		$settings_link = '<a href="' . esc_url( $starter_link ) . '">' . __( 'View Template Library', 'kadence-starter-templates' ) . '</a>';
 		array_unshift( $links, $settings_link );
 		return $links;
 	}
@@ -701,14 +731,19 @@ class Starter_Templates {
 	 * Creates the plugin page and a submenu item in WP Appearance menu.
 	 */
 	public function create_admin_page() {
-		$page = add_theme_page(
-			esc_html__( 'Starter Templates by Kadence WP', 'kadence-starter-templates' ),
-			esc_html__( 'Starter Templates', 'kadence-starter-templates' ),
-			'import',
-			'kadence-starter-templates',
-			array( $this, 'render_admin_page' )
-		);
-		add_action( 'admin_print_styles-' . $page, array( $this, 'scripts' ) );
+		if ( class_exists( '\\KadenceWP\\KadenceBlocks\\StellarWP\\Uplink\\Register' ) ) {
+			$page = add_submenu_page( 'kadence-blocks',  esc_html__( 'Starter Templates by Kadence WP', 'kadence-starter-templates' ), esc_html__( 'Starter Templates', 'kadence-starter-templates' ), 'import', 'kadence-starter-templates', array( $this, 'render_admin_page' ), 1 );
+			add_action( 'admin_print_styles-' . $page, array( $this, 'scripts' ) );
+		} else {
+			$page = add_theme_page(
+				esc_html__( 'Starter Templates by Kadence WP', 'kadence-starter-templates' ),
+				esc_html__( 'Starter Templates', 'kadence-starter-templates' ),
+				'import',
+				'kadence-starter-templates',
+				array( $this, 'render_admin_page' )
+			);
+			add_action( 'admin_print_styles-' . $page, array( $this, 'scripts' ) );
+		}
 	}
 
 	/**
@@ -730,12 +765,97 @@ class Starter_Templates {
 	}
 
 	/**
+	 * Check if network activation is enabled.
+	 */
+	public function is_network_authorize_enabled() {
+		$network_enabled = ! apply_filters( 'kadence_activation_individual_multisites', true );
+		if ( ! $network_enabled && defined( 'KADENCE_ACTIVATION_NETWORK_ENABLED' ) && KADENCE_ACTIVATION_NETWORK_ENABLED ) {
+			$network_enabled = true;
+		}
+		return $network_enabled;
+	}
+	/**
+	 * Get the current license key for the plugin.
+	 *
+	 * @return array{key: string, email: string}
+	 */
+	public function get_current_license_data(): array {
+
+		$license_data = array(
+			'ktp_api_key'   => $this->get_current_license_key(),
+			'activation_email' => $this->get_current_license_email(),
+		);
+
+		return $license_data;
+	}
+	/**
+	 * Get the current license key for the plugin.
+	 *
+	 * @return string 
+	 */
+	public function get_current_license_key() {
+
+		if ( function_exists( 'kadence_blocks_get_current_license_data' ) ) {
+			$data = kadence_blocks_get_current_license_data();
+			if ( ! empty( $data['key'] ) ) {
+				return $data['key'];
+			}
+		} else {
+			$key = get_license_key( 'kadence-starter-templates' );
+			if ( ! empty( $key ) ) {
+				return $key;
+			}
+		}
+		return '';
+	}
+	/**
+	 * Get the current license email for the plugin.
+	 *
+	 * @return string 
+	 */
+	public function get_current_license_email() {
+
+		if ( function_exists( 'kadence_blocks_get_current_license_data' ) ) {
+			$data = kadence_blocks_get_current_license_data();
+			if ( ! empty( $data['email'] ) ) {
+				return $data['email'];
+			}
+		}
+		$current_user = wp_get_current_user();
+		return $current_user->user_email;
+	}
+
+	/**
 	 * Loads admin style sheets and scripts
 	 */
 	public function scripts() {
+		$using_network_enabled = false;
+		$is_network_admin      = is_multisite() && is_network_admin() ? true : false;
+		$network_enabled       = $this->is_network_authorize_enabled();
+		if ( $network_enabled && function_exists( 'is_plugin_active_for_network' ) && is_plugin_active_for_network( 'kadence-starter-templates/kadence-starter-templates.php' ) ) {
+			$using_network_enabled = true;
+		}
+		$slug = class_exists( '\KadenceWP\KadenceBlocks\App' ) ? 'kadence-blocks' : 'kadence-starter-templates';
+		if ( class_exists( '\KadenceWP\KadenceBlocks\App' ) ) {
+			$token          = \KadenceWP\KadenceBlocks\StellarWP\Uplink\get_authorization_token( $slug );
+			$auth_url       = \KadenceWP\KadenceBlocks\StellarWP\Uplink\build_auth_url( apply_filters( 'kadence-blocks-auth-slug', $slug ), get_license_domain() );
+		} else {
+			$token          = get_authorization_token( $slug );
+			$auth_url       = build_auth_url( apply_filters( 'kadence-blocks-auth-slug', $slug ), get_license_domain() );
+		}
+		$license_key    = $this->get_current_license_key();
+		$disconnect_url = '';
+		$is_authorized  = false;
+		if ( ! empty( $license_key ) ) {
+			$is_authorized = is_authorized( $license_key, apply_filters( 'kadence-blocks-auth-slug', $slug ), ( ! empty( $token ) ? $token : '' ), get_license_domain() );
+		}
+		if ( $is_authorized ) {
+			$disconnect_url = get_disconnect_url( apply_filters( 'kadence-blocks-auth-slug', $slug ) );
+		}
 		$plugins = array (
 			'woocommerce' => array(
-				'title' => 'Woocommerce',
+				'title' => 'WooCommerce',
+				'description' => __( 'WooCommerce is a flexible, open-source eCommerce solution built on WordPress.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'woocommerce/woocommerce.php' ),
 				'src'   => 'repo',
 			),
@@ -746,16 +866,19 @@ class Starter_Templates {
 			),
 			'kadence-blocks' => array(
 				'title' => 'Kadence Blocks',
+				'description' => __( 'Kadence Blocks provides a collection powerful tools for the WordPress block editor.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'kadence-blocks/kadence-blocks.php' ),
 				'src'   => 'repo',
 			),
 			'kadence-blocks-pro' => array(
 				'title' => 'Kadence Block Pro',
+				'description' => __( 'Kadence Blocks Pro is a plugin that adds additional features to Kadence Blocks.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'kadence-blocks-pro/kadence-blocks-pro.php' ),
 				'src'   => 'bundle',
 			),
 			'kadence-pro' => array(
 				'title' => 'Kadence Pro',
+				'description' => __( 'Kadence Pro is a plugin that adds additional features to the Kadence Theme.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'kadence-pro/kadence-pro.php' ),
 				'src'   => 'bundle',
 			),
@@ -771,11 +894,13 @@ class Starter_Templates {
 			),
 			'learndash' => array(
 				'title' => 'LearnDash',
+				'description' => __( 'LearnDash is a learning management system (LMS) plugin for WordPress.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'sfwd-lms/sfwd_lms.php' ),
 				'src'   => 'thirdparty',
 			),
 			'learndash-course-grid' => array(
 				'title' => 'LearnDash Course Grid Addon',
+				'description' => __( 'Add a course grid to any page or post.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'learndash-course-grid/learndash_course_grid.php' ),
 				'src'   => 'thirdparty',
 			),
@@ -791,21 +916,25 @@ class Starter_Templates {
 			),
 			'give' => array(
 				'title' => 'GiveWP',
+				'description' => __( 'GiveWP is the perfect online fundraising platform to increase your online donations.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'give/give.php' ),
 				'src'   => 'repo',
 			),
 			'the-events-calendar' => array(
 				'title' => 'The Events Calendar',
+				'description' => __( 'The Events Calendar is a carefully crafted, extensible plugin that lets you easily manage and share events.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'the-events-calendar/the-events-calendar.php' ),
 				'src'   => 'repo',
 			),
 			'event-tickets' => array(
 				'title' => 'Event Tickets',
+				'description' => __( 'Event Tickets provides a simple way for visitors to RSVP or purchase tickets to your events.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'event-tickets/event-tickets.php' ),
 				'src'   => 'repo',
 			),
 			'orderable' => array(
 				'title' => 'Orderable',
+				'description' => __( 'Take restaurant orders online with Orderable. The WooCommerce plugin designed to help you manage your restaurant, your way – with no added fees!', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'orderable/orderable.php' ),
 				'src'   => 'repo',
 			),
@@ -816,8 +945,15 @@ class Starter_Templates {
 			),
 			'kadence-woo-extras' => array(
 				'title' => 'Kadence Shop Kit',
+				'description' => __( 'Kadence Shop Kit adds additional features to WooCommerce.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'kadence-woo-extras/kadence-woo-extras.php' ),
 				'src'   => 'bundle',
+			),
+			'kadence-woocommerce-email-designer' => array(
+				'title' => 'Kadence WooCommerce Email Designer',
+				'description' => __( 'Kadence WooCommerce Email Designer lets you customize the default WooCommerce emails.', 'kadence-starter-templates' ),
+				'state' => Plugin_Check::active_check( 'kadence-woocommerce-email-designer/kadence-woocommerce-email-designer.php' ),
+				'src'   => 'repo',
 			),
 			'depicter' => array(
 				'title' => 'Depicter Slider',
@@ -827,6 +963,12 @@ class Starter_Templates {
 			'seriously-simple-podcasting' => array(
 				'title' => 'Seriously Simple Podcasting',
 				'state' => Plugin_Check::active_check( 'seriously-simple-podcasting/seriously-simple-podcasting.php' ),
+				'src'   => 'repo',
+			),
+			'better-wp-security' => array(
+				'title' => 'Solid Security',
+				'description' => __( 'Security, Two Factor Authentication, and Brute Force Protection', 'kadence-starter-templates' ),
+				'state' => Plugin_Check::active_check( 'better-wp-security/better-wp-security.php' ),
 				'src'   => 'repo',
 			),
 		);
@@ -1033,28 +1175,25 @@ class Starter_Templates {
 			// Check for multiple images.
 			$has_content = ( 0 < wp_count_posts( 'attachment' )->inherit ? true : false );
 		}
-		if ( class_exists( 'Kadence_Theme_Pro' ) ) {
-			if ( is_multisite() && ! apply_filters( 'kadence_activation_individual_multisites', false ) ) {
-				$pro_data = get_site_option( 'ktp_api_manager' );
-			} else {
-				$pro_data = get_option( 'ktp_api_manager' );
-			}
-		} else {
-			$pro_data = false;
-		}
-		$show_builder_choice = ( 'active' === $plugins['elementor']['state'] ? true : false );
+		$pro_data = $this->get_current_license_data();
 		$current_user     = wp_get_current_user();
 		$user_email       = $current_user->user_email;
+		$show_builder_choice = ( 'active' === $plugins['elementor']['state'] ? true : false );
 		$subscribed       = ( class_exists( 'Kadence_Theme_Pro' ) || ! empty( apply_filters( 'kadence_starter_templates_custom_array', array() ) ) ? true : get_option( 'kadence_starter_templates_subscribe' ) );
-		wp_enqueue_style( 'kadence-starter-templates', KADENCE_STARTER_TEMPLATES_URL . 'assets/css/starter-templates.css', array( 'wp-components' ), KADENCE_STARTER_TEMPLATES_VERSION );
-		wp_enqueue_script( 'kadence-starter-templates', KADENCE_STARTER_TEMPLATES_URL . 'assets/js/starter-templates.js', array( 'jquery', 'wp-i18n', 'wp-element', 'wp-plugins', 'wp-components', 'wp-api', 'wp-hooks', 'wp-edit-post', 'lodash', 'wp-block-library', 'wp-block-editor', 'wp-editor' ), KADENCE_STARTER_TEMPLATES_VERSION, true );
+		wp_enqueue_media();
+		$kadence_starter_templates_meta = $this->get_asset_file( 'dist/starter-templates' );
+		wp_enqueue_style( 'kadence-starter-templates', KADENCE_STARTER_TEMPLATES_URL . 'dist/starter-templates.css', array( 'wp-components' ), KADENCE_STARTER_TEMPLATES_VERSION );
+		wp_enqueue_script( 'kadence-starter-templates', KADENCE_STARTER_TEMPLATES_URL . 'dist/starter-templates.js', array_merge( array( 'wp-api', 'wp-components', 'wp-plugins', 'wp-edit-post' ), $kadence_starter_templates_meta['dependencies'] ), $kadence_starter_templates_meta['version'], true );
 		wp_localize_script(
 			'kadence-starter-templates',
 			'kadenceStarterParams',
 			array(
 				'ajax_url'             => admin_url( 'admin-ajax.php' ),
+				'homeUrl'             => home_url( '/' ),
+				'pagesUrl'            => admin_url( 'edit.php?post_type=page' ),
 				'ajax_nonce'           => wp_create_nonce( 'kadence-ajax-verification' ),
 				'isKadence'            => class_exists( 'Kadence\Theme' ),
+				'livePreviewStyles'    => KADENCE_STARTER_TEMPLATES_URL . 'assets/css/live-preview-base.css?ver=' . KADENCE_STARTER_TEMPLATES_VERSION,
 				'ctemplates'           => apply_filters( 'kadence_custom_child_starter_templates_enable', false ),
 				'custom_icon'          => apply_filters( 'kadence_custom_child_starter_templates_logo', '' ),
 				'custom_name'          => apply_filters( 'kadence_custom_child_starter_templates_name', '' ),
@@ -1062,6 +1201,7 @@ class Starter_Templates {
 				'palettes'             => apply_filters( 'kadence_starter_templates_palettes_array', $palettes ),
 				'fonts'                => apply_filters( 'kadence_starter_templates_fonts_array', $fonts ),
 				'logo'                 => esc_attr( KADENCE_STARTER_TEMPLATES_URL . 'assets/images/kadence_logo.png' ),
+				'svgMaskPath'          => defined( 'KADENCE_BLOCKS_URL' ) ? KADENCE_BLOCKS_URL . 'includes/assets/images/masks/' : KADENCE_STARTER_TEMPLATES_URL . 'assets/images/masks/',
 				'has_content'          => $has_content,
 				'has_previous'         => $has_previous,
 				'starterSettings'      => get_option( 'kadence_starter_templates_config' ),
@@ -1080,8 +1220,39 @@ class Starter_Templates {
 				'user_email'           => $user_email,
 				'subscribed'           => $subscribed,
 				'openBuilder'          => $show_builder_choice,
+				'isAuthorized'        => $is_authorized,
+				'licenseKey'          => $license_key,
+				'authUrl'             => esc_url( $auth_url ),
+				'disconnectUrl'       => esc_url( $disconnect_url ),
+				'isNetworkAdmin'      => $is_network_admin,
+				'isNetworkEnabled'    => $using_network_enabled,
+				'blocksActive'        => class_exists( '\KadenceWP\KadenceBlocks\App' ) ? true : false,
 			)
 		);
+	}
+	/**
+	 * Get the asset file produced by wp scripts.
+	 *
+	 * @param string $filepath the file path.
+	 * @return array
+	 */
+	public function get_asset_file( $filepath ) {
+		$asset_path = KADENCE_STARTER_TEMPLATES_PATH . $filepath . '.asset.php';
+		return file_exists( $asset_path )
+			? include $asset_path
+			: array(
+				'dependencies' => array( 'lodash', 'react', 'react-dom', 'wp-block-editor', 'wp-blocks', 'wp-data', 'wp-element', 'wp-i18n', 'wp-polyfill', 'wp-primitives', 'wp-api' ),
+				'version'      => KADENCE_STARTER_TEMPLATES_VERSION,
+			);
+	}
+	/**
+	 * Check if a setting is registered.
+	 *
+	 * @param string $option_name the option group.
+	 */
+	public function is_setting_registered( $option_name ) {
+		global $wp_registered_settings;
+		return isset( $wp_registered_settings[ $option_name ] );
 	}
 	/**
 	 * Register settings
@@ -1098,6 +1269,19 @@ class Starter_Templates {
 				'default'           => '',
 			)
 		);
+		if ( ! $this->is_setting_registered( 'kadence_blocks_prophecy' ) ) {
+			register_setting(
+				'kadence_blocks_prophecy',
+				'kadence_blocks_prophecy',
+				array(
+					'type'              => 'string',
+					'description'       => __( 'Config Kadence Block Prophecy AI', 'kadence-blocks' ),
+					'sanitize_callback' => 'sanitize_text_field',
+					'show_in_rest'      => true,
+					'default'           => '',
+				)
+			);
+		}
 	}
 	/**
 	 * AJAX callback to install a plugin.
@@ -1347,6 +1531,31 @@ class Starter_Templates {
 	/**
 	 * AJAX callback to install a plugin.
 	 */
+	public function initial_install_ajax_callback() {
+		Helpers::verify_ajax_call();
+
+		if ( ! isset( $_POST['selected'] ) || ! isset( $_POST['builder'] ) ) {
+			wp_send_json_error( 'Missing Information' );
+		}
+		// Get selected file index or set it to 0.
+		$selected_index   = empty( $_POST['selected'] ) ? '' : sanitize_text_field( $_POST['selected'] );
+		$selected_builder = empty( $_POST['builder'] ) ? '' : sanitize_text_field( $_POST['builder'] );
+		if ( empty( $selected_index ) || empty( $selected_builder ) ) {
+			wp_send_json_error( 'Missing Parameters' );
+		}
+		delete_transient( 'kadence_importer_data' );
+		if ( empty( $this->import_files ) || ( is_array( $this->import_files ) && ! isset( $this->import_files[ $selected_index ] ) ) ) {
+			$template_database  = Template_Database_Importer::get_instance();
+			$this->import_files = $template_database->get_importer_files( $selected_index, $selected_builder );
+		}
+		if ( ! isset( $this->import_files[ $selected_index ] ) ) {
+			wp_send_json_error( 'Missing Template' );
+		}
+		wp_send_json( array( 'status' => 'initialSuccess' ) );
+	}
+	/**
+	 * AJAX callback to install a plugin.
+	 */
 	public function install_plugins_ajax_callback() {
 		Helpers::verify_ajax_call();
 
@@ -1359,6 +1568,7 @@ class Starter_Templates {
 		if ( empty( $selected_index ) || empty( $selected_builder ) ) {
 			wp_send_json_error( 'Missing Parameters' );
 		}
+		delete_transient( 'kadence_importer_data' );
 		if ( empty( $this->import_files ) || ( is_array( $this->import_files ) && ! isset( $this->import_files[ $selected_index ] ) ) ) {
 			$template_database  = Template_Database_Importer::get_instance();
 			$this->import_files = $template_database->get_importer_files( $selected_index, $selected_builder );
@@ -1657,7 +1867,6 @@ class Starter_Templates {
 				}
 			}
 		}
-
 		if ( false === $install ) {
 			wp_send_json_error();
 		} else {
@@ -2159,13 +2368,10 @@ class Starter_Templates {
 	public function import_demo_data_ajax_callback() {
 		// Try to update PHP memory limit (so that it does not run out of it).
 		ini_set( 'memory_limit', apply_filters( 'kadence-starter-templates/import_memory_limit', '350M' ) );
-
 		// Verify if the AJAX call is valid (checks nonce and current_user_can).
 		Helpers::verify_ajax_call();
-
 		// Is this a new AJAX call to continue the previous import?
 		$use_existing_importer_data = $this->use_existing_importer_data();
-
 		if ( ! $use_existing_importer_data ) {
 			// Create a date and time string to use for demo and log file names.
 			Helpers::set_demo_import_start_time();
@@ -2658,14 +2864,6 @@ class Starter_Templates {
 		}
 
 		return $output;
-	}
-
-
-	/**
-	 * Load the plugin textdomain, so that translations can be made.
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain( 'kadence-starter-templates', false, plugin_basename( dirname( dirname( __FILE__ ) ) ) . '/languages' );
 	}
 
 

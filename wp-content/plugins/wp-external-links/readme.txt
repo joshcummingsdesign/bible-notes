@@ -4,7 +4,7 @@ Tags: new window, new tab, external links, nofollow, noopener, ugc, sponsored, f
 Requires at least: 4.2
 Tested up to: 6.4
 Requires PHP: 7.2
-Stable tag: 2.59
+Stable tag: 2.60
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -242,6 +242,9 @@ See [FAQ](https://wordpress.org/plugins/wp-external-links/faq/) for more info.
 
 
 == Changelog ==
+= 2.60 =
+ * 2024-02-20
+ * fixed WordPress Network activation bug
 
 = 2.59 =
  * 2023-10-25

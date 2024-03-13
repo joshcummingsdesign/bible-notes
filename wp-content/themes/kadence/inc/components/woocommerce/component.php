@@ -1632,7 +1632,7 @@ class Component implements Component_Interface {
 		// Product Archive Columns Mobile.
 		if ( 'twocolumn' === kadence()->option( 'product_archive_mobile_columns' ) ) {
 			$css->start_media_query( $media_query['mobile'] );
-			$css->set_selector( '.woocommerce ul.products:not(.products-list-view), .wp-site-blocks .wc-block-grid:not(.has-2-columns):not(has-1-columns) .wc-block-grid__products' );
+			$css->set_selector( '.woocommerce ul.products:not(.products-list-view), .wp-site-blocks .wc-block-grid:not(.has-2-columns):not(.has-1-columns) .wc-block-grid__products' );
 			$css->add_property( 'grid-template-columns', 'repeat(2, minmax(0, 1fr))' );
 			$css->add_property( 'column-gap', '0.5rem' );
 			$css->add_property( 'grid-row-gap', '0.5rem' );

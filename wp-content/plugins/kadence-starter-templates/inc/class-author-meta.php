@@ -8,7 +8,7 @@
 * @package Kadence Starter Templates
  */
 
-namespace Kadence_Starter_Templates;
+namespace KadenceWP\KadenceStarterTemplates;
 
 /**
  * Adds and Saves extra profile fields for author box.

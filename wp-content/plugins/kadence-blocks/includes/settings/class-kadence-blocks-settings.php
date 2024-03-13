@@ -9,6 +9,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use function KadenceWP\KadenceBlocks\StellarWP\Uplink\get_authorization_token;
+use function KadenceWP\KadenceBlocks\StellarWP\Uplink\get_disconnect_url;
+use function KadenceWP\KadenceBlocks\StellarWP\Uplink\get_license_domain;
+use function KadenceWP\KadenceBlocks\StellarWP\Uplink\is_authorized;
+use function KadenceWP\KadenceBlocks\StellarWP\Uplink\build_auth_url;
 
 /**
  * Build Welcome Page class
@@ -39,6 +44,15 @@ class Kadence_Blocks_Settings {
 	private static $editor_width = null;
 
 	/**
+	 * Used to cache token authorization to prevent multiple
+	 * remote requests to the licensing server in the same
+	 * request lifecycle.
+	 *
+	 * @var null|bool
+	 */
+	private static $authorized_cache = null;
+
+	/**
 	 * Instance Control
 	 */
 	public static function get_instance() {
@@ -54,6 +68,7 @@ class Kadence_Blocks_Settings {
 		// only load if admin.
 		if ( is_admin() ) {
 			add_action( 'admin_menu', array( $this, 'add_menu' ) );
+			add_action( 'network_admin_menu', array( $this, 'add_network_menu' ), 1 );
 			add_filter( 'plugin_action_links_kadence-blocks/kadence-blocks.php', array( $this, 'add_settings_link' ) );
 			add_action( 'in_plugin_update_message-kadence-blocks/kadence-blocks.php', array( $this, 'plugin_update_message' ), 10, 2 );
 		}
@@ -499,9 +514,22 @@ class Kadence_Blocks_Settings {
 	/**
 	 * Add option page menu
 	 */
+	public function add_network_menu() {
+		$network_enabled = kadence_blocks_is_network_authorize_enabled();
+		if ( $network_enabled && function_exists( 'is_plugin_active_for_network' ) && is_plugin_active_for_network( 'kadence-blocks/kadence-blocks.php' ) ) {
+			add_menu_page( __( 'Kadence Blocks -  Gutenberg Page Builder Blocks', 'kadence-blocks' ), __( 'Kadence', 'kadence-blocks' ), $this->settings_user_capabilities(), 'kadence-blocks-home', null, $this->get_icon_svg() );
+			$home_page = add_submenu_page( 'kadence-blocks', __( 'Kadence Blocks', 'kadence-blocks' ), __( 'Home' ), $this->settings_user_capabilities(), 'kadence-blocks-home', array( $this, 'home_page' ), 0 );
+			add_action( 'admin_print_styles-' . $home_page, array( $this, 'home_scripts' ) );
+		}
+	}
+	/**
+	 * Add option page menu
+	 */
 	public function add_menu() {
-		add_menu_page( __( 'Kadence Blocks -  Gutenberg Page Builder Blocks', 'kadence-blocks' ), __( 'Kadence Blocks', 'kadence-blocks' ), $this->settings_user_capabilities(), 'kadence-blocks', null, $this->get_icon_svg() );
-		$page = add_submenu_page( 'kadence-blocks', __( 'Kadence Blocks -  Gutenberg Page Builder Blocks', 'kadence-blocks' ), __( 'Settings' ), $this->settings_user_capabilities(), 'kadence-blocks', array( $this, 'config_page' ), 0 );
+		add_menu_page( __( 'Kadence Blocks -  Gutenberg Page Builder Blocks', 'kadence-blocks' ), __( 'Kadence', 'kadence-blocks' ), $this->settings_user_capabilities(), 'kadence-blocks', null, $this->get_icon_svg() );
+		$home_page = add_submenu_page( 'kadence-blocks', __( 'Kadence Blocks', 'kadence-blocks' ), __( 'Home' ), $this->settings_user_capabilities(), 'kadence-blocks-home', array( $this, 'home_page' ), 0 );
+		$page = add_submenu_page( 'kadence-blocks', __( 'Kadence Blocks -  Gutenberg Page Builder Blocks', 'kadence-blocks' ), __( 'Settings' ), $this->settings_user_capabilities(), 'kadence-blocks', array( $this, 'config_page' ), 1 );
+		add_action( 'admin_print_styles-' . $home_page, array( $this, 'home_scripts' ) );
 		add_action( 'admin_print_styles-' . $page, array( $this, 'scripts' ) );
 	}
 	/**
@@ -593,6 +621,77 @@ class Kadence_Blocks_Settings {
 		);
 	}
 	/**
+	 * Loads admin style sheets and scripts
+	 */
+	public function home_scripts() {
+		$using_network_enabled = false;
+		$is_network_admin      = is_multisite() && is_network_admin() ? true : false;
+		$network_enabled = kadence_blocks_is_network_authorize_enabled();
+		if ( $network_enabled && function_exists( 'is_plugin_active_for_network' ) && is_plugin_active_for_network( 'kadence-blocks/kadence-blocks.php' ) ) {
+			$using_network_enabled = true;
+		}
+		$token          = get_authorization_token( 'kadence-blocks' );
+		$auth_url       = build_auth_url( apply_filters( 'kadence-blocks-auth-slug', 'kadence-blocks' ), get_license_domain() );
+		$license_key    = kadence_blocks_get_current_license_key();
+		$disconnect_url = '';
+		$is_authorized  = false;
+		if ( ! empty( $license_key ) ) {
+			$is_authorized = is_authorized( $license_key, 'kadence-blocks', ( ! empty( $token ) ? $token : '' ), get_license_domain() );
+		}
+
+		if ( $is_authorized ) {
+			$disconnect_url = get_disconnect_url( 'kadence-blocks' );
+		}
+		// Icons Scripts & Styles.
+		$kadence_icons_meta = kadence_blocks_get_asset_file( 'dist/icons' );
+		wp_register_script( 'kadence-icons', KADENCE_BLOCKS_URL . 'dist/icons.js', array_merge( $kadence_icons_meta['dependencies'], array( 'wp-api' ) ), $kadence_icons_meta['version'], true );
+		wp_set_script_translations( 'kadence-icons', 'kadence-blocks' );
+
+		$kadence_base = kadence_blocks_get_asset_file( 'dist/extension-kadence-base' );
+		wp_register_script( 'kadence-blocks-js', KADENCE_BLOCKS_URL . 'dist/extension-kadence-base.js', array_merge( $kadence_base['dependencies'], array( 'wp-api' ) ), $kadence_base['version'], true );
+		// Block CSS Scripts & Styles.
+		$kadence_stores_meta = kadence_blocks_get_asset_file( 'dist/extension-stores' );
+		wp_register_script( 'kadence-extension-stores', KADENCE_BLOCKS_URL . 'dist/extension-stores.js', array_merge( $kadence_stores_meta['dependencies'], array( 'wp-api', 'kadence-blocks-js' ) ), $kadence_stores_meta['version'], true );
+		// wp_register_style( 'kadence-extension-stores', KADENCE_BLOCKS_URL . 'dist/extension/stores.css', array( 'wp-edit-blocks' ), $kadence_stores_meta['version'] );
+		wp_set_script_translations( 'kadence-extension-stores', 'kadence-blocks' );
+
+		// Helpers Scripts & Styles.
+		$kadence_helpers_meta = kadence_blocks_get_asset_file( 'dist/helpers' );
+		wp_register_script( 'kadence-helpers', KADENCE_BLOCKS_URL . 'dist/helpers.js', array_merge( $kadence_helpers_meta['dependencies'], array( 'wp-api' ) ), $kadence_helpers_meta['version'], true );
+		wp_set_script_translations( 'kadence-helpers', 'kadence-blocks' );
+
+		// Components Scripts & Styles.
+		$kadence_components_meta = kadence_blocks_get_asset_file( 'dist/components' );
+		wp_register_script( 'kadence-components', KADENCE_BLOCKS_URL . 'dist/components.js', array_merge( $kadence_components_meta['dependencies'], array( 'wp-api', 'kadence-extension-stores', 'kadence-blocks-js' ) ), $kadence_components_meta['version'], true );
+		wp_register_style( 'kadence-components', KADENCE_BLOCKS_URL . 'dist/components.css', array( 'wp-edit-blocks' ), $kadence_components_meta['version'] );
+		wp_set_script_translations( 'kadence-components', 'kadence-blocks' );
+		$kadence_home_meta = kadence_blocks_get_asset_file( 'dist/admin-kadence-home' );
+		wp_enqueue_script( 'admin-kadence-home', KADENCE_BLOCKS_URL . 'dist/admin-kadence-home.js', $kadence_home_meta['dependencies'], $kadence_home_meta['version'], true );
+		wp_enqueue_style( 'admin-kadence-home', KADENCE_BLOCKS_URL . 'dist/admin-kadence-home.css', array( 'wp-edit-blocks', 'kadence-components' ), $kadence_home_meta['version'] );
+		wp_localize_script(
+			'admin-kadence-home',
+			'kadenceHomeParams',
+			array(
+				'ajaxurl'             => admin_url( 'admin-ajax.php' ),
+				'wpnonce'             => wp_create_nonce( 'kadence-blocks-manage' ),
+				'site_name'           => sanitize_title( get_bloginfo( 'name' ) ),
+				'pSlug'               => apply_filters( 'kadence-blocks-auth-slug', 'kadence-blocks' ),
+				'isAIDisabled'        => kadence_blocks_is_ai_disabled(),
+				'pVersion'            => KADENCE_BLOCKS_VERSION,
+				'isAuthorized'        => $is_authorized,
+				'licenseKey'          => $license_key,
+				'authUrl'             => esc_url( $auth_url ),
+				'disconnectUrl'       => esc_url( $disconnect_url ),
+				'pro'                 => ( class_exists( 'Kadence_Blocks_Pro' ) ? 'true' : 'false' ),
+				'apiKey'              => $license_key,
+				'isNetworkAdmin'      => $is_network_admin,
+				'isNetworkEnabled'    => $using_network_enabled,
+			)
+		);
+		wp_enqueue_style( 'kadence-blocks-admin-css', KADENCE_BLOCKS_URL . 'includes/assets/css/admin-dashboard.min.css', array( 'wp-jquery-ui-dialog', 'wp-color-picker' ), KADENCE_BLOCKS_VERSION, 'all' );
+		wp_enqueue_media();
+	}
+	/**
 	 * Register settings
 	 */
 	public function load_api_settings() {
@@ -625,6 +724,17 @@ class Kadence_Blocks_Settings {
 			array(
 				'type'              => 'string',
 				'description'       => __( 'Config Kadence Block Settings', 'kadence-blocks' ),
+				'sanitize_callback' => 'sanitize_text_field',
+				'show_in_rest'      => true,
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'kadence_blocks_prophecy',
+			'kadence_blocks_prophecy',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'Config Kadence Block Prophecy AI', 'kadence-blocks' ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'show_in_rest'      => true,
 				'default'           => '',
@@ -824,7 +934,6 @@ class Kadence_Blocks_Settings {
 		//add_settings_field( 'limited_margins', __( 'Enable Less Margin CSS', 'kadence-blocks' ), array( $this, 'limited_margins_callback' ), 'kt_blocks_editor_width_section', 'kt_blocks_editor_width_sec' );
 		add_settings_field( 'enable_editor_width', __( 'Enable Editor Width', 'kadence-blocks' ), array( $this, 'enabled_editor_width_callback' ), 'kt_blocks_editor_width_section', 'kt_blocks_editor_width_sec' );
 
-		$temp = get_registered_settings();
 		if ( ! defined( 'KADENCE_VERSION' ) ) {
 			register_setting( 'kadence_blocks_font_settings', 'kadence_blocks_font_settings', array( $this, 'validate_options' ) );
 			add_settings_section( 'kt_blocks_fonts_sec', '', array( $this, 'fonts_local_callback' ), 'kt_blocks_fonts_section' );
@@ -955,7 +1064,23 @@ class Kadence_Blocks_Settings {
 		}
 		return self::$editor_width;
 	}
-
+	/**
+	 * Loads config page
+	 */
+	public function home_page() {
+		do_action( 'stellarwp/telemetry/kadence-blocks/optin' );
+		?>
+		<div class="wrap kadence_blocks_dash">
+			<div class="kadence_blocks_dash_head_container">
+				<h2 class="notices" style="display:none;"></h2>
+				<div class="kadence_blocks_dash_wrap">
+					<div class="kadence_blocks_home_main">
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
 	/**
 	 * Loads config page
 	 */
@@ -1019,8 +1144,8 @@ class Kadence_Blocks_Settings {
 						<?php if ( apply_filters( 'kadence_blocks_editor_width', $this->show_editor_width() ) ) { ?>
 							<h2><?php echo esc_html__( 'Editor Max Widths', 'kadence-blocks' ); ?></br><small class="kt-main-subtitle"><?php echo esc_html__( 'Match the editor width to your sites width.', 'kadence-blocks' ); ?></small></h2>
 							<?php global $content_width; ?>
-								<div class="kt-main-description-notice"><?php echo esc_html__( 'Note: The current active themes "content_width" is set to:', 'kadence-blocks' ) . ' ' . esc_html( $content_width ); ?>px</div>
-								<div class="kt-promo-row-area">
+							<div class="kt-main-description-notice"><?php echo esc_html__( 'Note: The current active themes "content_width" is set to:', 'kadence-blocks' ) . ' ' . esc_html( $content_width ); ?>px</div>
+							<div class="kt-promo-row-area">
 								<?php
 								echo '<form action="options.php" method="post">';
 									settings_fields( 'kt_blocks_editor_width' );
@@ -1033,14 +1158,12 @@ class Kadence_Blocks_Settings {
 							<div class="kt-dashboard-spacer"></div>
 						<?php } ?>
 						<?php if ( apply_filters( 'kadence_blocks_show_local_fonts', ! defined( 'KADENCE_VERSION' ) ) ) { ?>
-							<h2><?php echo esc_html__( 'Google Fonts', 'kadence-blocks' ); ?></h2>
-							<?php global $content_width; ?>
+								<h2><?php echo esc_html__( 'Google Fonts', 'kadence-blocks' ); ?></h2>
 								<div class="kt-promo-row-area">
 								<?php
 								echo '<form action="options.php" method="post">';
 									settings_fields( 'kadence_blocks_font_settings' );
 									do_settings_sections( 'kt_blocks_fonts_section' );
-									submit_button( __( 'Save Changes', 'kadence-blocks' ) );
 								echo '</form>';
 								?>
 							</div>
@@ -1113,25 +1236,21 @@ class Kadence_Blocks_Settings {
 				'slug'  => 'kadence/rowlayout',
 				'name'  => __( 'Row Layout', 'kadence-blocks' ),
 				'desc'  => __( 'Create rows with nested blocks either in columns or as a container. Give style to your rows with background, overlay, padding, etc.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/rowlayout.jpg',
 			),
 			'kadence/form'        => array(
 				'slug'  => 'kadence/form',
 				'name'  => __( 'Form', 'kadence-blocks' ),
 				'desc'  => __( 'Create a contact form or marketing form and style it within the block editor.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/form-block.jpg',
 			),
 			'kadence/advancedgallery' => array(
 				'slug'  => 'kadence/advancedgallery',
 				'name'  => __( 'Advanced Gallery', 'kadence-blocks' ),
 				'desc'  => __( 'Photo galleries, carousels, and sliders! Enable custom links, captions, and more. Plus, you can select image sizes.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/gallery-block.jpg',
 			),
 			'kadence/advancedbtn' => array(
 				'slug'  => 'kadence/advancedbtn',
 				'name'  => __( 'Advanced Button', 'kadence-blocks' ),
 				'desc'  => __( 'Create an advanced button or a row of buttons. Style each one including hover controls plus you can use an icon and display them side by side', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/btn.jpg',
 			),
 			'kadence/lottie'        => array(
 				'slug'  => 'kadence/lottie',
@@ -1142,43 +1261,36 @@ class Kadence_Blocks_Settings {
 				'slug'  => 'kadence/icon',
 				'name'  => __( 'Icon', 'kadence-blocks' ),
 				'desc'  => __( 'Choose from over 1500+ SVG Icons to add into your page and style the size, colors, background, border, etc.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/icon.jpg',
 			),
 			'kadence/spacer'      => array(
 				'slug'  => 'kadence/spacer',
 				'name'  => __( 'Spacer/Divider', 'kadence-blocks' ),
 				'desc'  => __( 'Easily create a divider and determine the space around it or just create some space in your content.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/spacer.jpg',
 			),
 			'kadence/advancedheading'      => array(
 				'slug'  => 'kadence/advancedheading',
 				'name'  => __( 'Advanced Text', 'kadence-blocks' ),
 				'desc'  => __( 'Create a heading or paragraph and define sizes for desktop, tablet and mobile along with font family, colors, etc.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/heading.jpg',
 			),
 			'kadence/tabs'      => array(
 				'slug'  => 'kadence/tabs',
 				'name'  => __( 'Tabs', 'kadence-blocks' ),
 				'desc'  => __( 'Create custom vertical or horizontal tabs with advanced styling controls. Each tab content is an empty canvas able to contain any other blocks.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/tabs.jpg',
 			),
 			'kadence/infobox'      => array(
 				'slug'  => 'kadence/infobox',
 				'name'  => __( 'Info Box', 'kadence-blocks' ),
 				'desc'  => __( 'Create a box containing an icon or image and, optionally, a title, description, and learn more text. Style static and hover separately.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/infobox.jpg',
 			),
 			'kadence/accordion'      => array(
 				'slug'  => 'kadence/accordion',
 				'name'  => __( 'Accordion', 'kadence-blocks' ),
 				'desc'  => __( 'Create beautiful accordions! Each pane can contain any other block, customize title styles, content background, and borders.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/accordion.jpg',
 			),
 			'kadence/iconlist'      => array(
 				'slug'  => 'kadence/iconlist',
 				'name'  => __( 'Icon List', 'kadence-blocks' ),
 				'desc'  => __( 'Add beautiful icons to your lists and make them more engaging. Over 1500 icons to choose from and unlimited styles.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/iconlist.jpg',
 			),
 			'kadence/tableofcontents'      => array(
 				'slug'  => 'kadence/tableofcontents',
@@ -1199,7 +1311,6 @@ class Kadence_Blocks_Settings {
 				'slug'  => 'kadence/testimonials',
 				'name'  => __( 'Testimonials', 'kadence-blocks' ),
 				'desc'  => __( 'Create confidence in your brand or product by showing off beautiful unique testimonials, add as a carousel or a grid.', 'kadence-blocks' ),
-				'image' => KADENCE_BLOCKS_URL . 'includes/settings/img/testimonials.jpg',
 			),
 		);
 		return apply_filters( 'kadence_blocks_enable_disable_array', $blocks );

@@ -6,7 +6,11 @@
  * @package Kadence Starter Templates
  */
 
-namespace Kadence_Starter_Templates;
+namespace KadenceWP\KadenceStarterTemplates;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class ImportActions {
 	/**
@@ -77,7 +81,7 @@ class ImportActions {
 	 * @param int   $selected_index        Selected index of import.
 	 */
 	public function forms_import( $selected_import_files, $import_files, $selected_index, $selected_palette, $selected_font ) {
-		if ( ! empty( $selected_import_files['forms'] ) && class_exists( 'Kadence_Starter_Templates\Kadence_Starter_Templates_Fluent_Import' ) ) {
+		if ( ! empty( $selected_import_files['forms'] ) && class_exists( 'KadenceWP\KadenceStarterTemplates\Kadence_Starter_Templates_Fluent_Import' ) ) {
 			Kadence_Starter_Templates_Fluent_Import::import( $selected_import_files['forms'] );
 		}
 	}
@@ -90,7 +94,7 @@ class ImportActions {
 	 * @param int   $selected_index        Selected index of import.
 	 */
 	public function donations_import( $selected_import_files, $import_files, $selected_index, $selected_palette, $selected_font ) {
-		if ( ! empty( $selected_import_files['give-donations'] ) && class_exists( 'Kadence_Starter_Templates\Kadence_Starter_Templates_Give_Import' ) ) {
+		if ( ! empty( $selected_import_files['give-donations'] ) && class_exists( 'KadenceWP\KadenceStarterTemplates\Kadence_Starter_Templates_Give_Import' ) ) {
 			Kadence_Starter_Templates_Give_Import::import( $selected_import_files['give-donations'] );
 		}
 	}
@@ -102,7 +106,7 @@ class ImportActions {
 	 * @param int   $selected_index        Selected index of import.
 	 */
 	public function give_forms_import( $selected_import_files, $import_files, $selected_index, $selected_palette, $selected_font ) {
-		if ( ! empty( $selected_import_files['give-forms'] ) && class_exists( 'Kadence_Starter_Templates\Kadence_Starter_Templates_Give_Import' ) ) {
+		if ( ! empty( $selected_import_files['give-forms'] ) && class_exists( 'KadenceWP\KadenceStarterTemplates\Kadence_Starter_Templates_Give_Import' ) ) {
 			Kadence_Starter_Templates_Give_Import::import_forms( $selected_import_files['give-forms'] );
 		}
 	}
@@ -114,7 +118,7 @@ class ImportActions {
 	 * @param int   $selected_index        Selected index of import.
 	 */
 	public function depicter_import( $selected_import_files, $import_files, $selected_index, $selected_palette, $selected_font ) {
-		if ( ! empty( $selected_import_files['depicter'] ) && class_exists( 'Kadence_Starter_Templates\Kadence_Starter_Templates_Depicter_Import' ) ) {
+		if ( ! empty( $selected_import_files['depicter'] ) && class_exists( 'KadenceWP\KadenceStarterTemplates\Kadence_Starter_Templates_Depicter_Import' ) ) {
 			Kadence_Starter_Templates_Depicter_Import::import_slider( $selected_import_files['depicter'] );
 		}
 	}

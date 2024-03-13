@@ -5,7 +5,11 @@
  * @package Kadence Starter Templates
  */
 
-namespace Kadence_Starter_Templates;
+namespace KadenceWP\KadenceStarterTemplates;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use WP_Query;
 
@@ -25,14 +29,14 @@ class Importer {
 	private $microtime;
 
 	/**
-	 * The instance of the Kadence_Starter_Templates\Logger class.
+	 * The instance of the KadenceWP\KadenceStarterTemplates\Logger class.
 	 *
 	 * @var object
 	 */
 	public $logger;
 
 	/**
-	 * The instance of the Kadence_Starter_Templates class.
+	 * The instance of the KadenceWP\KadenceStarterTemplates class.
 	 *
 	 * @var object
 	 */
@@ -81,13 +85,13 @@ class Importer {
 			require ABSPATH . '/wp-admin/includes/class-wp-importer.php';
 		}
 		if ( ! class_exists( '\AwesomeMotive\WPContentImporter2\WXRImporter' ) ) {
-			require_once KADENCE_STARTER_TEMPLATES_PATH . 'vendor/wxr-importer/WXRImporter.php';
+			require_once KADENCE_STARTER_TEMPLATES_PATH . 'wxr-importer/WXRImporter.php';
 		}
 		if ( ! class_exists( '\AwesomeMotive\WPContentImporter2\WXRImportInfo' ) ) {
-			require_once KADENCE_STARTER_TEMPLATES_PATH . 'vendor/wxr-importer/WXRImportInfo.php';
+			require_once KADENCE_STARTER_TEMPLATES_PATH . 'wxr-importer/WXRImportInfo.php';
 		}
 		if ( ! class_exists( '\AwesomeMotive\WPContentImporter2\Importer' ) ) {
-			require_once KADENCE_STARTER_TEMPLATES_PATH . 'vendor/wxr-importer/Importer.php';
+			require_once KADENCE_STARTER_TEMPLATES_PATH . 'wxr-importer/Importer.php';
 		}
 		require_once KADENCE_STARTER_TEMPLATES_PATH . 'inc/class-wxr-importer.php';
 	}

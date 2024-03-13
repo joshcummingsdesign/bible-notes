@@ -29,7 +29,7 @@ function wpcode_update_snippet_status() {
 	$snippet_id = absint( $_POST['snippet_id'] );
 	$active     = isset( $_POST['active'] ) && 'true' === $_POST['active'];
 
-	$snippet = new WPCode_Snippet( $snippet_id );
+	$snippet = wpcode_get_snippet( $snippet_id );
 
 	if ( ! current_user_can( 'wpcode_activate_snippets', $snippet ) ) {
 		wpcode()->error->add_error(
@@ -49,7 +49,7 @@ function wpcode_update_snippet_status() {
 
 	if ( ! isset( $snippet->active ) || $active !== $snippet->active ) {
 		$error_message = sprintf(
-		// Translators: formatted error code.
+		// Translators: %2$s is the action that they were trying to perform, either activated or deactivated. %1$s is the error message why the action failed.
 			__( 'Snippet not %2$s, the following error was encountered: %1$s', 'insert-headers-and-footers' ),
 			'<code>' . wpcode()->error->get_last_error_message() . '</code>',
 			$active ? _x( 'activated', 'Snippet status change', 'insert-headers-and-footers' ) : _x( 'deactivated', 'Snippet status change', 'insert-headers-and-footers' )
@@ -123,7 +123,7 @@ function wpcode_generate_snippet() {
 
 	$generator_type = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : '';
 
-	$generator = wpcode()->generator->get_type( $generator_type );
+	$generator = wpcode()->generator()->get_type( $generator_type );
 
 	if ( ! $generator ) {
 		wp_send_json_error();
@@ -149,7 +149,7 @@ function wpcode_save_generated_snippet() {
 	}
 
 	$generator_type = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : '';
-	$generator      = wpcode()->generator->get_type( $generator_type );
+	$generator      = wpcode()->generator()->get_type( $generator_type );
 	// If a snippet id is passed, let's attempt to update it.
 	$snippet_id = isset( $_POST['snippet_id'] ) ? absint( $_POST['snippet_id'] ) : '';
 

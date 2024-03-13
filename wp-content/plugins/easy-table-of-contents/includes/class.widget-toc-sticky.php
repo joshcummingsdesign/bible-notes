@@ -179,8 +179,13 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                 extract ( $args );
 
                 $js_vars = array();
+                $js_vars[ 'appearance_options' ] = '';
                 $js_vars[ 'advanced_options' ] = '';
                 $js_vars[ 'scroll_fixed_position' ] = '30';
+                $js_vars[ 'sidebar_sticky_title' ] = 120;
+                $js_vars[ 'sidebar_sticky_title_size_unit' ] = '%';
+                $js_vars[ 'sidebar_sticky_title_weight' ] = '500';
+                $js_vars[ 'sidebar_sticky_title_color' ] = '#000';
                 $js_vars[ 'sidebar_width' ] = 'auto';
                 $js_vars[ 'sidebar_width_size_unit' ] = 'none';
                 $js_vars[ 'fixed_top_position' ] = '30';
@@ -189,9 +194,12 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                 $js_vars[ 'scroll_max_height' ] = 'auto';
                 $js_vars[ 'scroll_max_height_size_unit' ] = 'none';
 
-                if ( 'on' == $instance[ 'advanced_options' ] ||
+                if ( (isset($instance[ 'appearance_options' ]) && 'on' == $instance[ 'appearance_options' ] ) || 'on' == $instance[ 'advanced_options' ] || $js_vars[ 'scroll_fixed_position' ] != $instance[ 'scroll_fixed_position' ] ||
                         $js_vars[ 'scroll_fixed_position' ] != $instance[ 'scroll_fixed_position' ] ||
-                        $js_vars[ 'scroll_fixed_position' ] != $instance[ 'scroll_fixed_position' ] ||
+                        $js_vars[ 'sidebar_sticky_title' ] != $instance[ 'sidebar_sticky_title' ] ||
+                        $js_vars[ 'sidebar_sticky_title_size_unit' ] != $instance[ 'sidebar_sticky_title_size_unit' ] ||
+                        $js_vars[ 'sidebar_sticky_title_weight' ] != $instance[ 'sidebar_sticky_title_weight' ] ||
+                        $js_vars[ 'sidebar_sticky_title_color' ] != $instance[ 'sidebar_sticky_title_color' ] ||
                         $js_vars[ 'sidebar_width' ] != $instance[ 'sidebar_width' ] ||
                         $js_vars[ 'sidebar_width_size_unit' ] != $instance[ 'sidebar_width_size_unit' ] ||
                         $js_vars[ 'fixed_top_position' ] != $instance[ 'fixed_top_position' ] ||
@@ -201,12 +209,34 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                         $js_vars[ 'scroll_max_height_size_unit' ] != $instance[ 'scroll_max_height_size_unit' ]
                 )
                 {
+                    $js_vars[ 'appearance_options' ] = isset($instance[ 'appearance_options' ]) ? $instance[ 'appearance_options' ] : '';
+
                     $js_vars[ 'advanced_options' ] = $instance[ 'advanced_options' ];
 
                     if ( empty ( $instance[ 'scroll_fixed_position' ] ) || ( ! empty ( $instance[ 'scroll_fixed_position' ] ) && ! is_int ( $instance[ 'scroll_fixed_position' ] ) && 'auto' != $instance[ 'scroll_fixed_position' ] ) )
                         $js_vars[ 'scroll_fixed_position' ] = '30';
                     else
                         $js_vars[ 'scroll_fixed_position' ] = $instance[ 'scroll_fixed_position' ];
+
+                    if ( empty ( $instance[ 'sidebar_sticky_title' ] ) || ( ! empty ( $instance[ 'sidebar_sticky_title' ] ) && ! is_int ( $instance[ 'sidebar_sticky_title' ] ) ) )
+                        $js_vars[ 'sidebar_sticky_title' ] = 120;
+                    else
+                        $js_vars[ 'sidebar_sticky_title' ] = $instance[ 'sidebar_sticky_title' ];
+
+                    if ( empty ( $instance[ 'sidebar_sticky_title_size_unit' ] ) || ( ! empty ( $instance[ 'sidebar_sticky_title_size_unit' ] ) ) )
+                        $js_vars[ 'sidebar_sticky_title_size_unit' ] = '%';
+                    else
+                        $js_vars[ 'sidebar_sticky_title_size_unit' ] = $instance[ 'sidebar_sticky_title_size_unit' ];
+
+                    if ( empty ( $instance[ 'sidebar_sticky_title_weight' ] ) || ( ! empty ( $instance[ 'sidebar_sticky_title_weight' ] ) ) )
+                        $js_vars[ 'sidebar_sticky_title_weight' ] = '500';
+                    else
+                        $js_vars[ 'sidebar_sticky_title_weight' ] = $instance[ 'sidebar_sticky_title_weight' ];
+
+                    if ( empty ( $instance[ 'sidebar_sticky_title_color' ] ) || ( ! empty ( $instance[ 'sidebar_sticky_title_color' ] ) ) )
+                        $js_vars[ 'sidebar_sticky_title_color' ] = '#000';
+                    else
+                        $js_vars[ 'sidebar_sticky_title_color' ] = $instance[ 'sidebar_sticky_title_color' ];
 
                     if ( empty ( $instance[ 'sidebar_width' ] ) || ( ! empty ( $instance[ 'sidebar_width' ] ) && ! is_int ( $instance[ 'sidebar_width' ] ) && 'auto' != $instance[ 'sidebar_width' ] ) )
                         $js_vars[ 'sidebar_width' ] = 'auto';
@@ -303,9 +333,20 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                     ?>
 
                     <?php echo $before_title; ?>
-                    <span class="ez-toc-widget-sticky-title-container">
 
-                        <style type="text/css">
+                    <?php if(isset($instance[ 'sidebar_sticky_title' ]) && isset($instance[ 'sidebar_sticky_title_size_unit' ])){
+                            $title_font_size = $instance[ 'sidebar_sticky_title' ].$instance[ 'sidebar_sticky_title_size_unit' ];
+                        }else{
+                            $title_font_size = '120%';
+                        } ?>
+
+                    <span class="ez-toc-widget-sticky-title-container">
+                        <style>
+                            #<?php echo $this -> id ?> .ez-toc-widget-sticky-title {
+                                font-size: <?php echo esc_attr ( $title_font_size ); ?>;
+                                font-weight: <?php echo esc_attr ( $instance[ 'sidebar_sticky_title_weight' ] ); ?>;
+                                color: <?php echo esc_attr ( $instance[ 'sidebar_sticky_title_color' ] ); ?>;
+                            }
                             #<?php echo $this -> id ?> .ez-toc-widget-sticky-container ul.ez-toc-widget-sticky-list li.active{
                                 background-color: <?php echo esc_attr ( $instance[ 'highlight_color' ] ); ?>;
                             }
@@ -364,7 +405,7 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
 
                     <?php echo $after_title; ?>
                     <?php if ( 'css' == ezTOC_Option::get ( 'toc_loading' ) ): ?>
-                        <label for="ez-toc-widget-sticky-cssicon-toggle-item-count-<?= $cssIconID ?>" class="cssiconcheckbox">1</label><input type="checkbox" id="ez-toc-widget-sticky-cssicon-toggle-item-<?= $cssIconID ?>" <?= $toggle_view ?> style="display:none" />
+                        <label for="ez-toc-widget-sticky-cssicon-toggle-item-count-<?php $cssIconID ?>" class="cssiconcheckbox">1</label><input type="checkbox" id="ez-toc-widget-sticky-cssicon-toggle-item-<?php $cssIconID ?>" <?php $toggle_view ?> style="display:none" />
                     <?php endif; ?>
                     <?php
                 }
@@ -417,6 +458,20 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
 
             $instance[ 'hide_inline' ] = array_key_exists ( 'hide_inline', $new_instance ) ? $new_instance[ 'hide_inline' ] : '0';
 
+            if ( isset ( $new_instance[ 'appearance_options' ] ) && $new_instance[ 'appearance_options' ] == 'on' )
+            {
+                $instance[ 'sidebar_sticky_title' ] = ( int ) strip_tags ( $new_instance[ 'sidebar_sticky_title' ] );
+                $instance[ 'sidebar_sticky_title_size_unit' ] = strip_tags ( $new_instance[ 'sidebar_sticky_title_size_unit' ] );
+                $instance[ 'sidebar_sticky_title_weight' ] = strip_tags ( $new_instance[ 'sidebar_sticky_title_weight' ] );
+                $instance[ 'sidebar_sticky_title_color' ] = strip_tags ( $new_instance[ 'sidebar_sticky_title_color' ] );
+            } else
+            {
+                $instance[ 'sidebar_sticky_title' ] = 120;
+                $instance[ 'sidebar_sticky_title_size_unit' ] = '%';
+                $instance[ 'sidebar_sticky_title_weight' ] = '500';
+                $instance[ 'sidebar_sticky_title_color' ] = '#000';
+            }
+
             if ( isset ( $new_instance[ 'advanced_options' ] ) && $new_instance[ 'advanced_options' ] == 'on' )
             {
                 $instance[ 'advanced_options' ] = 'on';
@@ -443,7 +498,6 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                 $instance[ 'scroll_max_height_size_unit' ] = 'none';
             }
 
-
             return $instance;
         }
 
@@ -463,8 +517,13 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
             $defaults = array(
                 'highlight_color' => '#ededed',
                 'title' => 'Table of Contents',
+                'appearance_options' => '',
                 'advanced_options' => '',
                 'scroll_fixed_position' => 30,
+                'sidebar_sticky_title' => 120,
+                'sidebar_sticky_title_size_unit' => '%',
+                'sidebar_sticky_title_weight' => '500',
+                'sidebar_sticky_title_color' => '#000',
                 'sidebar_width' => 'auto',
                 'sidebar_width_size_unit' => 'none',
                 'fixed_top_position' => 30,
@@ -477,6 +536,7 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
             $instance = wp_parse_args ( ( array ) $instance, $defaults );
 
             $highlight_color = esc_attr ( $instance[ 'highlight_color' ] );
+            $title_color = esc_attr ( $instance[ 'sidebar_sticky_title_color' ] );
             ?>
             <p>
                 <label for="<?php echo $this -> get_field_id ( 'title' ); ?>"><?php _e ( 'Title', 'easy-table-of-contents' ); ?>:</label>
@@ -485,66 +545,103 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                        style="width:100%;"/>
             </p>
 
-            <p>
-                <label for="<?php echo $this -> get_field_id ( 'highlight_color' ); ?>"><?php _e ( 'Active Section Highlight Color:', 'easy-table-of-contents' ); ?></label><br>
-                <input type="text" name="<?php echo $this -> get_field_name ( 'highlight_color' ); ?>" class="color-picker" id="<?php echo $this -> get_field_id ( 'highlight_color' ); ?>" value="<?php echo $highlight_color; ?>" data-default-color="<?php echo $defaults[ 'highlight_color' ]; ?>" />
-            </p>
+            <div class="ez-toc-widget-appearance-title">
+                <input type="checkbox" class="ez_toc_widget_appearance_options" id="<?php echo $this -> get_field_id ( 'appearance_options' ); ?>" name="<?php echo $this -> get_field_name ( 'appearance_options' ); ?>" <?php ( 'on' === $instance[ 'appearance_options' ] ) ? 'checked="checked"' : ''; ?>/>
+                <label for="<?php echo $this -> get_field_id ( 'appearance_options' ); ?>"><?php _e ( 'Appearance', 'easy-table-of-contents' ); ?></label>
+                <div id="ez-toc-widget-options-container" class="ez-toc-widget-appearance-options-container">
+                    <div class="ez-toc-widget-form-group">
+                        <label for="<?php echo $this -> get_field_id ( 'sidebar_sticky_title' ); ?>"><?php _e ( 'Title Font Size', 'easy-table-of-contents' ); ?>:</label>
+                        <input type="text" id="<?php echo $this -> get_field_id ( 'sidebar_sticky_title' ); ?>" name="<?php echo $this -> get_field_name ( 'sidebar_sticky_title' ); ?>" value="<?php echo $instance[ 'sidebar_sticky_title' ]; ?>" />
 
-            <div class="ez-toc-widget-sticky-advanced-title">
-                <input type="checkbox" class="ez_toc_widget_sticky_advanced_options" id="<?php echo $this -> get_field_id ( 'advanced_options' ); ?>" name="<?php echo $this -> get_field_name ( 'advanced_options' ); ?>" <?= ( 'on' === $instance[ 'advanced_options' ] ) ? 'checked="checked"' : ''; ?>/><label for="<?php echo $this -> get_field_id ( 'advanced_options' ); ?>"><?= _e ( 'Advanced Options', 'easy-table-of-contents' ); ?></label>
+                        <select id="<?php echo $this -> get_field_id ( 'sidebar_sticky_title_size_unit' ); ?>" name="<?php echo $this -> get_field_name ( 'sidebar_sticky_title_size_unit' ); ?>" data-placeholder="" >
+                            <option value="%" <?php echo ( '%' == $instance[ 'sidebar_sticky_title_size_unit' ] ) ? 'selected' : ''; ?>><?php _e ( '%', 'easy-table-of-contents' ); ?></option>
+                            <option value="pt" <?php echo ( 'pt' == $instance[ 'sidebar_sticky_title_size_unit' ] ) ? 'selected=' : ''; ?> ><?php _e ( 'pt', 'easy-table-of-contents' ); ?></option>
+                            <option value="px" <?php echo ( 'px' == $instance[ 'sidebar_sticky_title_size_unit' ] ) ? 'selected=' : ''; ?>><?php _e ( 'px', 'easy-table-of-contents' ); ?></option>
+                            <option value="em" <?php echo ( 'em' == $instance[ 'sidebar_sticky_title_size_unit' ] ) ? 'selected=' : ''; ?>><?php _e ( 'em', 'easy-table-of-contents' ); ?></option>
+                        </select>
+                    </div>
 
+                    <div class="ez-toc-widget-form-group">
+                        <label for="<?php echo $this -> get_field_id ( 'sidebar_sticky_title_wgt' ); ?>"><?php _e ( 'Title Font Weight', 'easy-table-of-contents' ); ?>:</label>
 
-                <div id="ez-toc-widget-sticky-advanced-options-container" class="ez-toc-widget-sticky-advanced-options-container">
-                    <div class="ez-toc-widget-sticky-form-group">
+                        <select id="<?php echo $this -> get_field_id ( 'sidebar_sticky_title_weight' ); ?>" name="<?php echo $this -> get_field_name ( 'sidebar_sticky_title_weight' ); ?>" data-placeholder="" style=" width: 60px; ">
+                            <option value="100" <?php echo ( '100' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected' : ''; ?>><?php _e ( '100', 'easy-table-of-contents' ); ?></option>
+                            <option value="200" <?php echo ( '200' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected=' : ''; ?> ><?php _e ( '200', 'easy-table-of-contents' ); ?></option>
+                            <option value="300" <?php echo ( '300' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected=' : ''; ?>><?php _e ( '300', 'easy-table-of-contents' ); ?></option>
+                            <option value="400" <?php echo ( '400' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected=' : ''; ?>><?php _e ( '400', 'easy-table-of-contents' ); ?></option>
+                            <option value="500" <?php echo ( '500' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected=' : ''; ?>><?php _e ( '500', 'easy-table-of-contents' ); ?></option>
+                            <option value="600" <?php echo ( '600' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected=' : ''; ?>><?php _e ( '600', 'easy-table-of-contents' ); ?></option>
+                            <option value="700" <?php echo ( '700' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected=' : ''; ?>><?php _e ( '700', 'easy-table-of-contents' ); ?></option>
+                            <option value="800" <?php echo ( '800' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected=' : ''; ?>><?php _e ( '800', 'easy-table-of-contents' ); ?></option>
+                            <option value="900" <?php echo ( '900' == $instance[ 'sidebar_sticky_title_weight' ] ) ? 'selected=' : ''; ?>><?php _e ( '900', 'easy-table-of-contents' ); ?></option>
+                        </select>
+                    </div>
+
+                    <p class="ez-toc-widget-form-group">
+                        <label for="<?php echo $this -> get_field_id ( 'sidebar_sticky_title_color' ); ?>" style="margin-right: 12px;"><?php _e ( 'Font Title Color:', 'easy-table-of-contents' ); ?></label><br>
+                        <input type="text" name="<?php echo $this -> get_field_name ( 'sidebar_sticky_title_color' ); ?>" class="color-picker" id="<?php echo $this -> get_field_id ( 'sidebar_sticky_title_color' ); ?>" value="<?php echo $title_color; ?>" data-default-color="<?php echo $defaults[ 'sidebar_sticky_title_color' ]; ?>" />
+                    </p>
+                    <p class="ez-toc-widget-form-group" style="margin: 0;margin-top: 7px;">
+                        <label for="<?php echo $this -> get_field_id ( 'highlight_color' ); ?>" style="margin-right: 12px;"><?php _e ( 'Active Section Highlight Color:', 'easy-table-of-contents' ); ?></label><br>
+                        <input type="text" name="<?php echo $this -> get_field_name ( 'highlight_color' ); ?>" class="color-picker" id="<?php echo $this -> get_field_id ( 'highlight_color' ); ?>" value="<?php echo $highlight_color; ?>" data-default-color="<?php echo $defaults[ 'highlight_color' ]; ?>" />
+                    </p>
+                </div>
+            </div>
+
+            <div class="ez-toc-widget-advanced-title">
+                <input type="checkbox" class="ez_toc_widget_advanced_options" id="<?php echo $this -> get_field_id ( 'advanced_options' ); ?>" name="<?php echo $this -> get_field_name ( 'advanced_options' ); ?>" <?php ( 'on' === $instance[ 'advanced_options' ] ) ? 'checked="checked"' : ''; ?>/><label for="<?php echo $this -> get_field_id ( 'advanced_options' ); ?>"><?php _e ( 'Advanced Options', 'easy-table-of-contents' ); ?></label>
+
+                <div id="ez-toc-widget-options-container" class="ez-toc-widget-advanced-options-container">
+                    <div class="ez-toc-widget-form-group">
                         <label for="<?php echo $this -> get_field_id ( 'scroll_fixed_position' ); ?>"><?php _e ( 'Scroll Fixed Position', 'easy-table-of-contents' ); ?>:</label>
                         <input type="number" id="<?php echo $this -> get_field_id ( 'scroll_fixed_position' ); ?>" name="<?php echo $this -> get_field_name ( 'scroll_fixed_position' ); ?>" value="<?php echo $instance[ 'scroll_fixed_position' ]; ?>" />
                     </div>
 
-                    <div class="ez-toc-widget-sticky-form-group">
+                    <div class="ez-toc-widget-form-group">
                         <label for="<?php echo $this -> get_field_id ( 'sidebar_width' ); ?>"><?php _e ( 'Sidebar Width', 'easy-table-of-contents' ); ?>:</label>
                         <input type="text" id="<?php echo $this -> get_field_id ( 'sidebar_width' ); ?>" name="<?php echo $this -> get_field_name ( 'sidebar_width' ); ?>" value="<?php echo $instance[ 'sidebar_width' ]; ?>" />
 
                         <select id="<?php echo $this -> get_field_id ( 'sidebar_width_size_unit' ); ?>" name="<?php echo $this -> get_field_name ( 'sidebar_width_size_unit' ); ?>" data-placeholder="" >
-                            <option value="pt" <?= ( 'pt' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?> ><?php _e ( 'pt', 'easy-table-of-contents' ); ?></option>
+                            <option value="pt" <?php ( 'pt' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?> ><?php _e ( 'pt', 'easy-table-of-contents' ); ?></option>
 
-                            <option value="px" <?= ( 'px' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'px', 'easy-table-of-contents' ); ?></option>
-                            <option value="%" <?= ( '%' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( '%', 'easy-table-of-contents' ); ?></option>
-                            <option value="em" <?= ( 'em' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'em', 'easy-table-of-contents' ); ?></option>
-                            <option value="none" <?= ( 'none' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'none', 'easy-table-of-contents' ); ?></option>
+                            <option value="px" <?php ( 'px' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'px', 'easy-table-of-contents' ); ?></option>
+                            <option value="%" <?php ( '%' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( '%', 'easy-table-of-contents' ); ?></option>
+                            <option value="em" <?php ( 'em' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'em', 'easy-table-of-contents' ); ?></option>
+                            <option value="none" <?php ( 'none' == $instance[ 'sidebar_width_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'none', 'easy-table-of-contents' ); ?></option>
                         </select>
                     </div>
 
 
-                    <div class="ez-toc-widget-sticky-form-group">
+                    <div class="ez-toc-widget-form-group">
                         <label for="<?php echo $this -> get_field_id ( 'fixed_top_position' ); ?>"><?php _e ( 'Fixed Top Position', 'easy-table-of-contents' ); ?>:</label>
                         <input type="text" id="<?php echo $this -> get_field_id ( 'fixed_top_position' ); ?>" name="<?php echo $this -> get_field_name ( 'fixed_top_position' ); ?>" value="<?php echo $instance[ 'fixed_top_position' ]; ?>" />
 
                         <select id="<?php echo $this -> get_field_id ( 'fixed_top_position_size_unit' ); ?>" name="<?php echo $this -> get_field_name ( 'fixed_top_position_size_unit' ); ?>" data-placeholder="" >
-                            <option value="pt" <?= ( 'pt' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?> ><?php _e ( 'pt', 'easy-table-of-contents' ); ?></option>
-                            <option value="px" <?= ( 'px' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'px', 'easy-table-of-contents' ); ?></option>
-                            <option value="%" <?= ( '%' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( '%', 'easy-table-of-contents' ); ?></option>
-                            <option value="em" <?= ( 'em' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'em', 'easy-table-of-contents' ); ?></option>
-                            <option value="none" <?= ( 'none' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'none', 'easy-table-of-contents' ); ?></option>
+                            <option value="pt" <?php ( 'pt' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?> ><?php _e ( 'pt', 'easy-table-of-contents' ); ?></option>
+                            <option value="px" <?php ( 'px' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'px', 'easy-table-of-contents' ); ?></option>
+                            <option value="%" <?php ( '%' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( '%', 'easy-table-of-contents' ); ?></option>
+                            <option value="em" <?php ( 'em' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'em', 'easy-table-of-contents' ); ?></option>
+                            <option value="none" <?php ( 'none' == $instance[ 'fixed_top_position_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'none', 'easy-table-of-contents' ); ?></option>
                         </select>
                     </div>
 
 
-                    <div class="ez-toc-widget-sticky-form-group">
+                    <div class="ez-toc-widget-form-group">
                         <label for="<?php echo $this -> get_field_id ( 'navigation_scroll_bar' ); ?>"><?php _e ( 'Navigation Scroll Bar', 'easy-table-of-contents' ); ?>:</label>
-                        <input type="checkbox" id="<?php echo $this -> get_field_id ( 'navigation_scroll_bar' ); ?>" name="<?php echo $this -> get_field_name ( 'navigation_scroll_bar' ); ?>" <?= ( 'on' === $instance[ 'navigation_scroll_bar' ] ) ? 'checked="checked"' : ''; ?>/>
+                        <input type="checkbox" id="<?php echo $this -> get_field_id ( 'navigation_scroll_bar' ); ?>" name="<?php echo $this -> get_field_name ( 'navigation_scroll_bar' ); ?>" <?php ( 'on' === $instance[ 'navigation_scroll_bar' ] ) ? 'checked="checked"' : ''; ?>/>
 
                     </div>
 
-                    <div class="ez-toc-widget-sticky-form-group">
+                    <div class="ez-toc-widget-form-group">
                         <label for="<?php echo $this -> get_field_id ( 'scroll_max_height' ); ?>"><?php _e ( 'Scroll Max Height', 'easy-table-of-contents' ); ?>:</label>
                         <input type="text" id="<?php echo $this -> get_field_id ( 'scroll_max_height' ); ?>" name="<?php echo $this -> get_field_name ( 'scroll_max_height' ); ?>" value="<?php echo $instance[ 'scroll_max_height' ]; ?>" />
 
                         <select id="<?php echo $this -> get_field_id ( 'scroll_max_height_size_unit' ); ?>" name="<?php echo $this -> get_field_name ( 'scroll_max_height_size_unit' ); ?>" data-placeholder="" >
-                            <option value="pt" <?= ( 'pt' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?> ><?php _e ( 'pt', 'easy-table-of-contents' ); ?></option>
-                            <option value="px" <?= ( 'px' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'px', 'easy-table-of-contents' ); ?></option>
-                            <option value="%" <?= ( '%' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( '%', 'easy-table-of-contents' ); ?></option>
-                            <option value="em" <?= ( 'em' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'em', 'easy-table-of-contents' ); ?></option>
-                            <option value="none" <?= ( 'none' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'none', 'easy-table-of-contents' ); ?></option>
+                            <option value="pt" <?php ( 'pt' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?> ><?php _e ( 'pt', 'easy-table-of-contents' ); ?></option>
+                            <option value="px" <?php ( 'px' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'px', 'easy-table-of-contents' ); ?></option>
+                            <option value="%" <?php ( '%' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( '%', 'easy-table-of-contents' ); ?></option>
+                            <option value="em" <?php ( 'em' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'em', 'easy-table-of-contents' ); ?></option>
+                            <option value="none" <?php ( 'none' == $instance[ 'scroll_max_height_size_unit' ] ) ? 'selected="selected"' : ''; ?>><?php _e ( 'none', 'easy-table-of-contents' ); ?></option>
                         </select>
                     </div>
 

@@ -101,7 +101,7 @@ class BulkDatetimeChangeAdmin {
 
 			$bulkdatetimechange_settings = get_user_option( 'bulkdatetimechange', get_current_user_id() );
 			if ( $bulkdatetimechange_settings['picker'] ) {
-				wp_enqueue_script( 'jquery-datetimepicker', plugin_dir_url( __DIR__ ) . 'js/jquery.datetimepicker.js', null, '2.3.4' );
+				wp_enqueue_script( 'jquery-datetimepicker', plugin_dir_url( __DIR__ ) . 'js/jquery.datetimepicker.js', null, '2.3.4', true );
 			}
 			wp_enqueue_script( 'jquery-datetimepicker-bdtc', plugin_dir_url( __DIR__ ) . 'js/jquery.datetimepicker.bdtc.js', array( 'jquery' ), array(), '1.00', false );
 			wp_enqueue_script( 'bulkdatetimechange-js', plugin_dir_url( __DIR__ ) . 'js/jquery.bulkdatetimechange.js', array( 'jquery' ), array(), '1.00', false );

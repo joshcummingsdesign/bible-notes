@@ -64,7 +64,8 @@ abstract class WPCode_Metabox_Snippets {
 			$this->tabs['body'] = __( 'Body', 'insert-headers-and-footers' );
 		}
 
-		$this->tabs['code'] = __( 'Custom Code Snippet', 'insert-headers-and-footers' );
+		$this->tabs['code']      = __( 'Custom Code Snippet', 'insert-headers-and-footers' );
+		$this->tabs['revisions'] = __( 'Revisions', 'insert-headers-and-footers' );
 
 	}
 

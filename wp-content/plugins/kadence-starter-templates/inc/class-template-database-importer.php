@@ -6,8 +6,11 @@
  * @package Kadence Starter Templates
  */
 
-namespace Kadence_Starter_Templates;
+namespace KadenceWP\KadenceStarterTemplates;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Class for pulling in template database and saving locally
  */
@@ -228,18 +231,13 @@ class Template_Database_Importer {
 	 * @return string Returns the remote URL contents.
 	 */
 	public function get_remote_url_contents() {
-		// We only need the site url to validate iThemes license.
-		if ( 'iThemes' === $this->api_email ) {
-			if ( is_callable( 'network_home_url' ) ) {
-				$site_url = network_home_url( '', 'http' );
-			} else {
-				$site_url = get_bloginfo( 'url' );
-			}
-			$site_url = preg_replace( '/^https/', 'http', $site_url );
-			$site_url = preg_replace( '|/$|', '', $site_url );
+		if ( is_callable( 'network_home_url' ) ) {
+			$site_url = network_home_url( '', 'http' );
 		} else {
-			$site_url = '';
+			$site_url = get_bloginfo( 'url' );
 		}
+		$site_url = preg_replace( '/^https/', 'http', $site_url );
+		$site_url = preg_replace( '|/$|', '', $site_url );
 		$args = apply_filters(
 			'kadence_starter_get_templates_args',
 			array(
@@ -300,11 +298,21 @@ class Template_Database_Importer {
 	public function get_local_template_data_filename() {
 		$ktp_api = 'free';
 		if ( class_exists( 'Kadence_Theme_Pro' ) ) {
-			$ktp_data = get_option( 'ktp_api_manager' );
-			if ( $ktp_data && isset( $ktp_data['ktp_api_key'] ) && ! empty( $ktp_data['ktp_api_key'] ) ) {
-				$ktp_api = $ktp_data['ktp_api_key'];
-			} else if ( $ktp_data && isset( $ktp_data['ithemes_key'] ) && ! empty( $ktp_data['ithemes_key'] ) ) {
-				$ktp_api = $ktp_data['ithemes_key'];
+			$pro_data = array();
+			if ( function_exists( '\KadenceWP\KadencePro\StellarWP\Uplink\get_license_key' ) ) {
+				$pro_data['ktp_api_key'] = \KadenceWP\KadencePro\StellarWP\Uplink\get_license_key( 'kadence-theme-pro' );
+			}
+			if ( empty( $pro_data ) ) {
+				if ( is_multisite() && ! apply_filters( 'kadence_activation_individual_multisites', false ) ) {
+					$pro_data = get_site_option( 'ktp_api_manager' );
+				} else {
+					$pro_data = get_option( 'ktp_api_manager' );
+				}
+			}
+			if ( $pro_data && isset( $pro_data['ktp_api_key'] ) && ! empty( $pro_data['ktp_api_key'] ) ) {
+				$ktp_api = $pro_data['ktp_api_key'];
+			} else if ( $pro_data && isset( $pro_data['ithemes_key'] ) && ! empty( $pro_data['ithemes_key'] ) ) {
+				$ktp_api = $pro_data['ithemes_key'];
 			}
 		}
 		return md5( $this->get_base_url() . $this->get_base_path() . $this->template_type . KADENCE_STARTER_TEMPLATES_VERSION . $ktp_api );

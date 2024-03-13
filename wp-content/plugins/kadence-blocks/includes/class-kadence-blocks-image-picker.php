@@ -9,10 +9,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use KadenceWP\KadenceBlocks\Traits\Image_Size_Trait;
+
 /**
  * Class to create a minified css output.
  */
 class Kadence_Blocks_Image_Picker {
+
+	use Image_Size_Trait;
+
 	/**
 	 * The singleton instance
 	 *
@@ -50,7 +55,7 @@ class Kadence_Blocks_Image_Picker {
 
 		// Block CSS Scripts & Styles.
 		$kadence_image_picker_meta = kadence_blocks_get_asset_file( 'dist/extension-image-picker' );
-		wp_register_script( 'kadence-extension-image-picker', KADENCE_BLOCKS_URL . 'dist/extension-image-picker.js', $kadence_image_picker_meta['dependencies'], $kadence_image_picker_meta['version'], true );
+		wp_register_script( 'kadence-extension-image-picker', KADENCE_BLOCKS_URL . 'dist/extension-image-picker.js', array_merge( $kadence_image_picker_meta['dependencies'], array( 'wp-api', 'kadence-extension-stores' ) ), $kadence_image_picker_meta['version'], true );
 		wp_register_style( 'kadence-extension-image-picker', KADENCE_BLOCKS_URL . 'dist/extension-image-picker.css', array(), $kadence_image_picker_meta['version'] );
 	}
 
@@ -70,9 +75,12 @@ class Kadence_Blocks_Image_Picker {
 		if ( $is_option_enabled && isset( $kadence_blocks_settings['enable_image_picker'] ) && false === $kadence_blocks_settings['enable_image_picker'] ) {
 			$is_option_enabled = false;
 		}
-		$current_screen = is_admin() && function_exists( 'get_current_screen' ) ? get_current_screen()->base : '';
 
-		if ( $this->image_picker_has_access() && $is_option_enabled && 'upload' !== $current_screen ) {
+		$current_screen = is_admin() && function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		$current_screen_base = is_object( $current_screen ) ? $current_screen->base : '';
+
+		if ( $this->image_picker_has_access() && $is_option_enabled && 'upload' !== $current_screen_base ) {
 
 			wp_enqueue_script( 'kadence-extension-image-picker' );
 			wp_enqueue_style( 'kadence-extension-image-picker' );
@@ -81,37 +89,11 @@ class Kadence_Blocks_Image_Picker {
 				'kadence-extension-image-picker',
 				'kadenceExtensionImagePicker',
 				array(
-					'image_sizes' => $this->get_image_sizes(),
+					'image_sizes'      => $this->get_image_sizes(),
 					'default_provider' => 'pexels',
 				)
 			);
 		}
-	}
-
-	/**
-	 * Enqueue block plugin for backend editor.
-	 */
-	public function get_image_sizes() {
-		return array(
-			array(
-				'id' => 'thumbnail',
-				'width' => 150,
-				'height' => 150,
-				'crop' => true,
-			),
-			array(
-				'id' => 'medium_large',
-				'width' => 768,
-				'height' => 0,
-				'crop' => false,
-			),
-			array(
-				'id' => 'download',
-				'width' => 2048,
-				'height' => 2048,
-				'crop' => false,
-			),
-		);
 	}
 
 	/**

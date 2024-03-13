@@ -22,6 +22,9 @@ use function the_post;
 use function apply_filters;
 use function get_template_part;
 use function get_post_type;
+use function is_account_page;
+use function is_checkout;
+use function is_cart;
 
 
 /**
@@ -45,6 +48,8 @@ class Component implements Component_Interface {
 		add_action( 'elementor/theme/register_locations', array( $this, 'register_elementor_locations' ) );
 		add_action( 'elementor/dynamic_tags/register_tags', array( $this, 'add_palette_colors' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'disable_theme_account_css' ), 20 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'disable_theme_checkout_changes' ), 20 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'disable_theme_cart_changes' ), 20 );
 	}
 	/**
 	 * Disable theme account css.
@@ -57,6 +62,31 @@ class Component implements Component_Interface {
 				remove_action( 'woocommerce_before_account_navigation', array( $kadence_theme_class->components['woocommerce'], 'myaccount_nav_wrap_start' ), 2 );
 				remove_action( 'woocommerce_before_account_navigation', array( $kadence_theme_class->components['woocommerce'], 'myaccount_nav_avatar' ), 20 );
 				remove_action( 'woocommerce_after_account_navigation', array( $kadence_theme_class->components['woocommerce'], 'myaccount_nav_wrap_end' ), 50 );
+			}
+		}
+	}
+	/**
+	 * Disable theme checkout css.
+	 */
+	public function disable_theme_checkout_changes() {
+		if ( class_exists( 'woocommerce' ) && is_checkout() ) {
+			if ( function_exists( 'elementor_location_exits' ) && \Elementor\Plugin::$instance->db->is_built_with_elementor( get_the_ID() ) ) {
+				wp_enqueue_style( 'kadence-elementor-checkout', get_theme_file_uri( '/assets/css/elementor-checkout.min.css' ), array(), KADENCE_VERSION );
+			}
+		}
+	}
+	/**
+	 * Disable theme cart changes.
+	 */
+	public function disable_theme_cart_changes() {
+		if ( class_exists( 'woocommerce' ) && is_cart() ) {
+			if ( function_exists( 'elementor_location_exits' ) && \Elementor\Plugin::$instance->db->is_built_with_elementor( get_the_ID() ) ) {
+				wp_enqueue_style( 'kadence-elementor-cart', get_theme_file_uri( '/assets/css/elementor-cart.min.css' ), array(), KADENCE_VERSION );
+				$kadence_theme_class = \Kadence\Theme::instance();
+				// Remove Cart Changes.
+				remove_action( 'woocommerce_before_cart', array( $kadence_theme_class->components['woocommerce'], 'cart_form_wrap_before' ) );
+				remove_action( 'woocommerce_after_cart', array( $kadence_theme_class->components['woocommerce'], 'cart_form_wrap_after' ) );
+				remove_action( 'woocommerce_before_cart_table', array( $kadence_theme_class->components['woocommerce'], 'cart_summary_title' ) );
 			}
 		}
 	}

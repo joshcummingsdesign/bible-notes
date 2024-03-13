@@ -80,7 +80,7 @@ class Kadence_Blocks_Advanced_Form_Block extends Kadence_Blocks_Abstract_Block {
 			return;
 		}
 
-		$form_fields     = $this->get_form_fields( $attributes['id'] );
+		// $form_fields     = $this->get_form_fields( $attributes['id'] );
 		$form_attributes = $this->get_form_attributes( $attributes['id'] );
 
 		$form_attributes = json_decode( json_encode( $form_attributes ), true );
@@ -127,7 +127,6 @@ class Kadence_Blocks_Advanced_Form_Block extends Kadence_Blocks_Abstract_Block {
 			'.wp-block-kadence-advanced-form' . $unique_id . ' .kb-advanced-form input[type=time],' .
 			'.wp-block-kadence-advanced-form' . $unique_id . ' .kb-advanced-form input[type=email],' .
 			'.wp-block-kadence-advanced-form' . $unique_id . ' .kb-advanced-form input[type=file],' .
-			'.wp-block-kadence-advanced-form' . $unique_id . ' .kb-advanced-form input[type=email],' .
 			'.wp-block-kadence-advanced-form' . $unique_id . ' .kb-advanced-form select,' .
 			'.wp-block-kadence-advanced-form' . $unique_id . ' .kb-advanced-form textarea'
 		);
@@ -179,11 +178,6 @@ class Kadence_Blocks_Advanced_Form_Block extends Kadence_Blocks_Abstract_Block {
 		if ( ! empty( $desktop_border_color ) ) {
 			$css->add_property( '--kb-form-border-color', $desktop_border_color );
 		}
-		if ( ! empty( $field_style['borderActive'] ) ) {
-			$css->add_property( '--kb-form-border-focus-color', $desktop_border_color );
-			$css->render_color_output( $field_style, 'borderActive', '--kb-form-border-focus-color' );
-		}
-
 
 		/*
 		 * Field Placeholder text
@@ -209,6 +203,10 @@ class Kadence_Blocks_Advanced_Form_Block extends Kadence_Blocks_Abstract_Block {
 		);
 
 		$css->render_color_output( $input_font, 'colorActive', 'color' );
+
+		if ( ! empty( $field_style['borderActive'] ) ) {
+			$css->add_property( 'border-color',  $css->sanitize_color( $field_style['borderActive'] ) );
+		}
 
 		if ( ! empty( $field_style['boxShadowActive'][0] ) && $field_style['boxShadowActive'][0] === true ) {
 			$css->add_property( 'box-shadow', ( isset( $field_style['boxShadowActive'][7] ) && true === $field_style['boxShadowActive'][7] ? 'inset ' : '' ) . ( isset( $field_style['boxShadowActive'][3] ) && is_numeric( $field_style['boxShadowActive'][3] ) ? $field_style['boxShadowActive'][3] : '2' ) . 'px ' . ( isset( $field_style['boxShadowActive'][4] ) && is_numeric( $field_style['boxShadowActive'][4] ) ? $field_style['boxShadowActive'][4] : '2' ) . 'px ' . ( isset( $field_style['boxShadowActive'][5] ) && is_numeric( $field_style['boxShadowActive'][5] ) ? $field_style['boxShadowActive'][5] : '3' ) . 'px ' . ( isset( $field_style['boxShadowActive'][6] ) && is_numeric( $field_style['boxShadowActive'][6] ) ? $field_style['boxShadowActive'][6] : '0' ) . 'px ' . $css->render_color( ( isset( $field_style['boxShadowActive'][1] ) && ! empty( $field_style['boxShadowActive'][1] ) ? $field_style['boxShadowActive'][1] : '#000000' ), ( isset( $field_style['boxShadowActive'][2] ) && is_numeric( $field_style['boxShadowActive'][2] ) ? $field_style['boxShadowActive'][2] : 0.4 ) ) );
@@ -365,7 +363,7 @@ class Kadence_Blocks_Advanced_Form_Block extends Kadence_Blocks_Abstract_Block {
 		if ( isset( $field_style['isDark'] ) && $field_style['isDark'] ) {
 			$outer_classes[] = 'kb-form-is-dark';
 		}
-		if( !empty( $form_attributes['className'] ) ) {
+		if( ! empty( $form_attributes['className'] ) ) {
 			$outer_classes[] = $form_attributes['className'];
 		}
 		$background_type = ( ! empty( $background_style['backgroundType'] ) ? $background_style['backgroundType'] : 'normal' );
@@ -389,6 +387,12 @@ class Kadence_Blocks_Advanced_Form_Block extends Kadence_Blocks_Abstract_Block {
 			'class' => implode( ' ', $inner_classes ),
 			'method' => 'post',
 		);
+		if ( isset( $form_attributes['messages']['preError'] ) && ! empty( $form_attributes['messages']['preError'] ) ) {
+			$inner_args['data-error-message'] = $form_attributes['messages']['preError'];
+		}
+		if ( isset( $form_attributes['enableAnalytics'] ) && $form_attributes['enableAnalytics'] && class_exists( 'Kadence_Blocks_Pro' ) ) {
+			$inner_args['data-kb-events'] = 'yes';
+		}
 		if ( isset( $form_attributes['browserValidation'] ) && ! $form_attributes['browserValidation'] ) {
 			$inner_args['novalidate'] = 'true';
 		}

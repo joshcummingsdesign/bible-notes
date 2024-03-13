@@ -155,15 +155,13 @@ class Kadence_Blocks_Singlebtn_Block extends Kadence_Blocks_Abstract_Block {
 		}
 		// Hover before.
 		if ( 'gradient' === $bg_type && 'normal' === $bg_hover_type && ! empty( $attributes['backgroundHover'] ) ) {
-			$css->set_selector( '.kb-btn' . $unique_id . '.kb-button:hover::before' );
-			$css->add_property( 'background', $css->render_color( $attributes['backgroundHover'] ) );
 			$css->set_selector( '.kb-btn' . $unique_id . '.kb-button::before' );
+			$css->add_property( 'background', $css->render_color( $attributes['backgroundHover'] ) );
 			$css->add_property( 'transition', 'opacity .3s ease-in-out' );
 		}
 		if ( 'gradient' === $bg_hover_type && ! empty( $attributes['gradientHover'] ) ) {
-			$css->set_selector( '.kb-btn' . $unique_id . '.kb-button:hover::before' );
-			$css->add_property( 'background', $attributes['gradientHover'] );
 			$css->set_selector( '.kb-btn' . $unique_id . '.kb-button::before' );
+			$css->add_property( 'background', $attributes['gradientHover'] );
 			$css->add_property( 'transition', 'opacity .3s ease-in-out' );
 		}
 		// Only Icon.
@@ -180,12 +178,30 @@ class Kadence_Blocks_Singlebtn_Block extends Kadence_Blocks_Abstract_Block {
 				$css->add_property( 'display', 'block' );
 			}
 		}
+		if ( isset( $attributes['onlyText'][0] ) && '' !== $attributes['onlyText'][0] ) {
+			$css->set_media_state( 'tablet' );
+			$css->set_selector( '.kb-btn' . $unique_id . '.kb-button .kb-svg-icon-wrap' );
+			if ( true == $attributes['onlyText'][0] ) {
+				$css->add_property( 'display', 'none' );
+			} elseif ( false == $attributes['onlyText'][0] ) {
+				$css->add_property( 'display', 'block' );
+			}
+		}
 		if ( isset( $attributes['onlyIcon'][2] ) && '' !== $attributes['onlyIcon'][2] ) {
 			$css->set_media_state( 'mobile' );
 			$css->set_selector( '.kb-btn' . $unique_id . '.kb-button .kt-btn-inner-text' );
 			if ( true == $attributes['onlyIcon'][2] ) {
 				$css->add_property( 'display', 'none' );
 			} elseif ( false == $attributes['onlyIcon'][2] ) {
+				$css->add_property( 'display', 'block' );
+			}
+		}
+		if ( isset( $attributes['onlyText'][1] ) && '' !== $attributes['onlyText'][1] ) {
+			$css->set_media_state( 'mobile' );
+			$css->set_selector( '.kb-btn' . $unique_id . '.kb-button .kb-svg-icon-wrap' );
+			if ( true == $attributes['onlyText'][1] ) {
+				$css->add_property( 'display', 'none' );
+			} elseif ( false == $attributes['onlyText'][1] ) {
 				$css->add_property( 'display', 'block' );
 			}
 		}
@@ -257,7 +273,9 @@ class Kadence_Blocks_Singlebtn_Block extends Kadence_Blocks_Abstract_Block {
 			if ( $line_icon ) {
 				$stroke_width = 2;
 			}
-			$svg_icon = Kadence_Blocks_Svg_Render::render( $attributes['icon'], $fill, $stroke_width );
+			$title    = ( ! empty( $attributes['iconTitle'] ) ? $attributes['iconTitle'] : '' );
+			$hidden   = ( empty( $title ) ? true : false );
+			$svg_icon = Kadence_Blocks_Svg_Render::render( $attributes['icon'], $fill, $stroke_width, $title, $hidden );
 		}
 		$icon_left  = ! empty( $svg_icon ) && ! empty( $attributes['iconSide'] ) && 'left' === $attributes['iconSide'] ? '<span class="kb-svg-icon-wrap kb-svg-icon-' . esc_attr( $attributes['icon'] ) . ' kt-btn-icon-side-left">' . $svg_icon . '</span>' : '';
 		$icon_right = ! empty( $svg_icon ) && ! empty( $attributes['iconSide'] ) && 'right' === $attributes['iconSide'] ? '<span class="kb-svg-icon-wrap kb-svg-icon-' . esc_attr( $attributes['icon'] ) . ' kt-btn-icon-side-right">' . $svg_icon . '</span>' : '';

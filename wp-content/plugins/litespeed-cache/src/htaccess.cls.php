@@ -12,7 +12,7 @@
 
 namespace LiteSpeed;
 
-defined('WPINC') || exit;
+defined('WPINC') || exit();
 
 class Htaccess extends Root
 {
@@ -34,10 +34,11 @@ class Htaccess extends Root
 	const LS_MODULE_END = '</IfModule>';
 	const LS_MODULE_REWRITE_START = '<IfModule mod_rewrite.c>';
 	const REWRITE_ON = 'RewriteEngine on';
-	const LS_MODULE_DONOTEDIT = "## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##";
+	const LS_MODULE_DONOTEDIT = '## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##';
 	const MARKER = 'LSCACHE';
 	const MARKER_NONLS = 'NON_LSCACHE';
 	const MARKER_LOGIN_COOKIE = '### marker LOGIN COOKIE';
+	const MARKER_ASYNC = '### marker ASYNC';
 	const MARKER_CRAWLER = '### marker CRAWLER';
 	const MARKER_MOBILE = '### marker MOBILE';
 	const MARKER_NOCACHE_COOKIES = '### marker NOCACHE COOKIES';
@@ -91,8 +92,8 @@ class Htaccess extends Root
 
 		$this->__rewrite_on = array(
 			self::REWRITE_ON,
-			"CacheLookup on",
-			"RewriteRule .* - [E=Cache-Control:no-autoflush]",
+			'CacheLookup on',
+			'RewriteRule .* - [E=Cache-Control:no-autoflush]',
 			// "RewriteRule \.object-cache\.ini - [F,L]",
 			'RewriteRule ' . preg_quote(self::CONF_FILE) . ' - [F,L]',
 		);
@@ -286,7 +287,7 @@ class Htaccess extends Root
 		}
 
 		// Remove ^M characters.
-		$content = str_ireplace("\x0D", "", $content);
+		$content = str_ireplace("\x0D", '', $content);
 		return $content;
 	}
 
@@ -502,15 +503,15 @@ class Htaccess extends Root
 		$new_rules_backend_nonls = array();
 
 		# continual crawler
-		$id = Base::O_CRAWLER;
-		if (!empty($cfg[$id])) {
-			$new_rules[] = self::MARKER_CRAWLER . self::MARKER_START;
-			$new_rules[] = 'RewriteCond %{REQUEST_URI} /wp-admin/admin-ajax\.php';
-			$new_rules[] = 'RewriteCond %{QUERY_STRING} action=async_litespeed';
-			$new_rules[] = 'RewriteRule .* - [E=noabort:1]';
-			$new_rules[] = self::MARKER_CRAWLER . self::MARKER_END;
-			$new_rules[] = '';
-		}
+		// $id = Base::O_CRAWLER;
+		// if (!empty($cfg[$id])) {
+		$new_rules[] = self::MARKER_ASYNC . self::MARKER_START;
+		$new_rules[] = 'RewriteCond %{REQUEST_URI} /wp-admin/admin-ajax\.php';
+		$new_rules[] = 'RewriteCond %{QUERY_STRING} action=async_litespeed';
+		$new_rules[] = 'RewriteRule .* - [E=noabort:1]';
+		$new_rules[] = self::MARKER_ASYNC . self::MARKER_END;
+		$new_rules[] = '';
+		// }
 
 		// mobile agents
 		$id = Base::O_CACHE_MOBILE_RULES;
@@ -526,7 +527,7 @@ class Htaccess extends Root
 		$id = Base::O_CACHE_EXC_COOKIES;
 		if (!empty($cfg[$id])) {
 			$new_rules[] = self::MARKER_NOCACHE_COOKIES . self::MARKER_START;
-			$new_rules[] = 'RewriteCond %{HTTP_COOKIE} ' .  Utility::arr2regex($cfg[$id], true);
+			$new_rules[] = 'RewriteCond %{HTTP_COOKIE} ' . Utility::arr2regex($cfg[$id], true);
 			$new_rules[] = 'RewriteRule .* - [E=Cache-Control:no-cache]';
 			$new_rules[] = self::MARKER_NOCACHE_COOKIES . self::MARKER_END;
 			$new_rules[] = '';
@@ -552,9 +553,13 @@ class Htaccess extends Root
 		}
 
 		// check login cookie
+		$vary_cookies = $cfg[Base::O_CACHE_VARY_COOKIES];
 		$id = Base::O_CACHE_LOGIN_COOKIE;
-		$vary_cookies = $cfg[$id] ? array($cfg[$id]) : array();
-		if (LITESPEED_SERVER_TYPE === 'LITESPEED_SERVER_OLS') { // Need to keep this due to different behavior of OLS when handling response vary header @Sep/22/2018
+		if (!empty($cfg[$id])) {
+			$vary_cookies[] = $cfg[$id];
+		}
+		if (LITESPEED_SERVER_TYPE === 'LITESPEED_SERVER_OLS') {
+			// Need to keep this due to different behavior of OLS when handling response vary header @Sep/22/2018
 			if (defined('COOKIEHASH')) {
 				$vary_cookies[] = ',wp-postpass_' . COOKIEHASH;
 			}
@@ -645,13 +650,7 @@ class Htaccess extends Root
 	 */
 	private function _wrap_ls_module($rules = array())
 	{
-		return array_merge(
-			array(self::LS_MODULE_START),
-			$this->__rewrite_on,
-			array(''),
-			$rules,
-			array(self::LS_MODULE_END)
-		);
+		return array_merge(array(self::LS_MODULE_START), $this->__rewrite_on, array(''), $rules, array(self::LS_MODULE_END));
 	}
 
 	/**
@@ -680,11 +679,7 @@ class Htaccess extends Root
 			return $rules;
 		}
 
-		$rules = array_merge(
-			array(self::LS_MODULE_DONOTEDIT),
-			$rules,
-			array(self::LS_MODULE_DONOTEDIT)
-		);
+		$rules = array_merge(array(self::LS_MODULE_DONOTEDIT), $rules, array(self::LS_MODULE_DONOTEDIT));
 
 		return $rules;
 	}
@@ -840,12 +835,8 @@ class Htaccess extends Root
 		}
 
 		$start_marker = "# BEGIN {$marker}";
-		$end_marker   = "# END {$marker}";
-		$new_file_data = implode("\n", array_merge(
-			array($start_marker),
-			$this->_wrap_do_no_edit($rules),
-			array($end_marker)
-		));
+		$end_marker = "# END {$marker}";
+		$new_file_data = implode("\n", array_merge(array($start_marker), $this->_wrap_do_no_edit($rules), array($end_marker)));
 
 		return $new_file_data;
 	}

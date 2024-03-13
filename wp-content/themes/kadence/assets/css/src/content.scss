@@ -59,6 +59,10 @@ article.sticky {
 		margin-right: -1rem;
 		width: auto;
 	}
+	.content-width-fullwidth.content-style-boxed .content-bg:not(.loop-entry) {
+		margin-left: 0;
+		margin-right: 0;
+	}
 	.content-style-boxed .comments-area {
 		padding-left: 0.5rem;
 		padding-right: 0.5rem;

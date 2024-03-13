@@ -13,7 +13,7 @@
 
 namespace LiteSpeed;
 
-defined('WPINC') || exit;
+defined('WPINC') || exit();
 
 class ESI extends Root
 {
@@ -277,7 +277,12 @@ class ESI extends Root
 		 */
 		if (!empty($_SERVER['ESI_REFERER']) && !$this->cls('REST')->is_rest($_SERVER['ESI_REFERER'])) {
 			self::debug('overwrite REQUEST_URI to ESI_REFERER [from] ' . $_SERVER['REQUEST_URI'] . ' [to] ' . $_SERVER['ESI_REFERER']);
-			$_SERVER['REQUEST_URI'] = trailingslashit($_SERVER['ESI_REFERER']);
+			if (!empty($_SERVER['ESI_REFERER'])) {
+				$_SERVER['REQUEST_URI'] =
+					substr(get_option('permalink_structure'), -1) === '/' && strpos($_SERVER['ESI_REFERER'], '?') === false
+						? trailingslashit($_SERVER['ESI_REFERER'])
+						: $_SERVER['ESI_REFERER'];
+			}
 			# Prevent from 301 redirecting
 			if (!empty($_SERVER['SCRIPT_URI'])) {
 				$SCRIPT_URI = parse_url($_SERVER['SCRIPT_URI']);
@@ -432,7 +437,7 @@ class ESI extends Root
 		$control = esc_attr($inline_param['control']);
 		$tag = esc_attr($inline_param['tag']);
 
-		return "<esi:inline name='$url' cache-control='" . $control . "' cache-tag='" . $tag . "'>" . $inline_param['val'] . "</esi:inline>";
+		return "<esi:inline name='$url' cache-control='" . $control . "' cache-tag='" . $tag . "'>" . $inline_param['val'] . '</esi:inline>';
 	}
 
 	/**
@@ -451,8 +456,16 @@ class ESI extends Root
 	 * @param bool $svar  		If store the value in memory or not, in memory wil be faster
 	 * @param array $inline_val 	If show the current value for current request( this can avoid multiple esi requests in first time cache generating process )
 	 */
-	public function sub_esi_block($block_id, $wrapper, $params = array(), $control = 'private,no-vary', $silence = false, $preserved = false, $svar = false, $inline_param = array())
-	{
+	public function sub_esi_block(
+		$block_id,
+		$wrapper,
+		$params = array(),
+		$control = 'private,no-vary',
+		$silence = false,
+		$preserved = false,
+		$svar = false,
+		$inline_param = array()
+	) {
 		if (empty($block_id) || !is_array($params) || preg_match('/[^\w-]/', $block_id)) {
 			return false;
 		}
@@ -483,7 +496,7 @@ class ESI extends Root
 
 		// Build params for URL
 		$appended_params = array(
-			self::QS_ACTION	=> $block_id,
+			self::QS_ACTION => $block_id,
 		);
 		if (!empty($control)) {
 			$appended_params['_control'] = $control;
@@ -524,7 +537,7 @@ class ESI extends Root
 		if ($block_id == self::COMBO && isset($_SERVER['X-LSCACHE']) && strpos($_SERVER['X-LSCACHE'], 'combine') !== false) {
 			$output .= " combine='main'";
 		}
-		$output .= " />";
+		$output .= ' />';
 
 		if (!$silence) {
 			$output = "<!-- lscwp $wrapper -->$output<!-- lscwp $wrapper esi end -->";
@@ -556,11 +569,7 @@ class ESI extends Root
 	 */
 	private function _gen_esi_md5($params)
 	{
-		$keys = array(
-			self::QS_ACTION,
-			'_control',
-			self::QS_PARAMS,
-		);
+		$keys = array(self::QS_ACTION, '_control', self::QS_PARAMS);
 
 		$str = '';
 		foreach ($keys as $v) {
@@ -732,7 +741,7 @@ class ESI extends Root
 			self::PARAM_NAME => $name,
 			self::PARAM_ID => $widget->id,
 			self::PARAM_INSTANCE => $instance,
-			self::PARAM_ARGS => $args
+			self::PARAM_ARGS => $args,
 		);
 
 		echo $this->sub_esi_block('widget', 'widget ' . $name, $params, $esi_private . 'no-vary');
@@ -804,7 +813,6 @@ class ESI extends Root
 	 */
 	public function load_admin_bar_block($params)
 	{
-
 		if (!empty($params['ref'])) {
 			$ref_qs = parse_url($params['ref'], PHP_URL_QUERY);
 			if (!empty($ref_qs)) {
@@ -817,6 +825,8 @@ class ESI extends Root
 				}
 			}
 		}
+		// Needed when permalink structure is "Plain"
+		wp();
 
 		wp_admin_bar_render();
 		if (!$this->conf(Base::O_ESI_CACHE_ADMBAR)) {
@@ -828,7 +838,6 @@ class ESI extends Root
 
 		defined('LSCWP_LOG') && Debug2::debug('ESI: adminbar ref: ' . $_SERVER['REQUEST_URI']);
 	}
-
 
 	/**
 	 * Parses the esi input parameters and generates the comment form for esi display.
@@ -909,7 +918,7 @@ class ESI extends Root
 		Tag::add(Tag::TYPE_ESI . "esi.$shortcode");
 
 		// Output original shortcode final content
-		echo do_shortcode("[$shortcode " . implode(' ', $atts_ori) . " ]");
+		echo do_shortcode("[$shortcode " . implode(' ', $atts_ori) . ' ]');
 	}
 
 	/**

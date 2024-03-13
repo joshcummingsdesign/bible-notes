@@ -98,20 +98,6 @@ jQuery(document).ready(function ($) {
         );
     });
 
-
-    $('.eztoc-set-pos-btn').hide(); 
-    $("[name='ez-toc-settings[fixedtoc]']").on('click', function (e) {
-        if($(this).is(':checked'))
-        {
-            $('.eztoc-set-pos-btn').show();
-            console.log('checkbox checked');
-        }
-        else{
-            $('.eztoc-set-pos-btn').hide(); 
-            console.log('checkbox unchecked');
-        }
-    });
-
     let stickyToggleCheckbox = $('#eztoc-sticky').find("input[name='ez-toc-settings[sticky-toggle]']");
 let stickyToggleWidth = $('#eztoc-sticky').find("select[name='ez-toc-settings[sticky-toggle-width]']");
 let stickyToggleWidthCustom = $('#eztoc-sticky').find("input[name='ez-toc-settings[sticky-toggle-width-custom]']");
@@ -139,15 +125,15 @@ $(document).on("change", "input[name='ez-toc-settings[sticky-toggle]']", functio
     }
     
 });
-update_sticky_width_field(stickyToggleWidth.value);
-update_sticky_height_field(stickyToggleWidth.value);
+update_sticky_width_field(stickyToggleWidth.val());
+update_sticky_height_field(stickyToggleHeight.val());
 
 $(document).on("change", "select[name='ez-toc-settings[sticky-toggle-width]']", function() {
-    update_sticky_width_field($(stickyToggleWidth).val());
+    update_sticky_width_field($(this).val());
 });
 
 $(document).on("change", "select[name='ez-toc-settings[sticky-toggle-height]']", function() {
-   update_sticky_height_field($(stickyToggleHeight).val());
+   update_sticky_height_field($(this).val());
 });
 
 });
@@ -155,10 +141,8 @@ $(document).on("change", "select[name='ez-toc-settings[sticky-toggle-height]']",
 function update_sticky_width_field(width){
     let stickyToggleWidthCustom = jQuery('#eztoc-sticky').find("input[name='ez-toc-settings[sticky-toggle-width-custom]']");
     if(width == 'custom') {
-        jQuery(stickyToggleWidthCustom).val('350px');
         jQuery(stickyToggleWidthCustom).parents('tr').show(500);
     } else {
-        jQuery(stickyToggleWidthCustom).val('');
         jQuery(stickyToggleWidthCustom).parents('tr').hide(500);
     }
 }
@@ -166,10 +150,8 @@ function update_sticky_width_field(width){
 function update_sticky_height_field(height){
     let stickyToggleHeightCustom = jQuery('#eztoc-sticky').find("input[name='ez-toc-settings[sticky-toggle-height-custom]']");
     if(height == 'custom') {
-        jQuery(stickyToggleHeightCustom).val('800px');
         jQuery(stickyToggleHeightCustom).parents('tr').show(500);
     } else {
-        jQuery(stickyToggleHeightCustom).val('');
         jQuery(stickyToggleHeightCustom).parents('tr').hide(500);
     }
 }

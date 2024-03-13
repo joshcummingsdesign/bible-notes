@@ -367,6 +367,8 @@ class BulkDatetimeChange {
 		?>
 		</select>
 
+		<div class="cp_tooltip_change">
+		<span class="cp_tooltip_change_text"><?php esc_html_e( 'Can filter by directly entering the relevant text: post types, users, categories, date/time, and media. Can also refine your search by entering post tags.', 'bulk-datetime-change' ); ?></span>
 		<?php
 		$search_text = get_user_option( 'bulkdatetimechange_search_text', $uid );
 		if ( ! $search_text ) {
@@ -378,6 +380,10 @@ class BulkDatetimeChange {
 			<input style="vertical-align: middle;" name="search_text" type="text" value="<?php echo esc_attr( $search_text ); ?>">
 			<?php
 		}
+		?>
+		</span>
+		</div>
+		<?php
 
 		submit_button( __( 'Filter' ), 'large', 'bulk-datetime-change-filter', false );
 		?>

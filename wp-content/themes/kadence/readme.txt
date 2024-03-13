@@ -4,7 +4,7 @@ Tags: translation-ready, two-columns, right-sidebar, left-sidebar, footer-widget
 Requires at least: 6.2
 Tested up to: 6.4
 Requires PHP: 7.2
-Stable tag: 1.1.49
+Stable tag: 1.1.51
 License: GNU General Public License v3.0 (or later)
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -35,7 +35,20 @@ developers of this theme.
 
 = Changelog =
 
-== 1.1.49 | 9th October 2023 ==
+== 1.1.51 | 15th January 2024 ==
+* Fix: Issue with starter templates admin page link.
+
+== 1.1.50 | 18th December 2023 ==
+* Update: add requests after content hook.
+* Update: Google Fonts selection.
+* Fix: possible css issue in footer column sizing.
+* Fix: Possible css issue with product grid.
+* Fix: css specificity issue with button.
+* Fix: Issue with elementor cart and checkout widget.
+* Fix: Possible logo size issue when shrinking in dark mode.
+* Fix: Spacing issue with fullwidth in boxed mode on mobile.
+
+== 1.1.49 | 9th November 2023 ==
 * Fix: Issue with image select in customizer.
 * Fix: Issue with gradient control in customizer.
 

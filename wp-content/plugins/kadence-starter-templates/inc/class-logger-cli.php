@@ -21,7 +21,11 @@
  * @package Kadence Starter Templates
  */
 
-namespace Kadence_Starter_Templates;
+namespace KadenceWP\KadenceStarterTemplates;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class Logger_CLI extends Logger {
 

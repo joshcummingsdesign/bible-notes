@@ -31,6 +31,13 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 	protected $block_name = 'infobox';
 
 	/**
+	 * Allowed HTML tags for front end output
+	 *
+	 * @var string[]
+	 */
+	protected $allowed_html_tags = array( 'heading', 'p', 'span', 'div' );
+
+	/**
 	 * Instance Control
 	 */
 	public static function get_instance() {
@@ -75,7 +82,7 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 		}
 
 		// Style.
-		if ( ! empty( $attributes['containerBackground'] ) || $css->is_number( $attributes['containerBackgroundOpacity'] ) || ! empty( $attributes['maxWidth'] ) ) {
+		if ( ! empty( $attributes['containerBackground'] ) || $css->is_number( $attributes['containerBackgroundOpacity'] ) || ! empty( $attributes['maxWidth'] ) || ! empty( $attributes['tabletMaxWidth'] ) || ! empty( $attributes['mobileMaxWidth'] ) ) {
 			if ( isset( $attributes['containerBackground'] ) && ! empty( $attributes['containerBackground'] ) ) {
 				$alpha = ( isset( $attributes['containerBackgroundOpacity'] ) && is_numeric( $attributes['containerBackgroundOpacity'] ) ? $attributes['containerBackgroundOpacity'] : 1 );
 				$css->add_property( 'background', $css->render_color( $attributes['containerBackground'], $alpha ) );
@@ -83,10 +90,19 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 				$alpha = ( isset( $attributes['containerBackgroundOpacity'] ) && is_numeric( $attributes['containerBackgroundOpacity'] ) ? $attributes['containerBackgroundOpacity'] : 1 );
 				$css->add_property( 'background', $css->render_color( '#f2f2f2', $alpha ) );
 			}
-			if ( isset( $attributes['maxWidth'] ) && ! empty( $attributes['maxWidth'] ) ) {
-				$unit = ( isset( $attributes['maxWidthUnit'] ) && ! empty( $attributes['maxWidthUnit'] ) ? $attributes['maxWidthUnit'] : 'px' );
-				$css->add_property( 'max-width', $attributes['maxWidth'] . $unit );
+			$max_width_unit = ( isset( $attributes['maxWidthUnit'] ) && ! empty( $attributes['maxWidthUnit'] ) ? $attributes['maxWidthUnit'] : 'px' );
+			if ( ! empty( $attributes['maxWidth'] ) ) {
+				$css->add_property( 'max-width', $attributes['maxWidth'] . $max_width_unit );
 			}
+			if ( ! empty( $attributes['tabletMaxWidth'] ) ) {
+				$css->set_media_state( 'tablet' );
+				$css->add_property( 'max-width', $attributes['tabletMaxWidth'] . $max_width_unit );
+			}
+			if ( ! empty( $attributes['mobileMaxWidth'] ) ) {
+				$css->set_media_state( 'mobile' );
+				$css->add_property( 'max-width', $attributes['mobileMaxWidth'] . $max_width_unit );
+			}
+			$css->set_media_state( 'desktop' );
 		}
 		$css->render_measure_output( $attributes, 'containerPadding', 'padding', array( 'tablet_key' => 'containerTabletPadding', 'mobile_key' => 'containerMobilePadding' ) );
 		$css->render_measure_output( $attributes, 'containerMargin', 'margin', array( 'unit_key' => 'containerMarginUnit' ) );
@@ -192,18 +208,18 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 			}
 		}
 		if ( ! empty( $media_icon['size'] ) ) {
-			$css->set_selector( $base_selector . ' .kt-info-svg-icon, ' . $base_selector . ' .kt-info-svg-icon-flip, ' . $base_selector . ' .kt-blocks-info-box-number' );
+			$css->set_selector( $base_selector . ' .kadence-info-box-icon-container .kt-info-svg-icon, ' . $base_selector . ' .kt-info-svg-icon-flip, ' . $base_selector . ' .kt-blocks-info-box-number' );
 			$css->add_property( 'font-size', $media_icon['size'] . 'px' );
 		}
 		if ( isset( $media_icon['tabletSize'] ) && is_numeric( $media_icon['tabletSize'] ) ) {
 			$css->set_media_state( 'tablet' );
-			$css->set_selector( $base_selector . ' .kt-info-svg-icon, ' . $base_selector . ' .kt-info-svg-icon-flip, ' . $base_selector . ' .kt-blocks-info-box-number' );
+			$css->set_selector( $base_selector . ' .kadence-info-box-icon-container .kt-info-svg-icon, ' . $base_selector . ' .kt-info-svg-icon-flip, ' . $base_selector . ' .kt-blocks-info-box-number' );
 			$css->add_property( 'font-size', $media_icon['tabletSize'] . 'px' );
 			$css->set_media_state( 'desktop' );
 		}
 		if ( isset( $media_icon['mobileSize'] ) && is_numeric( $media_icon['mobileSize'] ) ) {
 			$css->set_media_state( 'mobile' );
-			$css->set_selector( $base_selector . ' .kt-info-svg-icon, ' . $base_selector . ' .kt-info-svg-icon-flip, ' . $base_selector . ' .kt-blocks-info-box-number' );
+			$css->set_selector( $base_selector . ' .kadence-info-box-icon-container .kt-info-svg-icon, ' . $base_selector . ' .kt-info-svg-icon-flip, ' . $base_selector . ' .kt-blocks-info-box-number' );
 			$css->add_property( 'font-size', $media_icon['mobileSize'] . 'px' );
 			$css->set_media_state( 'desktop' );
 		}
@@ -334,10 +350,12 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 			$css->add_property( 'border-bottom-color', ( isset( $media_style['hoverBorder'] ) && ! empty( $media_style['hoverBorder'] ) ? $css->render_color( $media_style['hoverBorder'] ) : '#444444' ) );
 		}
 
-		$titleTagType = !empty( $attributes['titleTagType'] ) ? $attributes['titleTagType'] : 'heading';
-		$titleTag = 'heading' === $titleTagType ? 'h' . ( !empty( $attributes['titleFont'][0]['level'] ) ? $attributes['titleFont'][0]['level'] : '2' ) : $titleTagType;
+		$attributes['titleTagLevel'] = !empty( $attributes['titleFont'][0]['level'] ) ? $attributes['titleFont'][0]['level'] : 2;
+		$attributes['titleTagType'] = !empty( $attributes['titleTagType'] ) ? $attributes['titleTagType'] : 'heading';
+		$titleTag = $this->get_html_tag( $attributes, 'titleTagType', 'h2', $this->allowed_html_tags, 'titleTagLevel' );
+
 		if ( isset( $attributes['titleColor'] ) || isset( $attributes['titleFont'] ) ) {
-			$css->set_selector( $base_selector . ' ' . $titleTag . '.kt-blocks-info-box-title' );
+			$css->set_selector( $base_selector . ' .kt-infobox-textcontent ' . $titleTag . '.kt-blocks-info-box-title' );
 			if ( isset( $attributes['titleColor'] ) && ! empty( $attributes['titleColor'] ) ) {
 				$css->add_property( 'color', $css->render_color( $attributes['titleColor'] ) );
 			}
@@ -402,7 +420,7 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 		}
 		if ( isset( $attributes['titleFont'] ) && is_array( $attributes['titleFont'] ) && isset( $attributes['titleFont'][0] ) && is_array( $attributes['titleFont'][0] ) && ( ( isset( $attributes['titleFont'][0]['size'] ) && is_array( $attributes['titleFont'][0]['size'] ) && isset( $attributes['titleFont'][0]['size'][1] ) && ! empty( $attributes['titleFont'][0]['size'][1] ) ) || ( isset( $attributes['titleFont'][0]['lineHeight'] ) && is_array( $attributes['titleFont'][0]['lineHeight'] ) && isset( $attributes['titleFont'][0]['lineHeight'][1] ) && ! empty( $attributes['titleFont'][0]['lineHeight'][1] ) ) ) ) {
 			$css->set_media_state( 'tablet' );
-			$css->set_selector( $base_selector . ' ' . $titleTag . '.kt-blocks-info-box-title' );
+			$css->set_selector( $base_selector . ' .kt-infobox-textcontent ' . $titleTag . '.kt-blocks-info-box-title' );
 			if ( isset( $attributes['titleFont'][0]['size'][1] ) && ! empty( $attributes['titleFont'][0]['size'][1] ) ) {
 				$css->add_property( 'font-size', $css->get_font_size( $attributes['titleFont'][0]['size'][1], ( ! isset( $attributes['titleFont'][0]['sizeType'] ) ? 'px' : $attributes['titleFont'][0]['sizeType'] ) ) );
 			}
@@ -413,7 +431,7 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 		}
 		if ( isset( $attributes['titleFont'] ) && is_array( $attributes['titleFont'] ) && isset( $attributes['titleFont'][0] ) && is_array( $attributes['titleFont'][0] ) && ( ( isset( $attributes['titleFont'][0]['size'] ) && is_array( $attributes['titleFont'][0]['size'] ) && isset( $attributes['titleFont'][0]['size'][2] ) && ! empty( $attributes['titleFont'][0]['size'][2] ) ) || ( isset( $attributes['titleFont'][0]['lineHeight'] ) && is_array( $attributes['titleFont'][0]['lineHeight'] ) && isset( $attributes['titleFont'][0]['lineHeight'][2] ) && ! empty( $attributes['titleFont'][0]['lineHeight'][2] ) ) ) ) {
 			$css->set_media_state( 'mobile' );
-			$css->set_selector( $base_selector . ' ' . $titleTag . '.kt-blocks-info-box-title' );
+			$css->set_selector( $base_selector . ' .kt-infobox-textcontent ' . $titleTag . '.kt-blocks-info-box-title' );
 			if ( isset( $attributes['titleFont'][0]['size'][2] ) && ! empty( $attributes['titleFont'][0]['size'][2] ) ) {
 				$css->add_property( 'font-size', $css->get_font_size( $attributes['titleFont'][0]['size'][2], ( ! isset( $attributes['titleFont'][0]['sizeType'] ) ? 'px' : $attributes['titleFont'][0]['sizeType'] ) ) );
 			}
@@ -511,7 +529,7 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 			if ( isset( $attributes['textColor'] ) && ! empty( $attributes['textColor'] ) ) {
 				$css->add_property( 'color', $css->render_color( $attributes['textColor'] ) );
 			}
-			$css->set_selector( $base_selector . ' .kt-blocks-info-box-text' );
+			$css->set_selector('.wp-block-kadence-infobox' . $base_selector . ' .kt-blocks-info-box-text' );
 			if ( isset( $attributes['textFont'] ) && is_array( $attributes['textFont'] ) && is_array( $attributes['textFont'][0] ) ) {
 				$text_font = $attributes['textFont'][0];
 				if ( isset( $text_font['size'] ) && is_array( $text_font['size'] ) && ! empty( $text_font['size'][0] ) ) {
@@ -576,7 +594,7 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 		}
 		if ( isset( $attributes['textFont'] ) && is_array( $attributes['textFont'] ) && isset( $attributes['textFont'][0] ) && is_array( $attributes['textFont'][0] ) && ( ( isset( $attributes['textFont'][0]['size'] ) && is_array( $attributes['textFont'][0]['size'] ) && isset( $attributes['textFont'][0]['size'][1] ) && ! empty( $attributes['textFont'][0]['size'][1] ) ) || ( isset( $attributes['textFont'][0]['lineHeight'] ) && is_array( $attributes['textFont'][0]['lineHeight'] ) && isset( $attributes['textFont'][0]['lineHeight'][1] ) && ! empty( $attributes['textFont'][0]['lineHeight'][1] ) ) ) ) {
 			$css->set_media_state( 'tablet' );
-			$css->set_selector( $base_selector . ' .kt-blocks-info-box-text' );
+			$css->set_selector( '.wp-block-kadence-infobox' . $base_selector . ' .kt-blocks-info-box-text' );
 			if ( isset( $attributes['textFont'][0]['size'][1] ) && ! empty( $attributes['textFont'][0]['size'][1] ) ) {
 				$css->add_property( 'font-size', $css->get_font_size( $attributes['textFont'][0]['size'][1], ( ! isset( $attributes['textFont'][0]['sizeType'] ) ? 'px' : $attributes['textFont'][0]['sizeType'] ) ) );
 			}
@@ -587,7 +605,7 @@ class Kadence_Blocks_Infobox_Block extends Kadence_Blocks_Abstract_Block {
 		}
 		if ( isset( $attributes['textFont'] ) && is_array( $attributes['textFont'] ) && isset( $attributes['textFont'][0] ) && is_array( $attributes['textFont'][0] ) && ( ( isset( $attributes['textFont'][0]['size'] ) && is_array( $attributes['textFont'][0]['size'] ) && isset( $attributes['textFont'][0]['size'][2] ) && ! empty( $attributes['textFont'][0]['size'][2] ) ) || ( isset( $attributes['textFont'][0]['lineHeight'] ) && is_array( $attributes['textFont'][0]['lineHeight'] ) && isset( $attributes['textFont'][0]['lineHeight'][2] ) && ! empty( $attributes['textFont'][0]['lineHeight'][2] ) ) ) ) {
 			$css->set_media_state( 'mobile' );
-			$css->set_selector( $base_selector . ' .kt-blocks-info-box-text' );
+			$css->set_selector( '.wp-block-kadence-infobox' . $base_selector . ' .kt-blocks-info-box-text' );
 			if ( isset( $attributes['textFont'][0]['size'][2] ) && ! empty( $attributes['textFont'][0]['size'][2] ) ) {
 				$css->add_property( 'font-size', $css->get_font_size( $attributes['textFont'][0]['size'][2], ( ! isset( $attributes['textFont'][0]['sizeType'] ) ? 'px' : $attributes['textFont'][0]['sizeType'] ) ) );
 			}

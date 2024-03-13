@@ -64,7 +64,7 @@ class Kadence_Blocks_Testimonials_Block extends Kadence_Blocks_Abstract_Block {
 		/* Load any Google fonts that are needed */
 		$attributes_with_fonts = array( 'titleFont', 'contentFont', 'nameFont', 'occupationFont' );
 		foreach ( $attributes_with_fonts as $attribute_font_key ) {
-			if ( isset( $attributes[ $attribute_font_key ][0] ) && isset( $attributes[ $attribute_font_key ][0]['google'] ) && ( isset( $attributes[ $attribute_font_key ][0]['loadGoogle'] ) && true === $attributes[ $attribute_font_key ][0]['loadGoogle'] ) && isset( $attributes[ $attribute_font_key ][0]['family'] ) ) {
+			if ( isset( $attributes[ $attribute_font_key ][0] ) && isset( $attributes[ $attribute_font_key ][0]['google'] ) && ( isset( $attributes[ $attribute_font_key ][0]['loadGoogle'] ) && true === $attributes[ $attribute_font_key ][0]['loadGoogle'] ) && isset( $attributes[ $attribute_font_key ][0]['family'] ) && true === $attributes[ $attribute_font_key ][0]['google']) {
 				$title_font = $attributes[ $attribute_font_key ][0];
 
 				$font_variant = isset( $title_font['variant'] ) ? $title_font['variant'] : null;
@@ -861,6 +861,9 @@ class Kadence_Blocks_Testimonials_Block extends Kadence_Blocks_Abstract_Block {
 			$wrapper_args = array(
 				'class' => implode( ' ', $outer_classes ),
 			);
+			if(isset($attributes['anchor']) && !empty($attributes['anchor'])) {
+				$wrapper_args['id'] = $attributes['anchor'];
+			}
 			$wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 			$content = sprintf( '<div %1$s>%2$s</div>', $wrapper_attributes, $inner_content );
 		} elseif ( ! empty( $attributes['layout'] ) && 'carousel' === $attributes['layout'] ) {

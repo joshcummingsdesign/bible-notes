@@ -55,6 +55,8 @@ function wpcode_admin_scripts() {
 					'learn_more_text' => __( 'Learn more about Testing Mode', 'insert-headers-and-footers' ),
 					'learn_more_link' => wpcode_utm_url( 'https://wpcode.com/docs/testing-mode/', 'testing-mode-learn-more', $current_screen->id ),
 				),
+				'multisite'         => false,
+				'connect_url'       => wpcode()->library_auth->auth_url(),
 			)
 		)
 	);
@@ -109,6 +111,10 @@ function wpcode_admin_body_class( $classes ) {
 
 	if ( 'wpcode' === $page_parent ) {
 		$classes .= ' wpcode-admin-page';
+
+		if ( ! empty( wpcode()->settings->get_option( 'dark_mode' ) ) ) {
+			$classes .= ' wpcode-dark-mode';
+		}
 	}
 
 	return $classes;

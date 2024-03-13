@@ -185,7 +185,7 @@ function ez_toc_export_all_settings()
     if(!isset($_GET['_wpnonce'])){
         die('-1');
     }
-    if( !wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ), '_wpnonce' ) ){
+    if( !wp_verify_nonce(  $_GET['_wpnonce'] , '_wpnonce' ) ){
         die('-1');
     }
 
@@ -221,22 +221,30 @@ add_action('shutdown', function() {
  
 }, 10);
 
-    add_filter('eztoc_wordpress_final_output', function($content){
-        if(!is_singular('post') && !is_page()) { return $content;}
-        if(ezTOC_Option::get('show_title_in_toc') == 1 && !is_admin()){ 
+add_filter('eztoc_wordpress_final_output', function($content){
+    if(!is_singular('post') && !is_page()) { return $content;}
+    if(ezTOC_Option::get('show_title_in_toc') == 1 && !is_admin()){ 
         return preg_replace_callback(
-            '/<h1(.*?)>(.*?)<\/h1>/i',
+            '/<body.*?>(.*?)<\/body>/is',
             function ($matches) {
-                $title = $matches[2];
-                $added_link ='<h1'.$matches[1].'><span class="ez-toc-section" id="'.esc_attr(ezTOCGenerateHeadingIDFromTitle($title)).'" ez-toc-data-id="#'.esc_attr(ezTOCGenerateHeadingIDFromTitle($title)).'"></span>';
-                $added_link .= esc_attr($title);
-                $added_link .= '<span class="ez-toc-section-end"></span></h1>';
-                return $added_link;
+                $body_content = $matches[1];
+                return preg_replace_callback(
+                    '/<h1(.*?)>(.*?)<\/h1>/i',
+                    function ($h1_matches) {
+                        $title = $h1_matches[2];
+                        $added_link = '<h1'.$h1_matches[1].'><span class="ez-toc-section" id="'.esc_attr(ezTOCGenerateHeadingIDFromTitle($title)).'" ez-toc-data-id="#'.esc_attr(ezTOCGenerateHeadingIDFromTitle($title)).'"></span>';
+                        $added_link .= esc_attr($title);
+                        $added_link .= '<span class="ez-toc-section-end"></span></h1>';
+                        return $added_link;
+                    },
+                    $body_content
+                );
             },
             $content
         );
     }
-    }, 10, 1);
+}, 10, 1);
+
     
     add_filter( 'ez_toc_modify_process_page_content', 'ez_toc_page_content_include_page_title', 10, 1 );
     function ez_toc_page_content_include_page_title( $content ) {
@@ -302,7 +310,7 @@ add_action('shutdown', function() {
     
                 $return = strtolower( $return );
             }
-            if ( ! $return ) {
+            if ( !$return || true == ezTOC_Option::get( 'all_fragment_prefix' ) ) {
     
                 $return = ( ezTOC_Option::get( 'fragment_prefix' ) ) ? ezTOC_Option::get( 'fragment_prefix' ) : '_';
             }
@@ -314,20 +322,95 @@ add_action('shutdown', function() {
         }
         return apply_filters( 'ez_toc_url_anchor_target', $return, $heading );
     }
+   //Device Eligibility
+  //@since 2.0.60
+function ez_toc_auto_device_target_status(){
+        $status = true;      
+        if(ezTOC_Option::get( 'device_target' ) == 'mobile'){
+            if(function_exists('wp_is_mobile') && wp_is_mobile()){                
+                $status = true;      
+            }else{                
+                $status = false;      
+            }
+        }
+        if(ezTOC_Option::get( 'device_target' ) == 'desktop'){
+            if(function_exists('wp_is_mobile') && wp_is_mobile()){                
+                $status = false;      			
+            }else{                
+                $status = true;      
+            }
+        }
+        return $status;
+}
+/**
+ * Check for the enable support of sticky toc/toggle
+ * @since 2.0.60
+ */
+function ez_toc_stikcy_enable_support_status(){
 
-add_filter( 'ez_toc_sticky_visible', 'ez_toc_sticky_visible_func' ,20);
-function ez_toc_sticky_visible_func( $visible ) {
-    $sticky_include_homepage = ezTOC_Option::get('sticky_include_homepage');
-    $sticky_include_category = ezTOC_Option::get('sticky_include_category');
-    $sticky_include_product_category = ezTOC_Option::get('sticky_include_product_category');
-    if ( is_front_page() ) {
-      $visible = ($sticky_include_homepage=='1')?true:false;
-    } elseif ( is_category() ) {
-      $visible = ($sticky_include_category=='1')?true:false;
-    } elseif ( is_tax( 'product_cat' ) ) {
-      $visible = ($sticky_include_product_category=='1')?true:false;
+    $status = false;
+
+    $stickyPostTypes = apply_filters('ez_toc_sticky_post_types', ezTOC_Option::get('sticky-post-types'));
+
+    if(!empty($stickyPostTypes)){
+        if(is_singular()){
+            $postType = get_post_type();
+            if(in_array($postType,$stickyPostTypes)){
+                $status = true;
+            }
+        }										
     }
-    return $visible;
+
+    if(ezTOC_Option::get('sticky_include_homepage')){
+        if ( is_front_page() ) {
+            $status = true;
+        }
+    }
+
+    if(ezTOC_Option::get('sticky_include_category')){
+        if ( is_category() ) {
+            $status = true;
+        }
+    }
+
+    if(ezTOC_Option::get('sticky_include_tag')){
+        if ( is_tag() ) {
+            $status = true;
+        }
+    }
+    
+    if(ezTOC_Option::get('sticky_include_product_category')){
+        if ( is_tax( 'product_cat' ) ) {
+            $status = true;
+        }
+    }
+
+    if(ezTOC_Option::get('sticky_include_custom_tax')){
+        if ( is_tax() ) {
+            $status = true;
+        }
+    }
+
+    //Device Eligibility
+    //@since 2.0.60
+    if(ezTOC_Option::get( 'sticky_device_target' ) == 'mobile'){
+        if(function_exists('wp_is_mobile') && wp_is_mobile()){
+            $status = true;
+        }else{
+            $status = false;
+        }
+    }
+
+    if(ezTOC_Option::get( 'sticky_device_target' ) == 'desktop'){
+        if(function_exists('wp_is_mobile') && wp_is_mobile()){
+            $status = false;
+        }else{
+            $status = true;
+        }
+    }
+    
+    return apply_filters('ez_toc_sticky_enable_support', $status);
+
 }
 
 /**
@@ -352,4 +435,76 @@ function ez_toc_para_blockquote_replace($blockquotes, $content, $step){
     }
     return $content;
 }
+}
+
+/**
+ * Helps allow line breaks
+ * @since 2.0.59
+ */
+add_filter('ez_toc_title_allowable_tags', 'ez_toc_link_allow_br_tag');
+function ez_toc_link_allow_br_tag($tags){
+    if(ezTOC_Option::get( 'prsrv_line_brk' )){
+        $tags = '<br>';
+    }
+    return $tags;
+}
+
+/**
+ * Check the status of shortcode enable support which is defined in shortcode attributes
+ * @since 2.0.59
+ */
+function ez_toc_shortcode_enable_support_status($atts){
+    
+    $status = true;
+
+    if(isset($atts['post_types'])){
+        $exp_post_types = explode(',', $atts['post_types']);
+        if(!empty($exp_post_types)){
+            $exp_post_types = array_map("trim",$exp_post_types);
+            if(is_singular()){
+                $curr_post_type = get_post_type();
+                if(in_array($curr_post_type, $exp_post_types )){
+                    $status = true;
+                }else{
+                    $status = false;
+                }
+            }else{
+                $status = false;
+            }       
+        }
+    }
+
+    if(isset($atts['post_in'])){
+        $exp_post_ids = explode(',', $atts['post_in']);
+        if(!empty($exp_post_ids)){
+            $exp_post_ids = array_map("trim",$exp_post_ids);
+            if(is_singular()){
+                $ID = get_the_ID();
+                if(in_array($ID, $exp_post_ids )){
+                    $status = true;
+                }else{
+                    $status = false;
+                }
+            }else{
+                $status = false;
+            }       
+        }
+    }
+            
+        
+    if(isset($atts['device_target']) && $atts['device_target'] != ''){
+        $status = false;
+        $my_device = $atts['device_target'];
+        if(function_exists('wp_is_mobile') && wp_is_mobile()){
+            if($my_device == 'mobile'){
+                $status = true;
+            }
+        }else{
+            if($my_device == 'desktop'){
+                $status = true;
+            }
+        }
+    }
+    
+    return $status;    
 }
