@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 05-February-2024 using Strauss.
+ * Modified by kadencewp on 01-April-2024 using Strauss.
  * @see https://github.com/BrianHenryIE/strauss
  */
 
@@ -68,7 +68,8 @@ final class AsyncResponse implements ResponseInterface, StreamableInterface
             while (true) {
                 foreach (self::stream([$response], $timeout) as $chunk) {
                     if ($chunk->isTimeout() && $response->passthru) {
-                        foreach (self::passthru($response->client, $response, new ErrorChunk($response->offset, $chunk->getError())) as $chunk) {
+                        // Timeouts thrown during initialization are transport errors
+                        foreach (self::passthru($response->client, $response, new ErrorChunk($response->offset, new TransportException($chunk->getError()))) as $chunk) {
                             if ($chunk->isFirst()) {
                                 return false;
                             }

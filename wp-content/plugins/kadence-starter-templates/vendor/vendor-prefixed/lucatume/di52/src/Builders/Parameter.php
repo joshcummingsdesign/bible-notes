@@ -5,7 +5,7 @@
  * @package KadenceWP\KadenceStarterTemplates\lucatume\DI52\Builders
  *
  * @license GPL-3.0
- * Modified by kadencewp on 05-February-2024 using Strauss.
+ * Modified by kadencewp on 01-April-2024 using Strauss.
  * @see https://github.com/BrianHenryIE/strauss
  */
 

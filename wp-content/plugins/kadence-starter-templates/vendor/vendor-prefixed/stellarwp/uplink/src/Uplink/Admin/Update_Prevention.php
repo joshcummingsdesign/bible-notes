@@ -2,7 +2,7 @@
 /**
  * @license GPL-2.0-or-later
  *
- * Modified by kadencewp on 05-February-2024 using Strauss.
+ * Modified by kadencewp on 01-April-2024 using Strauss.
  * @see https://github.com/BrianHenryIE/strauss
  */ declare( strict_types=1 );
 
@@ -56,10 +56,10 @@ class Update_Prevention {
 	 *
 	 * @since  4.9.12
 	 *
-	 * @param string       $source        File source location.
-	 * @param mixed        $remote_source Remote file source location.
-	 * @param WP_Upgrader  $upgrader      WP_Upgrader instance.
-	 * @param array<mixed> $extras         Extra arguments passed to hooked filters.
+	 * @param string|WP_Error $source        File source location.
+	 * @param mixed           $remote_source Remote file source location.
+	 * @param WP_Upgrader     $upgrader      WP_Upgrader instance.
+	 * @param array<mixed>    $extras         Extra arguments passed to hooked filters.
 	 *
 	 * @return string|WP_Error
 	 */

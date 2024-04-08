@@ -2,7 +2,7 @@
 /**
  * @license GPL-2.0-or-later
  *
- * Modified by kadencewp on 05-February-2024 using Strauss.
+ * Modified by kadencewp on 01-April-2024 using Strauss.
  * @see https://github.com/BrianHenryIE/strauss
  */ declare( strict_types=1 );
 
@@ -160,13 +160,13 @@ class Provider extends Abstract_Provider {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param bool         $reply      Whether to bail without returning the package.
-	 *                                 Default false.
-	 * @param string       $package    The package file name or URL.
-	 * @param \WP_Upgrader $upgrader   The WP_Upgrader instance.
-	 * @param array        $hook_extra Extra arguments passed to hooked filters.
+	 * @param  bool|\WP_Error  $reply       Whether to bail without returning the package.
+	 *                                      Default false.
+	 * @param  string|null     $package     The package file name or URL.
+	 * @param  \WP_Upgrader    $upgrader    The WP_Upgrader instance.
+	 * @param  array           $hook_extra  Extra arguments passed to hooked filters.
 	 *
-	 * @return mixed
+	 * @return string|bool|\WP_Error
 	 */
 	public function filter_upgrader_pre_download( $reply, $package, $upgrader, $hook_extra ) {
 		return $this->container->get( Package_Handler::class )->filter_upgrader_pre_download( $reply, $package, $upgrader, $hook_extra );
@@ -191,14 +191,18 @@ class Provider extends Abstract_Provider {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string       $source        File source location.
-	 * @param mixed        $remote_source Remote file source location.
-	 * @param \WP_Upgrader $upgrader      WP_Upgrader instance.
-	 * @param array        $extras        Extra arguments passed to hooked filters.
+	 * @param string|\WP_Error $source        File source location or a WP_Error.
+	 * @param mixed            $remote_source Remote file source location.
+	 * @param \WP_Upgrader     $upgrader      WP_Upgrader instance.
+	 * @param array            $extras        Extra arguments passed to hooked filters.
 	 *
 	 * @return string|\WP_Error
 	 */
 	public function filter_upgrader_source_selection_for_update_prevention( $source, $remote_source, $upgrader, $extras ) {
+		if ( is_wp_error( $source ) ) {
+			return $source;
+		}
+
 		return $this->container->get( Update_Prevention::class )->filter_upgrader_source_selection( $source, $remote_source, $upgrader, $extras );
 	}
 }

@@ -8,15 +8,15 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 05-February-2024 using Strauss.
+ * Modified by kadencewp on 01-April-2024 using Strauss.
  * @see https://github.com/BrianHenryIE/strauss
  */
 
 namespace KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpClient\DataCollector;
 
 use KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpClient\TraceableHttpClient;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpFoundation\Request;
+use KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 use Symfony\Component\VarDumper\Caster\ImgStub;

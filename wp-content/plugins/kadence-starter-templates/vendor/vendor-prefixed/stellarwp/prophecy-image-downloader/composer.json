@@ -13,6 +13,8 @@
         "stellarwp/prophecy-log": "^1.0",
         "symfony/filesystem": "^3.4|^4.4|^5.4|^6.2",
         "symfony/http-client": "^5.4|^6.2",
+        "symfony/http-foundation": "^5.4|^6.2",
+        "symfony/mime": "^5.4|^6.2",
         "symfony/string": "^5.4|^6.0"
     },
     "autoload": {

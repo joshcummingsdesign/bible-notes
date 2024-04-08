@@ -2,7 +2,7 @@
 /**
  * @license GPL-2.0-or-later
  *
- * Modified by kadencewp on 05-February-2024 using Strauss.
+ * Modified by kadencewp on 01-April-2024 using Strauss.
  * @see https://github.com/BrianHenryIE/strauss
  */ declare( strict_types=1 );
 
@@ -274,9 +274,24 @@ class Validation_Response {
 			return $this->handle_api_errors();
 		}
 
-		$update->id          = $this->response->id ?? '';
-		$update->plugin      = $this->response->plugin ?? '';
-		$update->slug        = $this->response->slug ?? '';
+		$id     = $this->response->id ?? '';
+		$plugin = $this->response->plugin ?? '';
+		$slug   = $this->response->slug ?? '';
+
+		if ( empty( $id ) ) {
+			$id = sprintf(
+				'stellarwp/plugins/%s',
+				empty( $slug ) ? $this->resource->get_slug() : $slug
+			);
+		}
+
+		if ( empty( $plugin ) ) {
+			$plugin = $this->resource->get_path();
+		}
+
+		$update->id          = $id;
+		$update->plugin      = $plugin;
+		$update->slug        = $slug;
 		$update->new_version = $this->response->version ?? '';
 		$update->url         = $this->response->homepage ?? '';
 		$update->tested      = $this->response->tested ?? '';

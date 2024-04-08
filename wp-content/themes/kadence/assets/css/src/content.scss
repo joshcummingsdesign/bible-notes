@@ -719,21 +719,23 @@ a.post-more-link {
 /*--------------------------------------------------------------
 ## Custom block font sizes.
 --------------------------------------------------------------*/
-
 .has-small-font-size {
-	font-size: $font-size-small;
+	font-size: var(--global-font-size-small);
 }
 
 .has-regular-font-size {
-	font-size: $font-size-regular;
+	font-size: var(--global-font-size-medium);
 }
 
 .has-large-font-size {
-	font-size: $font-size-large;
+	font-size: var(--global-font-size-large);
 }
 
 .has-larger-font-size {
-	font-size: $font-size-larger;
+	font-size: var(--global-font-size-larger);
+}
+.has-xxlarge-font-size {
+	font-size: var(--global-font-size-xxlarge);
 }
 
 .entry-content-asset.videofit{

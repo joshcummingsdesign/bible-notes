@@ -1,4 +1,15 @@
 <?php
+/**
+ * Pluggable functions for WPCode.
+ *
+ * @package WPCode
+ * @since 2.1.9
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 if ( ! function_exists( 'wpcode_get_snippet' ) ) {
 	/**

@@ -302,6 +302,20 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 			);
 		}
 
+		// Check if snippet is locked for editing.
+		$post_lock = wp_check_post_lock( $snippet );
+		if ( $post_lock ) {
+			$user = get_user_by( 'id', $post_lock );
+
+			$currently_editing = sprintf(
+				/* translators: %s: User display name */
+				esc_html__( '%s is currently editing', 'insert-headers-and-footers' ),
+				esc_html( $user->display_name )
+			);
+
+			$name = '<div class="wpcode-locked-snippet">' . $currently_editing . '</div>' . $name;
+		}
+
 		return $name;
 	}
 
@@ -473,7 +487,7 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		);
 
 		// Set column headers.
-		$this->_column_headers = array( $columns, $hidden, $sortable );
+		$this->_column_headers = array( $columns, $hidden, $sortable, 'name' );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$page = $this->get_pagenum();
@@ -843,6 +857,7 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	 */
 	protected function extra_tablenav( $which ) {
 		if ( 'top' === $which && 'trash' !== $this->view ) {
+			echo '<div class="actions alignleft">';
 			$this->type_dropdown( $this->get_post_type() );
 			$this->location_dropdown( $this->get_post_type() );
 
@@ -852,6 +867,7 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 				echo '&nbsp;';
 				submit_button( __( 'Clear', 'insert-headers-and-footers' ), '', 'filter_clear', false, array( 'id' => 'wpcode-filter-clear' ) );
 			}
+			echo '</div>';
 		}
 	}
 

@@ -156,11 +156,6 @@ class Importer {
 	public function import_content( $import_file_path, $single_page = false, $page_meta = '', $elementor = false ) {
 		$this->microtime = microtime( true );
 
-		// Increase PHP max execution time. Just in case, even though the AJAX calls are only 25 sec long.
-		if ( strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) === false ) {
-			set_time_limit( apply_filters( 'kadence-starter-templates/set_time_limit_for_demo_data_import', 300 ) );
-		}
-
 		// Disable import of authors.
 		add_filter( 'wxr_importer.pre_process.user', '__return_false', 20 );
 
@@ -796,14 +791,12 @@ class Importer {
 	 */
 	public function new_ajax_request_maybe( $data ) {
 		$time = microtime( true ) - $this->microtime;
-
 		// We should make a new ajax call, if the time is right.
-		if ( $time > apply_filters( 'kadence-starter-templates/time_for_one_ajax_call', 25 ) ) {
+		if ( $time > apply_filters( 'kadence-starter-templates/time_for_one_ajax_call', 45 ) ) {
 			$response = array(
 				'status'  => 'newAJAX',
 				'message' => 'Time for new AJAX request!: ' . $time,
 			);
-
 			// Add any output to the log file and clear the buffers.
 			$message = ob_get_clean();
 
@@ -825,6 +818,7 @@ class Importer {
 
 			// Send the request for a new AJAX call.
 			wp_send_json( $response );
+			die();
 		}
 
 		// Set importing author to the current user.

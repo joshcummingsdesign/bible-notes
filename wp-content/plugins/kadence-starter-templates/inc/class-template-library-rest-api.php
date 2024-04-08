@@ -42,6 +42,8 @@ use function wc_create_page;
 use function wc_get_product_object;
 use function wc_switch_to_site_locale;
 use function wc_get_page_id;
+use function post_type_archive_title;
+use function get_post_type_archive_url;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_license_domain;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_original_domain;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_license_key;
@@ -131,6 +133,13 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 * @var null
 	 */
 	private $api_key = '';
+
+	/**
+	 * API key for kadence membership
+	 *
+	 * @var null
+	 */
+	private $site_url = '';
 
 	/**
 	 * API email for kadence membership
@@ -516,6 +525,30 @@ class Library_REST_Controller extends WP_REST_Controller {
 		);
 		register_rest_route(
 			$this->namespace,
+			'/get-events',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'get_remote_events' ),
+					'permission_callback' => array( $this, 'get_items_permission_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/install-events',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'install_events' ),
+					'permission_callback' => array( $this, 'get_items_permission_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
 			'/install-settings',
 			array(
 				array(
@@ -723,7 +756,6 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 */
 	public function get_ai_base_sites( $request ) {
 		$this->get_license_keys();
-		$site_url = get_original_domain();
 		$reload   = $request->get_param( self::PROP_FORCE_RELOAD );
 
 		$identifier = 'ai-base-templates' . KADENCE_STARTER_TEMPLATES_VERSION;
@@ -742,7 +774,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 
 		$args = array(
 			'key'       => $this->api_key,
-			'site_url'  => $site_url,
+			'site_url'  => $this->site_url,
 			'beta'      => defined( 'KADENCE_STARTER_TEMPLATES_BETA' ) && KADENCE_STARTER_TEMPLATES_BETA ? 'true' : 'false',
 		);
 		$api_url  = add_query_arg( $args, 'https://base.startertemplatecloud.com/wp-json/kadence-starter-base/v1/sites' );
@@ -777,14 +809,8 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 */
 	public function get_auth_data( $request ) {
 		$this->get_license_keys();
-		if ( is_callable( 'network_home_url' ) ) {
-			$site_url = network_home_url( '', 'http' );
-		} else {
-			$site_url = get_bloginfo( 'url' );
-		}
-		$site_url = str_replace( array( 'http://', 'https://', 'www.' ), array( '', '', '' ), $site_url );
 		$auth = array(
-			'domain' => $site_url,
+			'domain' => $this->site_url,
 			'key'    => $this->api_key,
 		);
 		return rest_ensure_response( $auth );
@@ -1128,14 +1154,8 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 * @return string Returns the remote URL contents.
 	 */
 	public function get_remote_job( $job ) {
-		if ( is_callable( 'network_home_url' ) ) {
-			$site_url = network_home_url( '', 'http' );
-		} else {
-			$site_url = get_bloginfo( 'url' );
-		}
-		$site_url = str_replace( array( 'http://', 'https://', 'www.' ), array( '', '', '' ), $site_url );
 		$auth = array(
-			'domain' => $site_url,
+			'domain' => $this->site_url,
 			'key'    => $this->api_key,
 		);
 		$api_url  = $this->remote_ai_url . 'content/job/' . $job;
@@ -1176,14 +1196,8 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 * @return string Returns the remote URL contents.
 	 */
 	public function get_new_remote_contents( $context ) {
-		if ( is_callable( 'network_home_url' ) ) {
-			$site_url = network_home_url( '', 'http' );
-		} else {
-			$site_url = get_bloginfo( 'url' );
-		}
-		$site_url = str_replace( array( 'http://', 'https://', 'www.' ), array( '', '', '' ), $site_url );
 		$auth = array(
-			'domain' => $site_url,
+			'domain' => $this->site_url,
 			'key'    => $this->api_key,
 		);
 		$prophecy_data = json_decode( get_option( 'kadence_blocks_prophecy' ), true );
@@ -1617,6 +1631,19 @@ class Library_REST_Controller extends WP_REST_Controller {
 		return rest_ensure_response( array( 'success' => true ) );
 	}
 	/**
+	 * Get remote download link.
+	 *
+	 * @access public
+	 * @return string
+	 */
+	public function get_bundle_download_link( $base ) {
+		$data = $this->get_license_keys();
+		if ( empty( $data['api_key'] ) ) {
+			return '';
+		}
+		return 'https://licensing.kadencewp.com/api/plugins/v2/download?plugin=' . $base . '&key=' . urlencode( $data['api_key'] );
+	}
+	/**
 	 * Install Plugins.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -1711,6 +1738,35 @@ class Library_REST_Controller extends WP_REST_Controller {
 							// ref: function wp_ajax_install_plugin().
 							$upgrader = new Plugin_Upgrader( new WP_Ajax_Upgrader_Skin() );
 							$installed = $upgrader->install( $api->download_link );
+							if ( $installed ) {
+								$silent = ( 'give' === $base || 'elementor' === $base || 'fluentform' === $base || 'restrict-content' === $base ? false : true );
+								if ( 'give' === $base ) {
+									add_option( 'give_install_pages_created', 1, '', false );
+								}
+								if ( 'restrict-content' === $base ) {
+									update_option( 'rcp_install_pages_created', current_time( 'mysql' ) );
+								}
+								$activate = activate_plugin( $path, '', false, $silent );
+								if ( is_wp_error( $activate ) ) {
+									$install = false;
+								}
+							} else {
+								$install = false;
+							}
+						} else {
+							$install = false;
+						}
+					} elseif ( 'notactive' === $state && 'bundle' === $src ) {
+						if ( ! current_user_can( 'install_plugins' ) ) {
+							return new WP_Error( 'install_failed', __( 'Permissions Issue.' ), array( 'status' => 500 ) );
+						}
+						$download_link = $this->get_bundle_download_link( $base );
+						if ( $download_link ) {
+
+							// Use AJAX upgrader skin instead of plugin installer skin.
+							// ref: function wp_ajax_install_plugin().
+							$upgrader = new Plugin_Upgrader( new WP_Ajax_Upgrader_Skin() );
+							$installed = $upgrader->install( $download_link );
 							if ( $installed ) {
 								$silent = ( 'give' === $base || 'elementor' === $base || 'fluentform' === $base || 'restrict-content' === $base ? false : true );
 								if ( 'give' === $base ) {
@@ -2024,6 +2080,12 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 */
 	public function install_navigation( WP_REST_Request $request ) {
 		$site_id = $request->get_param( self::PROP_KEY );
+		$parameters = $request->get_json_params();
+		$install_goals = array();
+		if ( ! empty( $parameters['goals'] ) ) {
+			$install_goals = $parameters['goals'];
+		}
+		$install_goal = ( isset( $install_goals[0] ) ? $install_goals[0] : '' );
 		$url = 'https://base.startertemplatecloud.com/' . $site_id . '/wp-json/kadence-starter-base/v1/navigation';
 		$response = wp_safe_remote_get(
 			$url,
@@ -2055,15 +2117,20 @@ class Library_REST_Controller extends WP_REST_Controller {
 			}
 			$menu_id = wp_create_nav_menu( $menu['name'] );
 			$updates = array();
+			$extra_order = 0;
 			// Set up default menu items
 			foreach ( $menu['items'] as $item ) {
+				if ( 'Shop' === $item['title'] ) {
+					$extra_order = $item['menu_order'];
+					continue;
+				}
 				$args = array(
 					'menu-item-title' => $item['title'],
 					'menu-item-url' => '#',
 					'menu-item-status' => 'publish',
 					'menu-item-position' => $item['menu_order'],
 				);
-				// Lets not duplicate products.
+				// Lets not duplicate pages.
 				$has_page = get_posts( [
 					'post_type'  => 'page',
 					'title'      => $item['title'],
@@ -2099,14 +2166,38 @@ class Library_REST_Controller extends WP_REST_Controller {
 						update_option( 'page_for_posts', $page_id );
 						update_post_meta( $page_id, '_kadence_starter_templates_imported_post', true );
 					}
-				} else if ( ! empty( $item['title'] ) && 'Shop' === $item['title'] && class_exists( 'WooCommerce' ) ) {
+				}
+				if ( ! empty( $item['menu_item_parent'] ) ) {
+					$args['menu-item-parent-id'] = $updates[ $item['menu_item_parent'] ];
+				}
+				$updates[ $item['id'] ] = wp_update_nav_menu_item(
+					$menu_id,
+					0,
+					$args
+				);
+			}
+			update_term_meta( $menu_id, '_kadence_starter_templates_imported_term', true );
+			if ( $location_key === 'primary' || $location_key === 'mobile' ) {
+				if ( 'events' === $install_goal && post_type_exists( 'tribe_events' ) ) {
+					$args = array(
+						'menu-item-title' => 'Events',
+						'menu-item-url' => get_post_type_archive_link( 'tribe_events' ),
+						'menu-item-status' => 'publish',
+						'menu-item-position'  => $extra_order,
+					);
+					$item_id = wp_update_nav_menu_item(
+						$menu_id,
+						0,
+						$args
+					);
+				} else if ( 'ecommerce' === $install_goal && class_exists( 'WooCommerce' ) ) {
 					$page_id   = wc_get_page_id( 'shop' );
 					$shop_page = get_post( $page_id );
 					if ( ! $shop_page ) {
 						// Create Shop page using wp_insert_post
 						$page_id = wp_insert_post(
 							array(
-							'post_title'   => wp_strip_all_tags( $item['title'] ),
+							'post_title'   => 'Shop',
 							'post_content' => '',
 							'post_status'  => 'publish',
 							'post_type'    => 'page',
@@ -2117,26 +2208,22 @@ class Library_REST_Controller extends WP_REST_Controller {
 							update_post_meta( $page_id, '_kadence_starter_templates_imported_post', true );
 						}
 					}
-					if ( ! is_wp_error( $page_id ) ) {
+					if ( ! empty( $page_id  ) && ! is_wp_error( $page_id ) ) {
 						$args = array(
 							'menu-item-title' => $item['title'],
 							'menu-item-object-id' => $page_id,
 							'menu-item-object'    => 'page',
 							'menu-item-status'    => 'publish',
 							'menu-item-type'      => 'post_type',
-							'menu-item-position'  => $item['menu_order'],
+							'menu-item-position'  => $extra_order,
+						);
+						$item_id = wp_update_nav_menu_item(
+							$menu_id,
+							0,
+							$args
 						);
 					}
 				}
-				if ( ! empty( $item['menu_item_parent'] ) ) {
-					$args['menu-item-parent-id'] = $updates[ $item['menu_item_parent'] ];
-				}
-				$updates[ $item['id'] ] = wp_update_nav_menu_item(
-					$menu_id,
-					0,
-					$args
-				);
-				update_term_meta( $menu_id, '_kadence_starter_templates_imported_term', true );
 			}
 			$locations = get_theme_mod( 'nav_menu_locations' );
 			$locations[ $location_key ] = $menu_id;
@@ -2148,7 +2235,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 				WC_Install::create_pages();
 			}
 		}
-
+		flush_rewrite_rules();
 		return rest_ensure_response( 'updated' );
 	}
 	/**
@@ -2194,7 +2281,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 		wp_set_sidebars_widgets( $sidebars_widgets );
 	}
 	/**
-	 * Install Navigation.
+	 * Install Widgets.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
@@ -2297,6 +2384,8 @@ class Library_REST_Controller extends WP_REST_Controller {
 					$widget['content'] = str_replace( 'Sequoia', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Acacia', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Magnolia', $site_name, $widget['content'] );
+					$widget['content'] = str_replace( 'Willow', $site_name, $widget['content'] );
+					$widget['content'] = str_replace( 'Hemlock', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Aspen', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Juniper', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Almond', $site_name, $widget['content'] );
@@ -2923,7 +3012,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 					'url' => $post_data['image'],
 					'id'  => 0,
 				);
-				if ( strpos( $post_data['image'], 'images.pexels.com' ) !== false ) {
+				if ( substr( $post_data['image'], 0, strlen( 'https://images.pexels.com' ) ) === 'https://images.pexels.com' ) {
 					$image_data = $this->get_image_info( $image_library, $post_data['image'] );
 					if ( $image_data ) {
 						$alt                        = ! empty( $image_data['alt'] ) ? $image_data['alt'] : '';
@@ -2993,7 +3082,125 @@ class Library_REST_Controller extends WP_REST_Controller {
 		return rest_ensure_response( $posts );
 	}
 	/**
-	 * Install Pages.
+	 * Get Remote Events.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function get_remote_events( WP_REST_Request $request ) {
+		$url = 'https://base.startertemplatecloud.com/wp-json/kadence-starter-base/v1/events';
+		// Get the response.
+		$response = wp_safe_remote_get(
+			$url,
+			array(
+				'timeout' => 20,
+			)
+		);
+		// Early exit if there was an error.
+		if ( is_wp_error( $response ) || $this->is_response_code_error( $response ) ) {
+			return new WP_Error( 'install_failed', __( 'Could not get events from source.' ), array( 'status' => 500 ) );
+		}
+
+		// Get the body from our response.
+		$posts = wp_remote_retrieve_body( $response );
+
+		// Early exit if there was an error.
+		if ( is_wp_error( $posts ) ) {
+			return new WP_Error( 'install_failed', __( 'Could not get events from source.' ), array( 'status' => 500 ) );
+		}
+		$posts = json_decode( $posts, true );
+		if ( ! is_array( $posts ) ) {
+			return new WP_Error( 'install_failed', __( 'Could not get events from source.' ), array( 'status' => 500 ) );
+		}
+		return rest_ensure_response( $posts );
+	}
+	/**
+	 * Install Events.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function install_events( WP_REST_Request $request ) {
+		$parameters = $request->get_json_params();
+		if ( empty( $parameters['events'] ) ) {
+			return new WP_Error( 'no_events', __( 'No events to install.' ), array( 'status' => 500 ) );
+		}
+		$new_events    = array();
+		$events        = $parameters['events'];
+		$image_library    = isset( $parameters['image_library'] ) ? $parameters['image_library'] : '';
+		$variation = 1;
+		foreach ( $events as $event_data ) {
+			// Lets not duplicate products.
+			$has_event = get_posts( [
+				'post_type'  => 'tribe_events',
+				'title' => $event_data['title'],
+			] );
+			if ( $has_event ) {
+				$new_events[] = $has_event[0]->ID;
+				continue;
+			}
+			// Prepare Post content.
+			$category_ids  = $this->set_taxonomy_data( $event_data, 'categories', 'tribe_events_cat' );
+			$venue_ids     = $this->set_event_venue_data( $event_data );
+			$organizer_ids = $this->set_event_organizers_data( $event_data );
+			$downloaded_image = array();
+			if ( ! empty( $event_data['image'] ) ) {
+				$image            = array(
+					'url' => $event_data['image'],
+					'id'  => 0,
+				);
+				if ( substr( $event_data['image'], 0, strlen( 'https://images.pexels.com' ) ) === 'https://images.pexels.com' ) {
+					$image_data = $this->get_image_info( $image_library, $event_data['image'] );
+					if ( $image_data ) {
+						$alt                        = ! empty( $image_data['alt'] ) ? $image_data['alt'] : '';
+						$image['filename']          = ! empty( $image_data['filename'] ) ? $image_data['filename'] : $this->create_filename_from_alt( $alt );
+						$image['photographer']      = ! empty( $image_data['photographer'] ) ? $image_data['photographer'] : '';
+						$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
+						$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
+						$image['alt']               = $alt;
+						$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+					}
+				}
+				$downloaded_image = $this->import_image( $image );
+			}
+			$date       = strtotime( '+' . (string)$variation .' months' );
+			$start_date = date( 'Y-m-d', $date );
+			$event_item = array(
+				'post_status'  => 'publish',
+				'post_title'   => ( isset( $event_data['title'] ) ? wp_strip_all_tags( $event_data['title'] ) : '' ),
+				'post_content' => $this->process_page_content( $event_data['content'], $image_library ),
+				'EventStartDate' => $start_date,
+				'EventStartMeridian' => 'pm',
+				'EventStartMinute' => '00',
+				'EventStartHour' => '01',
+				'EventEndMeridian' => 'pm',
+				'EventEndMinute' => '00',
+				'EventEndHour' => '05',
+				'EventEndDate' => $start_date,
+				'FeaturedImage' => ! empty( $downloaded_image['id'] ) ? $downloaded_image['id'] : '',
+				'EventCost' => '0',
+				'venue' => isset( $event_data['venues'][0] ) ? $event_data['venues'][0] : '',
+			);
+			$event_id = tribe_create_event( $event_item );
+			// Check for errors and handle them accordingly
+			if ( is_wp_error( $event_id ) ) {
+				return new WP_Error( 'install_failed', __( 'Install failed.' ), array( 'status' => 500 ) );
+			}
+			update_post_meta( $event_id, '_kadence_starter_templates_imported_post', true );
+			foreach ( $organizer_ids as $organizer_id ) {
+				add_post_meta( $event_id, '_EventOrganizerID', $organizer_id );
+			}
+			wp_set_post_terms( $event_id, $category_ids, 'tribe_events_cat' );
+			$new_events[] = $event_id;
+			$variation++;
+		}
+		if ( empty( $new_events ) ) {
+			return new WP_Error( 'install_failed', __( 'Install failed.' ), array( 'status' => 500 ) );
+		}
+		return rest_ensure_response( $new_events );
+	}
+	/**
+	 * Install Products.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
@@ -3092,7 +3299,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 				'url' => $data['image'][0]['src'],
 				'id'  => 0,
 			);
-			if ( strpos( $image['url'], 'images.pexels.com' ) !== false ) {
+			if ( substr( $image['url'], 0, strlen( 'https://images.pexels.com' ) ) === 'https://images.pexels.com' ) {
 				$image_data = $this->get_image_info( $image_library, $image['url'] );
 				if ( $image_data ) {
 					$alt                        = ! empty( $image_data['alt'] ) ? $image_data['alt'] : '';
@@ -3120,7 +3327,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 						'url' => $single_image['src'],
 						'id'  => 0,
 					);
-					if ( strpos( $image['url'], 'images.pexels.com' ) !== false ) {
+					if ( substr( $image['url'], 0, strlen( 'https://images.pexels.com' ) ) === 'https://images.pexels.com' ) {
 						$image_data = $this->get_image_info( $image_library, $image['url'] );
 						if ( $image_data ) {
 							$alt                        = ! empty( $image_data['alt'] ) ? $image_data['alt'] : '';
@@ -3152,10 +3359,9 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 */
 	public function get_token_header( $args = array() ) {
 		$this->get_license_keys();
-		$site_url     = get_original_domain();
 		$site_name    = get_bloginfo( 'name' );
 		$defaults = [
-			'domain'          => $site_url,
+			'domain'          => $this->site_url,
 			'key'             => ! empty( $this->api_key ) ? $this->api_key : '',
 			'email'           => ! empty( $this->api_email ) ? $this->api_email : '',
 			'site_name'       => sanitize_title( $site_name ),
@@ -3166,6 +3372,144 @@ class Library_REST_Controller extends WP_REST_Controller {
 		$parsed_args = wp_parse_args( $args, $defaults );
 
 		return base64_encode( json_encode( $parsed_args ) );
+	}
+	/**
+	 * Set the venue and tag ids.
+	 *
+	 * @param array      $data    Item data.
+	 */
+	protected function set_event_venue_data( $data ) {
+		$venue_ids = array();
+		// Set the categories.
+		if ( ! empty( $data['venues'] ) ) {
+			foreach ( $data['venues'] as $venue ) {
+				// Lets not duplicate venues.
+				$has_venue = get_posts( [
+					'post_type'  => 'tribe_venue',
+					'title'      => $venue['Venue'],
+				] );
+				if ( $has_venue ) {
+					$venue_ids[] = $has_venue[0]->ID;
+					continue;
+				}
+				// Insert the venue.
+				$venue_id = wp_insert_post(
+					array(
+					'post_title'   => wp_strip_all_tags( $venue['Venue'] ),
+					'post_content' => '',
+					'post_status'  => 'publish',
+					'post_type'    => 'tribe_venue',
+					)
+				);
+				if ( ! is_wp_error( $venue_id ) ) {
+					$venue_ids[] = $venue_id;
+					update_post_meta( $venue_id, '_kadence_starter_templates_imported_post', true );
+					if ( isset( $venue['Address'] ) ) {
+						update_post_meta( $venue_id, '_VenueAddress', $venue['Address'] );
+					}
+					if ( isset( $venue['Country'] ) ) {
+						update_post_meta( $venue_id, '_VenueCountry', $venue['Country'] );
+					}
+					if ( isset( $venue['City'] ) ) {
+						update_post_meta( $venue_id, '_VenueCity', $venue['City'] );
+					}
+					if ( isset( $venue['Province'] ) ) {
+						update_post_meta( $venue_id, '_VenueProvince', $venue['Province'] );
+					}
+					if ( isset( $venue['State'] ) ) {
+						update_post_meta( $venue_id, '_VenueState', $venue['State'] );
+					}
+					if ( isset( $venue['State_Province'] ) ) {
+						update_post_meta( $venue_id, '_VenueStateProvince', $venue['State_Province'] );
+					}
+					if ( isset( $venue['Zip'] ) ) {
+						update_post_meta( $venue_id, '_VenueZip', $venue['Zip'] );
+					}
+					if ( isset( $venue['Phone'] ) ) {
+						update_post_meta( $venue_id, '_VenuePhone', $venue['Phone'] );
+					}
+					if ( isset( $venue['Website'] ) ) {
+						update_post_meta( $venue_id, '_VenueWebsite', $venue['Website'] );
+					}
+				}
+			}
+		}
+		return $venue_ids;
+	}
+	/**
+	 * Set the venue and tag ids.
+	 *
+	 * @param array      $data    Item data.
+	 */
+	protected function set_event_organizers_data( $data ) {
+		$organizer_ids = array();
+		// Set the categories.
+		if ( ! empty( $data['organizers'] ) ) {
+			foreach ( $data['organizers'] as $organizer ) {
+				// Lets not duplicate venues.
+				$has_organizer = get_posts( [
+					'post_type'  => 'tribe_organizer',
+					'title'      => $organizer['Organizer'],
+				] );
+				if ( $has_organizer ) {
+					$organizer_ids[] = $has_organizer[0]->ID;
+					continue;
+				}
+				// Insert the venue.
+				$organizer_id = wp_insert_post(
+					array(
+					'post_title'   => wp_strip_all_tags( $organizer['Organizer'] ),
+					'post_content' => '',
+					'post_status'  => 'publish',
+					'post_type'    => 'tribe_organizer',
+					)
+				);
+				if ( ! is_wp_error( $organizer_id ) ) {
+					$organizer_ids[] = $organizer_id;
+					update_post_meta( $organizer_id, '_kadence_starter_templates_imported_post', true );
+					if ( isset ( $organizer['Email'] ) ) {
+						update_post_meta( $organizer_id, '_OrganizerEmail', $organizer['Email'] );
+					}
+					if ( isset ( $organizer['Website'] ) ) {
+						update_post_meta( $organizer_id, '_OrganizerWebsite', $organizer['Website'] );
+					}
+					if ( isset ( $organizer['Phone'] ) ) {
+						update_post_meta( $organizer_id, '_OrganizerPhone', $organizer['Phone'] );
+					}
+				}
+			}
+		}
+		return $organizer_ids;
+	}
+		/**
+	 * Set the category and tag ids.
+	 *
+	 * @param array      $data    Item data.
+	 */
+	protected function set_taxonomy_data( $data, $key, $taxonomy ) {
+		$taxonomy_ids = array();
+		// Set the categories.
+		if ( ! empty( $data[$key] ) ) {
+			foreach ( $data[$key] as $slug => $name ) {
+				$taxonomy_term = get_term_by( 'slug', $slug, $taxonomy );
+				if ( ! $taxonomy_term ) {
+					$taxonomy_term = wp_insert_term(
+						$name, // the term.
+						$taxonomy, // the taxonomy.
+						array(
+							'slug' => $slug
+						)
+					);
+				}
+				if ( ! is_wp_error( $taxonomy_term ) && ! empty( $taxonomy_term->term_id ) ) {
+					$taxonomy_ids[] = $taxonomy_term->term_id;
+					update_term_meta( $taxonomy_term->term_id, '_kadence_starter_templates_imported_term', true );
+				} else if ( ! empty( $taxonomy_term['term_id'] ) ) {
+					$taxonomy_ids[] = $taxonomy_term['term_id'];
+				}
+			}
+		}
+		return $taxonomy_ids;
 	}
 	/**
 	 * Set the category and tag ids.
@@ -3197,6 +3541,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 		}
 		return $category_ids;
 	}
+
 	/**
 	 * Set the tag ids.
 	 *
@@ -3512,7 +3857,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 					'url' => $image_url,
 					'id'  => 0,
 				);
-				if ( strpos( $image_url, 'images.pexels.com' ) !== false ) {
+				if ( substr( $image_url, 0, strlen( 'https://images.pexels.com' ) ) === 'https://images.pexels.com' ) {
 					$image_data = $this->get_image_info( $image_library, $image_url );
 					if ( $image_data ) {
 						$alt                        = ! empty( $image_data['alt'] ) ? $image_data['alt'] : '';
@@ -3544,8 +3889,8 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 * @param string $filename The filename.
 	 * @return string a sanitized filename.
 	 */
-	public function sanitize_jpeg_filename( $filename ) {
-		return sanitize_file_name( $filename ) . '.jpeg';
+	public function sanitize_filename( $filename, $ext ) {
+		return sanitize_file_name( $filename ) . '.' . $ext;
 	}
 	/**
 	 * Create a filename from alt text.
@@ -3617,6 +3962,23 @@ class Library_REST_Controller extends WP_REST_Controller {
 		if ( $local_image['status'] ) {
 			return $local_image['image'];
 		}
+		$filename   = basename( $image_data['url'] );
+		$image_path = $image_data['url'];
+		// Check if the image is from Pexels and get the filename.
+		if ( substr( $image_data['url'], 0, strlen( 'https://images.pexels.com' ) ) === 'https://images.pexels.com' ) {
+			$image_path = parse_url( $image_data['url'], PHP_URL_PATH );
+			$filename = basename( $image_path );
+		}
+		$info = wp_check_filetype( $image_path );
+		$ext  = empty( $info['ext'] ) ? '' : $info['ext'];
+		$type = empty( $info['type'] ) ? '' : $info['type'];
+		// If we don't allow uploading the file type or ext, return.
+		if ( ! $type || ! $ext ) {
+			return $image_data;
+		}
+		// Custom filename if passed as data.
+		$filename = ! empty( $image_data['filename'] ) ? $this->sanitize_filename( $image_data['filename'], $ext ) : $filename;
+
 		$file_content = wp_remote_retrieve_body(
 			wp_safe_remote_get(
 				$image_data['url'],
@@ -3630,25 +3992,13 @@ class Library_REST_Controller extends WP_REST_Controller {
 		if ( empty( $file_content ) ) {
 			return $image_data;
 		}
-		$filename = basename( $image_data['url'] );
-		if ( strpos( $image_data['url'], 'images.pexels.com' ) !== false ) {
-			$image_path = parse_url( $image_data['url'], PHP_URL_PATH );
-			$filename = basename( $image_path );
-		}
-		// Custom filename if passed as data.
-		$filename = ! empty( $image_data['filename'] ) ? $this->sanitize_jpeg_filename( $image_data['filename'] ) : $filename;
 
 		$upload = wp_upload_bits( $filename, null, $file_content );
 		$post = array(
 			'post_title' => ( ! empty( $image_data['title'] ) ? $image_data['title'] : $filename ),
 			'guid'       => $upload['url'],
 		);
-		$info = wp_check_filetype( $upload['file'] );
-		if ( $info ) {
-			$post['post_mime_type'] = $info['type'];
-		} else {
-			return $image_data;
-		}
+		$post['post_mime_type'] = $type;
 		if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
 			include( ABSPATH . 'wp-admin/includes/image.php' );
 		}
@@ -3709,7 +4059,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 		if ( empty( $link ) ) {
 			return false;
 		}
-		if ( strpos( $link, 'https://images.pexels.com' ) !== false ) {
+		if ( substr( $link, 0, strlen( 'https://images.pexels.com' ) ) === 'https://images.pexels.com' ) {
 			return true;
 		}
 		return preg_match( '/^((https?:\/\/)|(www\.))([a-z0-9-].?)+(:[0-9]+)?\/[\w\-]+\.(jpg|png|gif|webp|jpeg)\/?$/i', $link );
@@ -4174,14 +4524,13 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 * @return string Returns the remote URL contents.
 	 */
 	public function get_remote_url_contents() {
-		$site_url = '';
 		$args = apply_filters(
 			'kadence_starter_get_templates_args',
 			array(
 				'request'   => ( $this->template_type ? $this->template_type : 'blocks' ),
 				'api_email' => $this->api_email,
 				'api_key'   => $this->api_key,
-				'site_url'  => $site_url,
+				'site_url'  => $this->site_url,
 			)
 		);
 		// Get the response.
@@ -4573,6 +4922,10 @@ class Library_REST_Controller extends WP_REST_Controller {
 		if ( ! empty( $data['api_email'] ) ) {
 			$this->api_email = $data['api_email'];
 		}
+		if ( ! empty( $data['site_url'] ) ) {
+			$this->site_url = $data['site_url'];
+		}
+		return $data;
 	}
 	/**
 	 * Get the current license key for the plugin.
@@ -4611,6 +4964,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 		$license_data = array(
 			'api_key'   => $this->get_current_license_key(),
 			'api_email' => $this->get_current_license_email(),
+			'site_url'  => get_original_domain(),
 		);
 		return $license_data;
 	}

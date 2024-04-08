@@ -63,6 +63,20 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	protected $snippet;
 
 	/**
+	 * Whether the snippet is currently edited by someone else.
+	 *
+	 * @var bool
+	 */
+	protected $is_locked = false;
+
+	/**
+	 * The name of user who locked the snippet.
+	 *
+	 * @var string
+	 */
+	protected $locked_by;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -83,6 +97,18 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			if ( ! is_null( $snippet_post ) && $this->get_post_type() === $snippet_post->post_type ) {
 				$this->snippet_id = $snippet_post->ID;
 				$this->snippet    = wpcode_get_snippet( $snippet_post );
+
+				// Let's check if it's not already being edited by someone else.
+				$snippet_locked = wp_check_post_lock( $this->snippet_id );
+				if ( $snippet_locked ) {
+					$locked_by = get_user_by( 'id', $snippet_locked );
+					if ( $locked_by ) {
+						$this->locked_by = $locked_by->display_name;
+						$this->is_locked = true;
+					}
+				} else {
+					wp_set_post_lock( $this->snippet_id );
+				}
 			}
 		}
 	}
@@ -436,6 +462,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		</div>
 		<?php $this->get_input_auto_insert_options(); ?>
 		<div class="wpcode-metabox-form">
+			<?php $this->get_input_row_as_file(); ?>
 			<?php $this->get_input_row_schedule(); ?>
 		</div>
 		<?php
@@ -1384,6 +1411,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			$data['conditions'] = wpcode()->conditional_logic->get_all_admin_options();
 		}
 
+		$data['snippet_id']             = isset( $this->snippet_id ) ? $this->snippet_id : 0;
 		$data['save_to_library_url']    = wpcode_utm_url( 'https://wpcode.com/lite/', 'snippet-editor', 'save-to-library', 'upgrade-to-pro' );
 		$data['save_to_library_title']  = __( 'Save to Library is a Pro Feature', 'insert-headers-and-footers' );
 		$data['save_to_library_text']   = __( 'Upgrade to PRO today and save your private snippets to the WPCode library for easy access. You can also share your snippets with other users or load them on other sites.', 'insert-headers-and-footers' );
@@ -1402,6 +1430,9 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		$data['blocks_url']             = wpcode_utm_url( 'https://wpcode.com/lite/', 'snippet-editor', 'blocks', 'modal' );
 		$data['blocks_button']          = $data['save_to_library_button'];
 		$data['shortcode_attributes']   = __( 'Shortcode Attributes', 'insert-headers-and-footers' );
+		$data['laf_title']              = __( 'Load as file is a Pro Feature', 'insert-headers-and-footers' );
+		$data['laf_text']               = __( 'Upgrade to PRO today and unlock loading your CSS and JS snippets as files for better performance and improved compatibility with caching plugins.', 'insert-headers-and-footers' );
+		$data['laf_url']                = wpcode_utm_url( 'https://wpcode.com/lite/', 'snippet-editor', 'laf', 'modal' );
 		$data['php_cl_location_notice'] = sprintf(
 		// Translators: %1$s Opening anchor tag. %2$s Closing anchor tag.
 			__( 'For better results using conditional logic with PHP snippets we automatically switched the auto-insert location to "Frontend Conditional Logic" that runs later. If you want to run the snippet earlier please switch back to "Run Everywhere" but note not all conditional logic options will be available. %1$sRead more%2$s', 'insert-headers-and-footers' ),
@@ -1421,6 +1452,10 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		$data['cl_labels_custom']   = $this->get_conditional_logic_operators_custom_labels();
 		$data['error_line']         = $error_line;
 		$data['error_line_message'] = esc_html__( 'The snippet has been recently deactivated due to an error on this line', 'insert-headers-and-footers' );
+		$data['is_locked']          = $this->is_locked;
+		$data['locked_by']          = $this->locked_by;
+		// Translators: The name of the user that is currently editing the snippet is appended at the end.
+		$data['edited'] = esc_html__( 'This snippet is currently being edited by ', 'insert-headers-and-footers' );
 
 		return $data;
 	}
@@ -1618,10 +1653,46 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	}
 
 	/**
+	 * Get the description of the load as file option.
+	 *
+	 * @return string
+	 */
+	public function get_input_row_as_file_description() {
+		return sprintf(
+			// Translators: Link to the documentation article for files as snippets. %1$s is the opening anchor tag, %2$s is the closing anchor tag.
+			esc_html__( 'If enabled, this snippet will be loaded as a physical file instead of being inserted in the source of the page. %1$sLearn more%2$s.', 'insert-headers-and-footers' ),
+			'<a target="_blank" rel="noreferrer noopener" href="' . esc_url( wpcode_utm_url( 'https://wpcode.com/docs/snippet-files', 'snippet-manager', 'load-as-file', 'learn-more' ) ) . '">',
+			'</a>'
+		);
+	}
+
+	/**
+	 * Get the markup for displaying an option to load the snippet as a file if the code type is CSS or JS.
+	 *
+	 * @return void
+	 */
+	public function get_input_row_as_file() {
+		$this->metabox_row(
+			esc_html__( 'Load as file', 'insert-headers-and-footers' ),
+			$this->get_checkbox_toggle(
+				false,
+				'wpcode_snippet_as_file'
+			),
+			'wpcode_snippet_as_file',
+			'#wpcode_snippet_type',
+			'js,css',
+			$this->get_input_row_as_file_description(),
+			true,
+			'wpcode_snippet_as_file_option'
+		);
+	}
+
+	/**
 	 * Get the markup of the schedule inputs.
 	 *
 	 * @param string $start Start date.
 	 * @param string $end End date.
+	 * @param bool   $read_only If the inputs should be read-only.
 	 *
 	 * @return string
 	 */
@@ -1837,6 +1908,18 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	public function maybe_show_error_notice() {
 		if ( ! isset( $this->snippet ) ) {
 			return;
+		}
+		if ( $this->is_locked ) {
+			?>
+			<div class="notice-warning fade notice is-dismissible">
+				<p>
+					<?php
+					// Translators: The placeholder gets replaced with the display name of the user currently editing the snippet.
+					printf( esc_html__( 'Notice: %1$s is also editing this snippet. Please be aware that your changes could be overwritten.', 'insert-headers-and-footers' ), esc_html( $this->locked_by ) );
+					?>
+				</p>
+			</div>
+			<?php
 		}
 		$last_error = $this->snippet->get_last_error();
 		if ( empty( $last_error ) ) {

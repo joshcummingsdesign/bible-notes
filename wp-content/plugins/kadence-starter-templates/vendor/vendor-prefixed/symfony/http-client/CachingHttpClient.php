@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 05-February-2024 using Strauss.
+ * Modified by kadencewp on 01-April-2024 using Strauss.
  * @see https://github.com/BrianHenryIE/strauss
  */
 
@@ -16,7 +16,7 @@ namespace KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpClient;
 
 use KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpClient\Response\MockResponse;
 use KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpClient\Response\ResponseStream;
-use Symfony\Component\HttpFoundation\Request;
+use KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpCache\HttpCache;
 use Symfony\Component\HttpKernel\HttpCache\StoreInterface;
 use Symfony\Component\HttpKernel\HttpClientKernel;

@@ -4204,6 +4204,7 @@ class Component implements Component_Interface, Templating_Component_Interface {
 					'sfwd-assignment_comments' => true,
 					// MISC
 					'ie11_basic_support' => false,
+					'theme_json_mode'    => false,
 				)
 			);
 		}
@@ -4596,6 +4597,10 @@ class Component implements Component_Interface, Templating_Component_Interface {
 	public function get_pro_url( $url, $initial_url = '', $source = '', $medium = '', $campaign = '' ) {
 		if ( empty( $initial_url ) ) {
 			$initial_url = $url;
+		}
+		$partner_url = get_option( 'kadence_partner_pro_url', '' );
+		if ( ! empty( $partner_url ) && in_array( $partner_url, self::$allowed_urls, true ) ) {
+			$url = $partner_url;
 		}
 		$url = apply_filters( 'kadence_get_pro_url', $url, $initial_url );
 		if ( in_array( $url, self::$allowed_urls, true ) ) {

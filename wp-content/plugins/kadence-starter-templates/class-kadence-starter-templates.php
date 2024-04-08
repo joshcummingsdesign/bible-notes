@@ -1544,6 +1544,7 @@ class Starter_Templates {
 			wp_send_json_error( 'Missing Parameters' );
 		}
 		delete_transient( 'kadence_importer_data' );
+		// error_log( 'Setup Initial Install' );
 		if ( empty( $this->import_files ) || ( is_array( $this->import_files ) && ! isset( $this->import_files[ $selected_index ] ) ) ) {
 			$template_database  = Template_Database_Importer::get_instance();
 			$this->import_files = $template_database->get_importer_files( $selected_index, $selected_builder );
@@ -1557,6 +1558,7 @@ class Starter_Templates {
 	 * AJAX callback to install a plugin.
 	 */
 	public function install_plugins_ajax_callback() {
+		// error_log( 'Install Plugins' );
 		Helpers::verify_ajax_call();
 
 		if ( ! isset( $_POST['selected'] ) || ! isset( $_POST['builder'] ) ) {
@@ -1972,6 +1974,10 @@ class Starter_Templates {
 	public function import_demo_single_data_ajax_callback() {
 		// Try to update PHP memory limit (so that it does not run out of it).
 		ini_set( 'memory_limit', apply_filters( 'kadence-starter-templates/import_memory_limit', '350M' ) );
+		// Increase PHP max execution time. Just in case, even though the AJAX calls are only 25 sec long.
+		if ( strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) === false ) {
+			set_time_limit( apply_filters( 'kadence-starter-templates/set_time_limit_for_demo_data_import', 300 ) );
+		}
 
 		// Verify if the AJAX call is valid (checks nonce and current_user_can).
 		Helpers::verify_ajax_call();
@@ -2366,10 +2372,18 @@ class Starter_Templates {
 	 * 4). execute 'after content import' actions (before widget import WP action, widget import, customizer import, after import WP action)
 	 */
 	public function import_demo_data_ajax_callback() {
-		// Try to update PHP memory limit (so that it does not run out of it).
-		ini_set( 'memory_limit', apply_filters( 'kadence-starter-templates/import_memory_limit', '350M' ) );
+		// error_log( 'Install Content' );
 		// Verify if the AJAX call is valid (checks nonce and current_user_can).
 		Helpers::verify_ajax_call();
+
+		// Try to update PHP memory limit (so that it does not run out of it).
+		ini_set( 'memory_limit', apply_filters( 'kadence-starter-templates/import_memory_limit', '350M' ) );
+
+		// Increase PHP max execution time. Just in case, even though the AJAX calls are only 25 sec long.
+		if ( strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) === false ) {
+			set_time_limit( apply_filters( 'kadence-starter-templates/set_time_limit_for_demo_data_import', 300 ) );
+		}
+
 		// Is this a new AJAX call to continue the previous import?
 		$use_existing_importer_data = $this->use_existing_importer_data();
 		if ( ! $use_existing_importer_data ) {
