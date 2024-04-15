@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 19-March-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified by kadencewp on 10-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Contracts\HttpClient\Test;
@@ -44,5 +44,12 @@ class TestHttpServer
         } while (!@fopen('http://127.0.0.1:'.$port, 'r'));
 
         return $process;
+    }
+
+    public static function stop(int $port = 8057)
+    {
+        if (isset(self::$process[$port])) {
+            self::$process[$port]->stop();
+        }
     }
 }

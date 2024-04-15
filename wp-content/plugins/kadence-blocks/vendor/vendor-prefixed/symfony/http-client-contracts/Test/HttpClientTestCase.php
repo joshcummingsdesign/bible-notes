@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 19-March-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified by kadencewp on 10-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Contracts\HttpClient\Test;
@@ -28,6 +28,12 @@ abstract class HttpClientTestCase extends TestCase
     public static function setUpBeforeClass(): void
     {
         TestHttpServer::start();
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        TestHttpServer::stop(8067);
+        TestHttpServer::stop(8077);
     }
 
     abstract protected function getHttpClient(string $testCase): HttpClientInterface;
@@ -971,6 +977,14 @@ abstract class HttpClientTestCase extends TestCase
         } finally {
             unset($_SERVER['http_proxy']);
         }
+
+        $response = $client->request('GET', 'http://localhost:8057/301/proxy', [
+            'proxy' => 'http://localhost:8057',
+        ]);
+
+        $body = $response->toArray();
+        $this->assertSame('localhost:8057', $body['HTTP_HOST']);
+        $this->assertMatchesRegularExpression('#^http://(localhost|127\.0\.0\.1):8057/$#', $body['REQUEST_URI']);
     }
 
     public function testNoProxy()

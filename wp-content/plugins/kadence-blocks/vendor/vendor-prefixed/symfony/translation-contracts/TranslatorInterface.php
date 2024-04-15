@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 19-March-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified by kadencewp on 10-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Contracts\Translation;
@@ -65,5 +65,5 @@ interface TranslatorInterface
      *
      * @throws \InvalidArgumentException If the locale contains invalid characters
      */
-    public function trans(string $id, array $parameters = [], string $domain = null, string $locale = null);
+    public function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null);
 }

@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 19-March-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified by kadencewp on 10-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\Filesystem;
@@ -73,6 +73,9 @@ class Filesystem
             if ($originIsLocal) {
                 // Like `cp`, preserve executable permission bits
                 self::box('chmod', $targetFile, fileperms($targetFile) | (fileperms($originFile) & 0111));
+
+                // Like `cp`, preserve the file modification time
+                self::box('touch', $targetFile, filemtime($originFile));
 
                 if ($bytesCopied !== $bytesOrigin = filesize($originFile)) {
                     throw new IOException(sprintf('Failed to copy the whole content of "%s" to "%s" (%g of %g bytes copied).', $originFile, $targetFile, $bytesCopied, $bytesOrigin), 0, null, $originFile);
@@ -201,7 +204,7 @@ class Filesystem
 
                     throw new IOException(sprintf('Failed to remove directory "%s": ', $file).$lastError);
                 }
-            } elseif (!self::box('unlink', $file) && (str_contains(self::$lastError, 'Permission denied') || file_exists($file))) {
+            } elseif (!self::box('unlink', $file) && ((self::$lastError && str_contains(self::$lastError, 'Permission denied')) || file_exists($file))) {
                 throw new IOException(sprintf('Failed to remove file "%s": ', $file).self::$lastError);
             }
         }

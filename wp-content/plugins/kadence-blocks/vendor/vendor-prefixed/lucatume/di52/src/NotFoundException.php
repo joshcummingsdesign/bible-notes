@@ -5,7 +5,7 @@
  * @package lucatume\DI52
  *
  * @license GPL-3.0
- * Modified by kadencewp on 19-March-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified by kadencewp on 10-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\lucatume\DI52;

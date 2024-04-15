@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 19-March-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified by kadencewp on 10-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\HttpFoundation;
@@ -41,7 +41,7 @@ class ParameterBag implements \IteratorAggregate, \Countable
      *
      * @return array
      */
-    public function all(/* string $key = null */)
+    public function all(/* ?string $key = null */)
     {
         $key = \func_num_args() > 0 ? func_get_arg(0) : null;
 

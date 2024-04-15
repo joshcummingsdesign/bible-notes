@@ -2,7 +2,7 @@
 /**
  * @license GPL-2.0-only
  *
- * Modified by kadencewp on 19-March-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified by kadencewp on 10-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */ declare(strict_types=1);
 
 namespace KadenceWP\KadenceBlocks\StellarWP\ProphecyMonorepo\Container\Contracts;
