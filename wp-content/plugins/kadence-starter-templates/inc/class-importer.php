@@ -671,9 +671,9 @@ class Importer {
 	 */
 	private function check_for_image( $file ) {
 		if ( ! empty( $file ) ) {
-			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png)\b/i', $file, $matches );
+			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png|webp)\b/i', $file, $matches );
 			$file_name = basename( $matches[0] );
-			$ext = array( ".png", ".jpg", ".gif", ".jpeg" );
+			$ext = array( ".png", ".jpg", ".gif", ".jpeg", ".webp" );
 			$clean_filename = str_replace( $ext, "", $file_name );
 			$clean_filename = trim( html_entity_decode( sanitize_title( $clean_filename ) ) );
 			if ( post_exists( $clean_filename ) ) {
@@ -706,7 +706,7 @@ class Importer {
 		}
 		if ( ! empty( $file ) ) {
 			// Set variables for storage, fix file filename for query strings.
-			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png)\b/i', $file, $matches );
+			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png|webp)\b/i', $file, $matches );
 			$file_array = array();
 			$file_array['name'] = basename( $matches[0] );
 

@@ -3,7 +3,7 @@ Contributors: britner
 Tags: templates, gutenberg
 Requires at least: 6.2
 Tested up to: 6.5
-Stable tag: 2.1.0
+Stable tag: 2.1.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -124,6 +124,17 @@ assist you with verification, CVE assignment, and notify the
 developers of this plugin.
 
 == Changelog ==
+
+= 2.1.2 =
+* Fix: Beta enabled in release.
+
+= 2.1.1 =
+* Update: AI wizard
+* Fix: Issue with images in widget areas.
+* Fix: Issue with some webp images.
+* Fix: Issue with possible php notice in import logger.
+* Fix: Issue with some widget links not updating.
+* Fix: Plugin install issue.
 
 = 2.1.0 =
 * Add: Site Goals in Beta - Dynamic section support.

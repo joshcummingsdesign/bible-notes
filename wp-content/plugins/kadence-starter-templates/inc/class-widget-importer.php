@@ -278,8 +278,7 @@ class WidgetImporter {
 					if ( $sidebar_available ) {
 						$widget_message_type = 'success';
 						$widget_message      = __( 'Imported', 'kadence-starter-templates' );
-					}
-					else {
+					} else {
 						$widget_message_type = 'warning';
 						$widget_message      = __( 'Imported to Inactive', 'kadence-starter-templates' );
 					}

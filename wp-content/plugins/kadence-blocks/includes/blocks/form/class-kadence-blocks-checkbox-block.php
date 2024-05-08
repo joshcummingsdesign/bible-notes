@@ -71,9 +71,6 @@ class Kadence_Blocks_Checkbox_Block extends Kadence_Blocks_Advanced_Form_Input_B
 		$is_required   = $this->is_required( $attributes );
 		$class_id = $this->class_id( $attributes );
 		$outer_classes = array( 'kb-adv-form-field', 'kb-field' . $class_id );
-		if ( ! empty( $attributes['className'] ) ) {
-			$outer_classes[] = $attributes['className'];
-		}
 		$wrapper_args       = array(
 			'class' => implode( ' ', $outer_classes ),
 		);
@@ -90,12 +87,13 @@ class Kadence_Blocks_Checkbox_Block extends Kadence_Blocks_Advanced_Form_Input_B
 		$inner_content      .= $this->field_aria_label( $attributes );
 		foreach ( $attributes['options'] as $key => $option ) {
 			$id         = 'field' . $class_id . '_' . $key;
-			$is_checked_from_param = ! empty( $option['value'] ) && $option['value'] && in_array( $option['value'], explode( ',', $this->get_default( $attributes ) ) );
+			$option_value = $this->get_option_value( $option );
+			$is_checked_from_param = ! empty( $option_value ) && $option_value && in_array( $option_value, explode( ',', $this->get_default( $attributes ) ) );
 			$is_checked_from_editor = ! empty( $option['selected'] );
 			$is_checked = $is_checked_from_editor || $is_checked_from_param;
 
 			$inner_content .= '<div class="kb-radio-check-item">';
-			$inner_content .= '<input class="kb-checkbox-style" type="checkbox" ' . $this->aria_described_by( $attributes ) . ' id="' . esc_attr( $id ) . '" name="' . esc_attr( $this->field_name( $attributes ) ) . '[]"' . ( $is_checked ? ' checked' : '' ) . ' value="' . esc_attr( $this->get_option_value( $option ) ) . '">';
+			$inner_content .= '<input class="kb-checkbox-style" type="checkbox" ' . $this->aria_described_by( $attributes ) . ' id="' . esc_attr( $id ) . '" name="' . esc_attr( $this->field_name( $attributes ) ) . '[]"' . ( $is_checked ? ' checked' : '' ) . ' value="' . esc_attr( $option_value ) . '">';
 
 			$inner_content .= '<label for="' . esc_attr( $id ) . '">' . $option['label'] . '</label>';
 

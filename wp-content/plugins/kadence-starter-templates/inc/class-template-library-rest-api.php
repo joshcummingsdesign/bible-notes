@@ -2386,6 +2386,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 					$widget['content'] = str_replace( 'Magnolia', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Willow', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Hemlock', $site_name, $widget['content'] );
+					$widget['content'] = str_replace( 'Fig', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Aspen', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Juniper', $site_name, $widget['content'] );
 					$widget['content'] = str_replace( 'Almond', $site_name, $widget['content'] );
@@ -3021,7 +3022,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 						$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
 						$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
 						$image['alt']               = $alt;
-						$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+						$image['title']             = __( 'Photo by', 'kadence-starter-templates' ) . ' ' . $image['photographer'];
 					}
 				}
 				$downloaded_image = $this->import_image( $image );
@@ -3158,7 +3159,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 						$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
 						$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
 						$image['alt']               = $alt;
-						$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+						$image['title']             = __( 'Photo by', 'kadence-starter-templates' ) . ' ' . $image['photographer'];
 					}
 				}
 				$downloaded_image = $this->import_image( $image );
@@ -3308,7 +3309,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 					$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
 					$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
 					$image['alt']               = $alt;
-					$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+					$image['title']             = __( 'Photo by', 'kadence-starter-templates' ) . ' ' . $image['photographer'];
 				}
 			}
 			$downloaded_image = $this->import_image( $image );
@@ -3336,7 +3337,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 							$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
 							$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
 							$image['alt']               = $alt;
-							$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+							$image['title']             = __( 'Photo by', 'kadence-starter-templates' ) . ' ' . $image['photographer'];
 						}
 					}
 					$downloaded_image = $this->import_image( $image );
@@ -3365,7 +3366,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 			'key'             => ! empty( $this->api_key ) ? $this->api_key : '',
 			'email'           => ! empty( $this->api_email ) ? $this->api_email : '',
 			'site_name'       => sanitize_title( $site_name ),
-			'product_slug'    => apply_filters( 'kadence-blocks-auth-slug', 'kadence-blocks' ),
+			'product_slug'    => apply_filters( 'kadence-blocks-auth-slug', 'kadence-starter-templates' ),
 			'product_version' => KADENCE_STARTER_TEMPLATES_VERSION,
 		];
 
@@ -3866,7 +3867,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 						$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
 						$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
 						$image['alt']               = $alt;
-						$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+						$image['title']             = __( 'Photo by', 'kadence-starter-templates' ) . ' ' . $image['photographer'];
 					}
 				}
 				$downloaded_image       = $this->import_image( $image );
@@ -4083,53 +4084,53 @@ class Library_REST_Controller extends WP_REST_Controller {
 		$query_params  = parent::get_collection_params();
 
 		$query_params[ self::PROP_CONTEXT ] = array(
-			'description' => __( 'The requested ai context.', 'kadence-blocks' ),
+			'description' => __( 'The requested ai context.', 'kadence-starter-templates' ),
 			'type'        => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_LIBRARY ] = array(
-			'description' => __( 'The requested library.', 'kadence-blocks' ),
+			'description' => __( 'The requested library.', 'kadence-starter-templates' ),
 			'type'        => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_LIBRARY_URL ] = array(
-			'description' => __( 'The requested library URL.', 'kadence-blocks' ),
+			'description' => __( 'The requested library URL.', 'kadence-starter-templates' ),
 			'type'        => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 
 		$query_params[ self::PROP_FORCE_RELOAD ] = array(
-			'description' => __( 'Force a refresh of the context.', 'kadence-blocks' ),
+			'description' => __( 'Force a refresh of the context.', 'kadence-starter-templates' ),
 			'type'        => 'boolean',
 			'default'     => false,
 		);
 		$query_params[ self::PROP_KEY ] = array(
-			'description'       => __( 'Library Key.', 'kadence-blocks' ),
+			'description'       => __( 'Library Key.', 'kadence-starter-templates' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_API_KEY ] = array(
-			'description'       => __( 'Kadence License Key.', 'kadence-blocks' ),
+			'description'       => __( 'Kadence License Key.', 'kadence-starter-templates' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_API_EMAIL ] = array(
-			'description'       => __( 'Kadence License Email.', 'kadence-blocks' ),
+			'description'       => __( 'Kadence License Email.', 'kadence-starter-templates' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_API_PRODUCT ] = array(
-			'description'       => __( 'Kadence License Product ID.', 'kadence-blocks' ),
+			'description'       => __( 'Kadence License Product ID.', 'kadence-starter-templates' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_PAGE ] = array(
-			'description'       => __( 'Import Page.', 'kadence-blocks' ),
+			'description'       => __( 'Import Page.', 'kadence-starter-templates' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_PLUGINS ] = array(
-			'description'       => __( 'Import Plugins', 'kadence-blocks' ),
+			'description'       => __( 'Import Plugins', 'kadence-starter-templates' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'string',
@@ -4138,27 +4139,27 @@ class Library_REST_Controller extends WP_REST_Controller {
 			'validate_callback' => array( $this, 'validate_array' ),
 		);
 		$query_params[ self::PROP_INDUSTRY ] = array(
-			'description'       => __( 'The selected Industry', 'kadence-blocks' ),
+			'description'       => __( 'The selected Industry', 'kadence-starter-templates' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_IMAGE_TYPE ] = array(
-			'description'       => __( 'The Image type to return', 'kadence-blocks' ),
+			'description'       => __( 'The Image type to return', 'kadence-starter-templates' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 		$query_params[ self::PROP_INDUSTRIES ] = array(
-			'description'       => __( 'The industries to return', 'kadence-blocks' ),
+			'description'       => __( 'The industries to return', 'kadence-starter-templates' ),
 			'type'              => 'array',
 			'sanitize_callback' => array( $this, 'sanitize_industries_array' ),
 		);
 		$query_params[ self::PROP_IMAGE_SIZES ] = array(
-			'description'       => __( 'The Image type to return', 'kadence-blocks' ),
+			'description'       => __( 'The Image type to return', 'kadence-starter-templates' ),
 			'type'              => 'array',
 			'sanitize_callback' => array( $this, 'sanitize_image_sizes_array' ),
 		);
 		// $query_params[ self::PROP_PAGES ] = array(
-		// 	'description'       => __( 'Import Pages', 'kadence-blocks' ),
+		// 	'description'       => __( 'Import Pages', 'kadence-starter-templates' ),
 		// 	'type'        => 'array',
 		// 	'items'       => array(
 		// 		'type' => 'string',

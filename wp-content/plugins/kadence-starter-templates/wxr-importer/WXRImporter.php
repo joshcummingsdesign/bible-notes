@@ -1887,20 +1887,21 @@ class WXRImporter extends \WP_Importer {
 				$result = add_term_meta( $term_id, $key, $value );
 
 				if ( is_wp_error( $result ) ) {
+					$log_value = ! empty( $value ) && is_array( $value ) ? wp_json_encode( $value ) : $value;
 					$this->logger->warning( sprintf(
 						__( 'Failed to add metakey: %s, metavalue: %s to term_id: %d', 'wordpress-importer' ),
 						$key,
-						$value,
+						$log_value,
 						$term_id
 					) );
 					do_action( 'wxr_importer.process_failed.termmeta', $result, $meta_item, $term_id, $term );
-				}
-				else {
+				} else {
+					$log_value = ! empty( $value ) && is_array( $value ) ? wp_json_encode( $value ) : $value;
 					$this->logger->debug( sprintf(
 						__( 'Meta for term_id %d : %s => %s ; successfully added!', 'wordpress-importer' ),
 						$term_id,
 						$key,
-						$value
+						$log_value
 					) );
 				}
 

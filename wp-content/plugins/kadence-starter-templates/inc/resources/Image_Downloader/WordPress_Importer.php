@@ -84,7 +84,7 @@ final class WordPress_Importer {
 			}
 
 			$info         = wp_check_filetype( $scaled->file );
-			$title        = sprintf( __( 'Photo by %s', 'kadence-blocks' ), $scaled->photographer );
+			$title        = sprintf( __( 'Photo by %s', 'kadence-starter-templates' ), $scaled->photographer );
 			$filename     = $this->get_file_name( $scaled );
 			$uploaded_url = $upload['url'] . "/$filename";
 

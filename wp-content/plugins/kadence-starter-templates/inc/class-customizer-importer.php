@@ -339,7 +339,7 @@ class CustomizerImporter {
 		}
 		if ( ! empty( $file ) ) {
 			// Set variables for storage, fix file filename for query strings.
-			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png)\b/i', $file, $matches );
+			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png|webp)\b/i', $file, $matches );
 			$file_array = array();
 			$file_array['name'] = basename( $matches[0] );
 

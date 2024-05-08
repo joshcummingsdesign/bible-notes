@@ -73,7 +73,7 @@ class Author_Meta {
 					</tr>
 					<tr>
 						<th>
-							<label for="twitter">Twitter</label>
+							<label for="twitter">X formerly Twitter</label>
 						</th>
 						<td>
 							<input type="text" name="twitter" id="twitter" value="<?php echo esc_attr( get_the_author_meta( 'twitter', $user->ID ) ); ?>" class="regular-text" /><br />

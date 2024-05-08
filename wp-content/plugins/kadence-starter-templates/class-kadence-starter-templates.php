@@ -1200,7 +1200,7 @@ class Starter_Templates {
 				'plugins'              => apply_filters( 'kadence_starter_templates_plugins_array', $plugins ),
 				'palettes'             => apply_filters( 'kadence_starter_templates_palettes_array', $palettes ),
 				'fonts'                => apply_filters( 'kadence_starter_templates_fonts_array', $fonts ),
-				'logo'                 => esc_attr( KADENCE_STARTER_TEMPLATES_URL . 'assets/images/kadence_logo.png' ),
+				'logo'                 => apply_filters( 'kadence_starter_templates_dash_logo', esc_attr( KADENCE_STARTER_TEMPLATES_URL . 'assets/images/kadence_logo.png' ) ),
 				'svgMaskPath'          => defined( 'KADENCE_BLOCKS_URL' ) ? KADENCE_BLOCKS_URL . 'includes/assets/images/masks/' : KADENCE_STARTER_TEMPLATES_URL . 'assets/images/masks/',
 				'has_content'          => $has_content,
 				'has_previous'         => $has_previous,

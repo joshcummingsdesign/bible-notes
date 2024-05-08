@@ -211,6 +211,8 @@ class Kadence_Starter_Templates_AI_Events {
 					'keywords'          => $event_data['keywords'] ?? '',
 					'tone'              => $event_data['tone'] ?? '',
 					'collections'       => $event_data['customCollections'] ?? '',
+					'goals'             => $event_data['goals'] ?? '',
+					'lang'			    => $event_data['lang'] ?? '',
 				];
 				break;
 			case 'ai_wizard_complete':
@@ -224,6 +226,8 @@ class Kadence_Starter_Templates_AI_Events {
 					'keywords'          => $event_data['keywords'] ?? '',
 					'tone'              => $event_data['tone'] ?? '',
 					'collections'       => $event_data['customCollections'] ?? '',
+					'goals'             => $event_data['goals'] ?? '',
+					'lang'              => $event_data['lang'] ?? '',
 				];
 				break;
 			case 'import_ai_starter_template':
@@ -240,6 +244,8 @@ class Kadence_Starter_Templates_AI_Events {
 					'has_content'        => $event_data['has_content'] ?? false,
 					'starter_has_woo'    => $event_data['has_woo'] ?? false,
 					'starter_has_posts'  => $event_data['has_posts'] ?? false,
+					'goals'              => $event_data['goals'] ?? '',
+					'lang'               => $event_data['lang'] ?? '',
 				];
 				break;
 			case 'collection_updated':
