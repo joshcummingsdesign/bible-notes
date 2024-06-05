@@ -3,7 +3,7 @@ Contributors: britner
 Tags: templates, gutenberg
 Requires at least: 6.2
 Tested up to: 6.5
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -124,6 +124,10 @@ assist you with verification, CVE assignment, and notify the
 developers of this plugin.
 
 == Changelog ==
+
+= 2.1.3 =
+* Fix: Wizard step not saving.
+* Fix: Issue with some images repeating.
 
 = 2.1.2 =
 * Fix: Beta enabled in release.

@@ -2,8 +2,7 @@
 /**
  * @license MIT
  *
- * Modified by kadencewp on 01-April-2024 using Strauss.
- * @see https://github.com/BrianHenryIE/strauss
+ * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */ declare(strict_types=1);
 
 /*
@@ -65,7 +64,7 @@ class PsrLogMessageProcessor implements ProcessorInterface
             if (is_null($val) || is_scalar($val) || (is_object($val) && method_exists($val, "__toString"))) {
                 $replacements[$placeholder] = $val;
             } elseif ($val instanceof \DateTimeInterface) {
-                if (!$this->dateFormat && $val instanceof \Monolog\DateTimeImmutable) {
+                if (!$this->dateFormat && $val instanceof \KadenceWP\KadenceStarterTemplates\Monolog\DateTimeImmutable) {
                     // handle monolog dates using __toString if no specific dateFormat was asked for
                     // so that it follows the useMicroseconds flag
                     $replacements[$placeholder] = (string) $val;

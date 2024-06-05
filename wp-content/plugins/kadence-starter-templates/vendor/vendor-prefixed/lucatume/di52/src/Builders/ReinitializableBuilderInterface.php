@@ -1,12 +1,11 @@
 <?php
 /**
- * The API provided by a Builder that can be re-initialized.
+ * The API Kadence_Starter_Templates_provided by a Builder that can be re-initialized.
  *
  * @package KadenceWP\KadenceStarterTemplates\lucatume\DI52\Builders
  *
  * @license GPL-3.0
- * Modified by kadencewp on 01-April-2024 using Strauss.
- * @see https://github.com/BrianHenryIE/strauss
+ * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceStarterTemplates\lucatume\DI52\Builders;

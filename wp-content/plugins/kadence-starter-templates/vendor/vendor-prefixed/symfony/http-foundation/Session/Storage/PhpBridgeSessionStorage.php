@@ -8,8 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 01-April-2024 using Strauss.
- * @see https://github.com/BrianHenryIE/strauss
+ * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceStarterTemplates\Symfony\Component\HttpFoundation\Session\Storage;
@@ -28,8 +27,8 @@ class PhpBridgeSessionStorage extends NativeSessionStorage
      */
     public function __construct($handler = null, ?MetadataBag $metaBag = null)
     {
-        if (!\extension_loaded('session')) {
-            throw new \LogicException('PHP extension "session" is required.');
+        if (!\extension_loaded('KadenceWP\KadenceStarterTemplates\session')) {
+            throw new \LogicException('PHP extension "KadenceWP\KadenceStarterTemplates\session" is required.');
         }
 
         $this->setMetadataBag($metaBag);

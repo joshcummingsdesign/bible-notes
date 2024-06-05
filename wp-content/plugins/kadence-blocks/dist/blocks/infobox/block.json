@@ -498,6 +498,14 @@
       "type": "string",
       "default": "px"
     },
+    "maxWidthTabletUnit": {
+      "type": "string",
+      "default": ""
+    },
+    "maxWidthMobileUnit": {
+      "type": "string",
+      "default": ""
+    },
     "containerMargin": {
       "type": "array",
       "default": [
@@ -799,6 +807,10 @@
     "borderHoverRadiusUnit": {
       "type": "string",
       "default": "px"
+    },
+    "fullHeight": {
+      "type": "boolean",
+      "default": false
     },
     "kbVersion": {
       "type": "number",

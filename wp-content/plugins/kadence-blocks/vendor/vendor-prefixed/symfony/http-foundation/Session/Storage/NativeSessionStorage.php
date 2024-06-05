@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 10-April-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\HttpFoundation\Session\Storage;
@@ -101,8 +101,8 @@ class NativeSessionStorage implements SessionStorageInterface
      */
     public function __construct(array $options = [], $handler = null, ?MetadataBag $metaBag = null)
     {
-        if (!\extension_loaded('session')) {
-            throw new \LogicException('PHP extension "session" is required.');
+        if (!\extension_loaded('KadenceWP\KadenceBlocks\session')) {
+            throw new \LogicException('PHP extension "KadenceWP\KadenceBlocks\session" is required.');
         }
 
         $options += [

@@ -1,13 +1,13 @@
 <?php return array(
     'root' => array(
         'name' => 'kadencewp/kadence-starter-templates',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => 'f21b57f0ddc5d235bf676b66d17a834972c06e4e',
+        'pretty_version' => '1.0.0+no-version-set',
+        'version' => '1.0.0.0',
+        'reference' => NULL,
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'adbario/php-dot-notation' => array(
@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'kadencewp/kadence-starter-templates' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => 'f21b57f0ddc5d235bf676b66d17a834972c06e4e',
+            'pretty_version' => '1.0.0+no-version-set',
+            'version' => '1.0.0.0',
+            'reference' => NULL,
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

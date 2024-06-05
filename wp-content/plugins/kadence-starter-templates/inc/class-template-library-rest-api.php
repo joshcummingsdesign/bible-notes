@@ -4864,6 +4864,13 @@ class Library_REST_Controller extends WP_REST_Controller {
 				'path'  => 'seriously-simple-podcasting/seriously-simple-podcasting.php',
 				'src'   => 'repo',
 			),
+			'better-wp-security' => array(
+				'title' => 'Solid Security',
+				'base'  => 'better-wp-security',
+				'slug'  => 'better-wp-security',
+				'path'  => 'better-wp-security/better-wp-security.php',
+				'src'   => 'repo',
+			),
 		);
 		return $importer_plugins;
 	}
