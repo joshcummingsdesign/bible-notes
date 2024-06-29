@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\String;
@@ -150,7 +150,7 @@ class LazyString implements \Stringable, \JsonSerializable
         } elseif ($callback instanceof \Closure) {
             $r = new \ReflectionFunction($callback);
 
-            if (false !== strpos($r->name, '{closure}') || !$class = \PHP_VERSION_ID >= 80111 ? $r->getClosureCalledClass() : $r->getClosureScopeClass()) {
+            if (str_contains($r->name, '{closure') || !$class = \PHP_VERSION_ID >= 80111 ? $r->getClosureCalledClass() : $r->getClosureScopeClass()) {
                 return $r->name;
             }
 

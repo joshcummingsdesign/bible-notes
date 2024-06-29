@@ -2,7 +2,7 @@
 /**
  * @license MIT
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */ declare(strict_types=1);
 
 /*
@@ -35,6 +35,8 @@ class DateTimeImmutable extends \DateTimeImmutable implements \JsonSerializable
     {
         $this->useMicroseconds = $useMicroseconds;
 
+        // if you like to use a custom time to pass to Logger::addRecord directly,
+        // call modify() or setTimestamp() on this instance to change the date after creating it
         parent::__construct('now', $timezone);
     }
 

@@ -2,7 +2,7 @@
 /**
  * @license MIT
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */ declare(strict_types=1);
 
 /*
@@ -166,7 +166,7 @@ class FilterHandler extends Handler implements ProcessableHandlerInterface, Rese
      *
      * @phpstan-param Record $record
      */
-    public function getHandler(array $record = null)
+    public function getHandler(?array $record = null)
     {
         if (!$this->handler instanceof HandlerInterface) {
             $this->handler = ($this->handler)($record, $this);

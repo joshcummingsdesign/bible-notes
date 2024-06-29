@@ -2,12 +2,13 @@
 /**
  * @license GPL-2.0-or-later
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */ declare( strict_types=1 );
 
 namespace KadenceWP\KadenceBlocks\StellarWP\Uplink\Notice;
 
 use KadenceWP\KadenceBlocks\StellarWP\Uplink\Components\Controller;
+use KadenceWP\KadenceBlocks\StellarWP\Uplink\View\Exceptions\FileNotFoundException;
 
 /**
  * Renders a notice.
@@ -27,6 +28,8 @@ final class Notice_Controller extends Controller {
 	 *
 	 * @param  array{type?: string, message?: string, dismissible?: bool, alt?: bool, large?: bool}  $args The notice.
 	 *
+	 * @throws FileNotFoundException If the view is not found.
+	 *
 	 * @return void
 	 */
 	public function render( array $args = [] ): void {
@@ -39,8 +42,27 @@ final class Notice_Controller extends Controller {
 		];
 
 		echo $this->view->render( self::VIEW, [
-			'message' => $args['message'],
-			'classes' => $this->classes( $classes )
+			'message'           => $args['message'],
+			'classes'           => $this->classes( $classes ),
+			'allowed_tags'      => [
+				'a'      => [
+					'href'   => [],
+					'title'  => [],
+					'target' => [],
+					'rel'    => [],
+				],
+				'br'     => [],
+				'code'   => [],
+				'em'     => [],
+				'pre'    => [],
+				'span'   => [],
+				'strong' => [],
+			],
+			'allowed_protocols' => [
+				'http',
+				'https',
+				'mailto',
+			],
 		] );
 	}
 

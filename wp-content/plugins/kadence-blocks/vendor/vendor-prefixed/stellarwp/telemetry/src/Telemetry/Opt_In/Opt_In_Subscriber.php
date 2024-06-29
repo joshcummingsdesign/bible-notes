@@ -7,7 +7,7 @@
  * @package StellarWP\Telemetry
  *
  * @license GPL-2.0-or-later
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\StellarWP\Telemetry\Opt_In;

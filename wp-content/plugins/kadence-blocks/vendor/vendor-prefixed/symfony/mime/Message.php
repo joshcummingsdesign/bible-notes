@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\Mime;
@@ -126,11 +126,18 @@ class Message extends RawMessage
 
     public function ensureValidity()
     {
-        if (!$this->headers->has('To') && !$this->headers->has('Cc') && !$this->headers->has('Bcc')) {
+        $to = (null !== $header = $this->headers->get('To')) ? $header->getBody() : null;
+        $cc = (null !== $header = $this->headers->get('Cc')) ? $header->getBody() : null;
+        $bcc = (null !== $header = $this->headers->get('Bcc')) ? $header->getBody() : null;
+
+        if (!$to && !$cc && !$bcc) {
             throw new LogicException('An email must have a "To", "Cc", or "Bcc" header.');
         }
 
-        if (!$this->headers->has('From') && !$this->headers->has('Sender')) {
+        $from = (null !== $header = $this->headers->get('From')) ? $header->getBody() : null;
+        $sender = (null !== $header = $this->headers->get('Sender')) ? $header->getBody() : null;
+
+        if (!$from && !$sender) {
             throw new LogicException('An email must have a "From" or a "Sender" header.');
         }
 

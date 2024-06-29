@@ -2,7 +2,7 @@
 /**
  * @license MIT
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */ declare(strict_types=1);
 
 /*
@@ -342,7 +342,7 @@ class Logger implements LoggerInterface, ResettableInterface
      *
      * @phpstan-param Level $level
      */
-    public function addRecord(int $level, string $message, array $context = [], DateTimeImmutable $datetime = null): bool
+    public function addRecord(int $level, string $message, array $context = [], ?DateTimeImmutable $datetime = null): bool
     {
         if (isset(self::RFC_5424_LEVELS[$level])) {
             $level = self::RFC_5424_LEVELS[$level];

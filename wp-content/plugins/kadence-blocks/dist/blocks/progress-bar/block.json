@@ -30,7 +30,7 @@
     },
     "width": {
       "type": "number",
-      "default": "0"
+      "default": ""
     },
     "uniqueID": {
       "type": "string"
@@ -136,8 +136,7 @@
       "type": "string"
     },
     "containerMaxWidth": {
-      "type": "number",
-      "default": 0
+      "type": "number"
     },
     "tabletContainerMaxWidth": {
       "type": "number"

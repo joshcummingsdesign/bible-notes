@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\HttpClient;
@@ -123,7 +123,7 @@ final class EventSourceHttpClient implements HttpClientInterface, ResetInterface
                 return;
             }
 
-            $rx = '/((?:\r\n|[\r\n]){2,})/';
+            $rx = '/((?:\r\n){2,}|\r{2,}|\n{2,})/';
             $content = $state->buffer.$chunk->getContent();
 
             if ($chunk->isLast()) {

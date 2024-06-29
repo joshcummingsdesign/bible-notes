@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\String\Inflector;
@@ -239,6 +239,9 @@ final class EnglishInflector implements InflectorInterface
 
         // teeth (tooth)
         ['htoot', 5, true, true, 'teeth'],
+
+        // albums (album)
+        ['mubla', 5, true, true, 'albums'],
 
         // bacteria (bacterium), criteria (criterion), phenomena (phenomenon)
         ['mu', 2, true, true, 'a'],

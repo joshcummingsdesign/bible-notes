@@ -714,6 +714,18 @@
     "altTitle": {
       "type": "string",
       "default": ""
+    },
+    "iconTooltip": {
+      "type": "string",
+      "default": ""
+    },
+    "iconTooltipPlacement": {
+      "type": "string",
+      "default": ""
+    },
+    "iconTooltipDash": {
+      "type": "boolean",
+      "default": false
     }
   },
   "usesContext": [

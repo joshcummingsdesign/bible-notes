@@ -13,8 +13,8 @@
       "default": 1
     },
     "title": {
-      "type": "array",
-      "source": "children",
+      "type": "rich-text",
+      "source": "rich-text",
       "selector": ".kt-blocks-accordion-title",
       "default": ""
     },

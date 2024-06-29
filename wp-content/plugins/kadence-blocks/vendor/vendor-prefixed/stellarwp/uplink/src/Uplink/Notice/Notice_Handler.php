@@ -2,7 +2,7 @@
 /**
  * @license GPL-2.0-or-later
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */ declare( strict_types=1 );
 
 namespace KadenceWP\KadenceBlocks\StellarWP\Uplink\Notice;
@@ -79,7 +79,7 @@ final class Notice_Handler {
 	 * @return bool
 	 */
 	private function save(): bool {
-		return set_transient( self::TRANSIENT, $this->notices, 300 );
+		return (bool) set_transient( self::TRANSIENT, $this->notices, 300 );
 	}
 
 	/**
@@ -88,7 +88,7 @@ final class Notice_Handler {
 	 * @return bool
 	 */
 	private function clear(): bool {
-		return delete_transient( self::TRANSIENT );
+		return (bool) delete_transient( self::TRANSIENT );
 	}
 
 }

@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\HttpFoundation;
@@ -288,7 +288,11 @@ class HeaderUtils
         }
 
         foreach ($partMatches as $matches) {
-            $parts[] = '' === $separators ? self::unquote($matches[0][0]) : self::groupParts($matches, $separators, false);
+            if ('' === $separators && '' !== $unquoted = self::unquote($matches[0][0])) {
+                $parts[] = $unquoted;
+            } elseif ($groupedParts = self::groupParts($matches, $separators, false)) {
+                $parts[] = $groupedParts;
+            }
         }
 
         return $parts;

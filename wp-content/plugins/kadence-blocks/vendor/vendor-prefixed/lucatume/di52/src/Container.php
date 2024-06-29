@@ -5,7 +5,7 @@
  * @package lucatume\DI52
  *
  * @license GPL-3.0
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\lucatume\DI52;
@@ -919,6 +919,8 @@ class Container implements ArrayAccess, ContainerInterface
     {
         $this->resolver = clone $this->resolver;
         $this->builders = clone $this->builders;
+        $this->builders->setContainer($this);
+        $this->builders->setResolver($this->resolver);
         $this->bindThis();
     }
 }

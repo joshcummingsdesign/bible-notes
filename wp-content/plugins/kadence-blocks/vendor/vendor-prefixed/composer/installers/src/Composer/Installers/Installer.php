@@ -2,7 +2,7 @@
 /**
  * @license MIT
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Composer\Installers;
@@ -31,6 +31,7 @@ class Installer extends LibraryInstaller
         'agl'          => 'AglInstaller',
         'annotatecms'  => 'AnnotateCmsInstaller',
         'bitrix'       => 'BitrixInstaller',
+        'botble'       => 'BotbleInstaller',
         'bonefish'     => 'BonefishInstaller',
         'cakephp'      => 'CakePHPInstaller',
         'chef'         => 'ChefInstaller',
@@ -39,6 +40,7 @@ class Installer extends LibraryInstaller
         'cockpit'      => 'CockpitInstaller',
         'codeigniter'  => 'CodeIgniterInstaller',
         'concrete5'    => 'Concrete5Installer',
+        'concretecms'  => 'ConcreteCMSInstaller',
         'croogo'       => 'CroogoInstaller',
         'dframe'       => 'DframeInstaller',
         'dokuwiki'     => 'DokuWikiInstaller',
@@ -50,6 +52,7 @@ class Installer extends LibraryInstaller
         'ee3'          => 'ExpressionEngineInstaller',
         'ee2'          => 'ExpressionEngineInstaller',
         'ezplatform'   => 'EzPlatformInstaller',
+        'fork'         => 'ForkCMSInstaller',
         'fuel'         => 'FuelInstaller',
         'fuelphp'      => 'FuelphpInstaller',
         'grav'         => 'GravInstaller',
@@ -150,6 +153,9 @@ class Installer extends LibraryInstaller
         }
 
         $class = 'KadenceWP\\KadenceBlocks\\Composer\\Installers\\' . $this->supportedTypes[$frameworkType];
+        /**
+         * @var BaseInstaller
+         */
         $installer = new $class($package, $this->composer, $this->getIO());
 
         $path = $installer->getInstallPath($package, $frameworkType);
@@ -183,6 +189,8 @@ class Installer extends LibraryInstaller
 
     /**
      * {@inheritDoc}
+     *
+     * @param string $packageType
      */
     public function supports($packageType)
     {

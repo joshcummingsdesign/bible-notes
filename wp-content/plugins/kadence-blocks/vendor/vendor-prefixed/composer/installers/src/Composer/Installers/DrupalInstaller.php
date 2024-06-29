@@ -2,7 +2,7 @@
 /**
  * @license MIT
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Composer\Installers;
@@ -25,5 +25,6 @@ class DrupalInstaller extends BaseInstaller
         'console'          => 'console/{$name}/',
         'console-language' => 'console/language/{$name}/',
         'config'           => 'config/sync/',
+        'recipe'           => 'recipes/{$name}',
     );
 }

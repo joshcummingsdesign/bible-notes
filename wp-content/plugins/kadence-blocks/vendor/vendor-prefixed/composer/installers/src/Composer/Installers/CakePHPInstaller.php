@@ -2,7 +2,7 @@
 /**
  * @license MIT
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Composer\Installers;
@@ -51,7 +51,7 @@ class CakePHPInstaller extends BaseInstaller
     /**
      * Check if CakePHP version matches against a version
      *
-     * @phpstan-param Constraint::STR_OP_* $matcher
+     * @phpstan-param '='|'=='|'<'|'<='|'>'|'>='|'<>'|'!=' $matcher
      */
     protected function matchesCakeVersion(string $matcher, string $version): bool
     {

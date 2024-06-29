@@ -453,6 +453,10 @@
     },
     "overlayBlendMode": {
       "type": "string"
+    },
+    "imagePosition": {
+      "type": "string",
+      "default": ""
     }
   },
   "supports": {

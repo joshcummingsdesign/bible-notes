@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Symfony\Component\String;
@@ -197,7 +197,7 @@ abstract class AbstractUnicodeString extends AbstractString
 
         if (!$compat || \PHP_VERSION_ID < 70300 || !\defined('Normalizer::NFKC_CF')) {
             $str->string = normalizer_normalize($str->string, $compat ? \Normalizer::NFKC : \Normalizer::NFC);
-            $str->string = mb_strtolower(str_replace(self::FOLD_FROM, self::FOLD_TO, $this->string), 'UTF-8');
+            $str->string = mb_strtolower(str_replace(self::FOLD_FROM, self::FOLD_TO, $str->string), 'UTF-8');
         } else {
             $str->string = normalizer_normalize($str->string, \Normalizer::NFKC_CF);
         }

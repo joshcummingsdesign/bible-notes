@@ -2,14 +2,16 @@
 /**
  * @license MIT
  *
- * Modified by kadencewp on 29-May-2024 using {@see https://github.com/BrianHenryIE/strauss}.
+ * Modified using {@see https://github.com/BrianHenryIE/strauss}.
  */
 
 namespace KadenceWP\KadenceBlocks\Psr\Container;
 
+use Throwable;
+
 /**
  * Base interface representing a generic exception in a container.
  */
-interface ContainerExceptionInterface
+interface ContainerExceptionInterface extends Throwable
 {
 }
