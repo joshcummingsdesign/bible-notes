@@ -16,8 +16,6 @@ add_action( 'wp_ajax_wpcode_save_generated_snippet', 'wpcode_save_generated_snip
 add_action( 'wp_ajax_wpcode_verify_ssl', 'wpcode_verify_ssl' );
 add_filter( 'heartbeat_received', 'wpcode_heartbeat_data', 10, 3 );
 add_action( 'wp_ajax_wpcode_save_editor_height', 'wpcode_save_editor_height' );
-add_action( 'wp_ajax_wpcode_install_plugin', 'wpcode_ajax_install_plugin' );
-
 
 /**
  * Handles toggling a snippet status from the admin.
@@ -275,102 +273,4 @@ function wpcode_save_editor_height() {
 	}
 
 	wp_send_json_error();
-}
-
-/**
- * AJAX handler to install a plugin from .org by slug.
- *
- * @return void
- */
-function wpcode_ajax_install_plugin() {
-	check_ajax_referer( 'wpcode_admin' );
-
-	// If the current user can't install plugins they should not be trying this.
-	if ( ! current_user_can( 'install_plugins' ) ) {
-		wp_send_json_error();
-	}
-
-	require_once ABSPATH . 'wp-admin/includes/file.php';
-	require_once ABSPATH . 'wp-admin/includes/template.php';
-	require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
-	require_once ABSPATH . 'wp-admin/includes/screen.php';
-
-	$allowed_plugins = array(
-		'search-replace-wpcode' => array(
-			'url'      => 'https://downloads.wordpress.org/plugin/search-replace-wpcode.zip',
-			'slug'     => 'search-replace-wpcode/wsrw.php',
-			'pro_slug' => 'search-replace-wpcode-pro/wsrw-premium.php',
-		),
-	);
-
-	$slug = isset( $_POST['slug'] ) ? sanitize_text_field( wp_unslash( $_POST['slug'] ) ) : '';
-
-	if ( ! array_key_exists( $slug, $allowed_plugins ) ) {
-		wp_send_json_error();
-	}
-
-	// If we got this far, the plugin needs to be installed, let's use our custom plugin installer.
-	// Set the current screen to avoid undefined notices.
-	set_current_screen( 'toplevel_page_wpcode' );
-	// Do not allow WordPress to search/download translations, as this will break JS output.
-	remove_action( 'upgrader_process_complete', array( 'Language_Pack_Upgrader', 'async_upgrade' ), 20 );
-
-	wpcode_require_upgrader();
-
-	// Let's check if the plugin is already installed.
-	if ( is_plugin_active( $allowed_plugins[ $slug ]['slug'] ) ) {
-		wp_send_json_success(
-			array(
-				'msg' => esc_html__( 'Plugin already installed and activated.', 'insert-headers-and-footers' ),
-			)
-		);
-	}
-
-	$installed_plugins = array_keys( get_plugins() );
-
-	// Let's check the pro plugin first.
-	if ( in_array( $allowed_plugins[ $slug ]['pro_slug'], $installed_plugins, true ) ) {
-		activate_plugin( $allowed_plugins[ $slug ]['pro_slug'] );
-		wp_send_json_success(
-			array(
-				'message' => esc_html__( 'Plugin activated.', 'insert-headers-and-footers' ),
-			)
-		);
-	}
-
-	// Let's check if the plugin is already installed but not activated.
-	if ( in_array( $allowed_plugins[ $slug ]['slug'], $installed_plugins, true ) ) {
-		activate_plugin( $allowed_plugins[ $slug ]['slug'] );
-		wp_send_json_success(
-			array(
-				'message' => esc_html__( 'Plugin activated.', 'insert-headers-and-footers' ),
-			)
-		);
-	}
-
-	// Create the plugin upgrader with our custom skin.
-	$installer = new Plugin_Upgrader( new WPCode_Skin() );
-
-	$installer->install( $allowed_plugins[ $slug ]['url'] );
-
-	// Flush the cache and return the newly installed plugin basename.
-	wp_cache_flush();
-
-	$plugin_basename = $installer->plugin_info();
-	if ( ! $plugin_basename ) {
-		wp_send_json_error();
-	}
-
-	// Activate the plugin silently.
-	$activated = activate_plugin( $plugin_basename );
-
-	if ( is_wp_error( $activated ) ) {
-		wp_send_json_error();
-	}
-
-	wp_send_json_success(
-		array(
-			'message' => esc_html__( 'Plugin installed and activated.', 'insert-headers-and-footers' ),
-		)
-	);
 }

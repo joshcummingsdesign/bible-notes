@@ -1062,7 +1062,7 @@ abstract class WPCode_Admin_Page {
 						<span class="screen-reader-text"><?php echo esc_html( $search_label ); ?></span>
 						<?php wpcode_icon( 'search', 16, 16 ); ?>
 					</label>
-					<input type="search" id="wpcode-items-search" placeholder="<?php echo esc_html( $search_label ); ?>"/>
+					<input type="search" class="wpcode-items-search-input" placeholder="<?php echo esc_html( $search_label ); ?>"/>
 				</div>
 			<?php } ?>
 			<ul class="wpcode-items-categories-list wpcode-items-filters">

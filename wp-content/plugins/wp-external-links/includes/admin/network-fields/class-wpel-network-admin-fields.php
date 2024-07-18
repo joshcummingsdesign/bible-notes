@@ -83,7 +83,7 @@ final class WPEL_Network_Admin_Fields extends FWP_Settings_Section_Base_1x0x0
         );
 
         echo ' <p class="description">'
-                . __( 'Or else it will be added to the "Settings" menu', 'wp-external-links' )
+                . esc_html__( 'Or else it will be added to the "Settings" menu', 'wp-external-links' )
                 .'</p>';
     }
 

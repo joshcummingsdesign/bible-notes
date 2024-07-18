@@ -348,9 +348,9 @@ class WPCode_Admin_Page_Headers_Footers extends WPCode_Admin_Page {
 		);
 
 		$this->metabox(
-			__( 'Code Revisions', 'wpcode-premium' ),
+			__( 'Code Revisions', 'insert-headers-and-footers' ),
 			$html,
-			__( 'Easily switch back to a previous version of your global scripts.', 'wpcode-premium' )
+			__( 'Easily switch back to a previous version of your global scripts.', 'insert-headers-and-footers' )
 		);
 
 	}

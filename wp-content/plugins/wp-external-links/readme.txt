@@ -1,10 +1,10 @@
 === External Links - nofollow, noopener & new window ===
 Contributors: WebFactory
-Tags: new window, new tab, external links, nofollow, noopener, ugc, sponsored, follow, dofollow, noreferrer, internal links, links, link, internal link, external link, link scanner, link checker
+Tags: new window, new tab, external links, nofollow, noopener
 Requires at least: 4.2
-Tested up to: 6.4
+Tested up to: 6.6
 Requires PHP: 7.2
-Stable tag: 2.60
+Stable tag: 2.61
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -170,6 +170,9 @@ Here are some suggestions on solving the problem:
 1. Use `wpel_before_apply_link`-action to ignore your links (f.e. containing certain class or data-attribute)
 1. Use `wpel_apply_settings`-filter to ignore complete post, pages, categories etc
 
+= How can I report security bugs? =
+
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/wp-external-links)
 
 == Screenshots ==
 
@@ -237,11 +240,13 @@ When filter returns false the plugin settings will not be applied. Can be used w
 
 `add_filter( 'wpel_apply_settings', '__return_false' );`
 
-
 See [FAQ](https://wordpress.org/plugins/wp-external-links/faq/) for more info.
 
-
 == Changelog ==
+= 2.61 =
+ * 2024-07-08
+ * minor security fixes
+
 = 2.60 =
  * 2024-02-20
  * fixed WordPress Network activation bug

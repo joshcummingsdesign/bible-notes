@@ -198,7 +198,7 @@ abstract class WPEL_Link_Fields_Base extends FWP_Settings_Section_Base_1x0x0
         ) );
 
         echo '<p class="description">'
-                . __( 'Use this <code>{title}</code> for the original title value '
+                . esc_html__( 'Use this <code>{title}</code> for the original title value '
                 .'and <code>{text}</code> for the link text (or <code>{text_clean}</code> for text stripped of HTML) as shown on the page', 'wp-external-links' )
                 .'</p>';
     }

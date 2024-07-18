@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name:    WP External Links
- * Version:        2.60
+ * Version:        2.61
  * Plugin URI:     https://getwplinks.com/
  * Description:    Open external links in a new tab or window, control "nofollow" and "noopener", set font icon; SEO friendly.
  * Author:         WebFactory Ltd
@@ -10,7 +10,7 @@
  * License:        Dual licensed under the MIT and GPLv2+ licenses
  * Text Domain:    wp-external-links
 
- * Copyright 2019 - 2023  WebFactory Ltd  (email: support@webfactoryltd.com)
+ * Copyright 2019 - 2024  WebFactory Ltd  (email: support@webfactoryltd.com)
  * Copyright 2011 - 2019  @freelancephp
 
  * This program is free software; you can redistribute it and/or modify

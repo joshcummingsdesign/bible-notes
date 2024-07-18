@@ -177,11 +177,19 @@ var WP_Optimize_Smush = function() {
 	});
 
 	/**
+	 * Boolean flag to track whether uncompressed images have already been loaded,
+	 * preventing multiple unnecessary loads
+	 */
+	var uncompressed_images_already_loaded = false;
+
+	/**
 	 *  Checks if smush is active and loads images if yes - image tabs change.
 	 */
 	$('#wp-optimize-nav-tab-wrapper__wpo_images .nav-tab').on('click', function() {
+		if (uncompressed_images_already_loaded) return;
+
 		if ($(this).is('#wp-optimize-nav-tab-wpo_images-smush')) {
-			get_info_from_smush_manager();
+			get_info_from_smush_manager(false);
 		}
 	});
 
@@ -189,9 +197,11 @@ var WP_Optimize_Smush = function() {
 	 * Checks if smush is active and loads images if yes - main menu change.
 	 */
 	$('#wp-optimize-wrap').on('page-change', function(e, params) {
+		if (uncompressed_images_already_loaded) return;
+
 		if ('wpo_images' == params.page) {
 			if ($('#wp-optimize-nav-tab-wrapper__wpo_images .nav-tab-active').is('#wp-optimize-nav-tab-wpo_images-smush')) {
-				get_info_from_smush_manager();
+				get_info_from_smush_manager(false);
 			}
 		}
 	});
@@ -765,6 +775,8 @@ var WP_Optimize_Smush = function() {
 				update_smush_action_buttons_state();
 			}
 		}));
+
+		uncompressed_images_already_loaded = true;
 	}
 
 
@@ -1501,9 +1513,6 @@ var WP_Optimize_Smush = function() {
 		};
 	}
 	wp_optimize.smush_settings = get_smush_options;
-
-	setTimeout(get_info_from_smush_manager, 1000, false);
-	
 } // END WP_Optimize_Smush
 
 /**

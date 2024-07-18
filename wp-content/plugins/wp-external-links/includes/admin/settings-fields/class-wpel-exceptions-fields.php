@@ -123,7 +123,7 @@ final class WPEL_Exceptions_Fields extends FWP_Settings_Section_Base_1x0x0
         ) );
 
         echo '<p class="description">'
-                . __( 'Separate page- / post-id\'s by comma.', 'wp-external-links' )
+                . esc_html__( 'Separate page- / post-id\'s by comma.', 'wp-external-links' )
                 .'</p>';
     }
 
@@ -134,7 +134,7 @@ final class WPEL_Exceptions_Fields extends FWP_Settings_Section_Base_1x0x0
         ) );
 
         echo '<p class="description">'
-                . __( 'Separate classes by comma.', 'wp-external-links' )
+                . esc_html__( 'Separate classes by comma.', 'wp-external-links' )
                 .'</p>';
     }
 
@@ -142,7 +142,7 @@ final class WPEL_Exceptions_Fields extends FWP_Settings_Section_Base_1x0x0
     {
         $this->get_html_fields()->check_with_label(
             $args[ 'key' ]
-            , __( 'Treat all links to the site\'s domain and subdomains as internal links', 'wp-external-links' )
+            , esc_html__( 'Treat all links to the site\'s domain and subdomains as internal links', 'wp-external-links' )
             , '1'
             , ''
         );
@@ -169,7 +169,7 @@ final class WPEL_Exceptions_Fields extends FWP_Settings_Section_Base_1x0x0
         ) );
 
         echo '<p class="description">'
-                . __( 'Separate url\'s by comma and/or a line break. '
+                . esc_html__( 'Separate url\'s by comma and/or a line break. '
                 .'Write the url\'s as specific as you want them to match.', 'wp-external-links' )
                 .'</p>';
     }

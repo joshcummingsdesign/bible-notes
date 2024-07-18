@@ -177,10 +177,10 @@ function wpcode_get_copy_target_button( $target, $prefix = '', $suffix = '' ) {
  */
 function wpcode_get_conditions_relation_labels() {
 	return array(
-		'='           => __( 'Is', 'insert-headers-and-footers' ),
-		'!='          => __( 'Is not', 'insert-headers-and-footers' ),
 		'contains'    => __( 'Contains', 'insert-headers-and-footers' ),
 		'notcontains' => __( 'Doesn\'t Contain', 'insert-headers-and-footers' ),
+		'='           => __( 'Is', 'insert-headers-and-footers' ),
+		'!='          => __( 'Is not', 'insert-headers-and-footers' ),
 		'before'      => __( 'Is Before', 'insert-headers-and-footers' ),
 		'after'       => __( 'Is After', 'insert-headers-and-footers' ),
 		'before-or'   => __( 'Is on or Before', 'insert-headers-and-footers' ),
@@ -457,6 +457,12 @@ function wpcode_clear_all_plugins_page_cache() {
 	// SiteGround Optimizer.
 	if ( function_exists( 'sg_cachepress_purge_cache' ) ) {
 		sg_cachepress_purge_cache();
+	}
+
+	if ( class_exists( 'Swift_Performance_Cache' ) ) {
+		if ( method_exists( 'Swift_Performance_Cache', 'clear_all_cache' ) ) {
+			Swift_Performance_Cache::clear_all_cache();
+		}
 	}
 
 	// WP Engine.

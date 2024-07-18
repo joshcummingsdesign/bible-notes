@@ -119,7 +119,7 @@ final class WPEL_Exit_Confirmation_Fields extends WPEL_Link_Fields_Base
     ));
 
     echo '<p class="description">'
-      . __('Title of the Exit Confirmation popup. Leave empty for no title.', 'wp-external-links')
+      . esc_html__('Title of the Exit Confirmation popup. Leave empty for no title.', 'wp-external-links')
       . '</p>';
   }
 
@@ -131,56 +131,56 @@ final class WPEL_Exit_Confirmation_Fields extends WPEL_Link_Fields_Base
       'placeholder' => __('', 'wp-external-links'),
     ));
 
-    echo '<p class="description">' . __('Text of the Exit Confirmation popup. Leave empty for no text.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Text of the Exit Confirmation popup. Leave empty for no text.', 'wp-external-links') . '</p>';
   }
 
   protected function show_text_color(array $args)
   {
     $this->get_html_fields()->color($args['key'], array());
 
-    echo '<p class="description">' . __('Color of the Exit Confirmation popup text.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Color of the Exit Confirmation popup text.', 'wp-external-links') . '</p>';
   }
 
   protected function show_title_color(array $args)
   {
     $this->get_html_fields()->color($args['key'], array());
 
-    echo '<p class="description">' . __('Color of the Exit Confirmation popup title.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Color of the Exit Confirmation popup title.', 'wp-external-links') . '</p>';
   }
 
   protected function show_title_size(array $args)
   {
     $this->get_html_fields()->number($args['key'], array('class' => 'wpel-field-number', 'unit' => 'px'));
 
-    echo '<p class="description">' . __('Text size of the Exit Confirmation popup title.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Text size of the Exit Confirmation popup title.', 'wp-external-links') . '</p>';
   }
 
   protected function show_text_size(array $args)
   {
     $this->get_html_fields()->number($args['key'], array('class' => 'wpel-field-number', 'unit' => 'px'));
 
-    echo '<p class="description">' . __('Text size of the Exit Confirmation popup text.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Text size of the Exit Confirmation popup text.', 'wp-external-links') . '</p>';
   }
 
   protected function show_popup_width(array $args)
   {
     $this->get_html_fields()->number($args['key'], array('class' => 'wpel-field-number', 'unit' => 'px'));
 
-    echo '<p class="description">' . __('Width of the Exit Confirmation popup.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Width of the Exit Confirmation popup.', 'wp-external-links') . '</p>';
   }
 
   protected function show_popup_height(array $args)
   {
     $this->get_html_fields()->number($args['key'], array('class' => 'wpel-field-number', 'unit' => 'px'));
 
-    echo '<p class="description">' . __('Height of the Exit Confirmation popup. Leave empty for auto.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Height of the Exit Confirmation popup. Leave empty for auto.', 'wp-external-links') . '</p>';
   }
 
   protected function show_overlay(array $args)
   {
     $this->get_html_fields()->check_with_label(
       $args['key'],
-      __('Show transparent overlay behind popup', 'wp-external-links'),
+      esc_html__('Show transparent overlay behind popup', 'wp-external-links'),
       '1',
       ''
     );
@@ -190,14 +190,14 @@ final class WPEL_Exit_Confirmation_Fields extends WPEL_Link_Fields_Base
   {
     $this->get_html_fields()->color($args['key'], array());
 
-    echo '<p class="description">' . __('Background color of the Exit Confirmation popup.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Background color of the Exit Confirmation popup.', 'wp-external-links') . '</p>';
   }
 
   protected function show_title_background(array $args)
   {
     $this->get_html_fields()->color($args['key'], array());
 
-    echo '<p class="description">' . __('Background color of the Exit Confirmation popup title.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Background color of the Exit Confirmation popup title.', 'wp-external-links') . '</p>';
   }
 
 
@@ -222,14 +222,14 @@ final class WPEL_Exit_Confirmation_Fields extends WPEL_Link_Fields_Base
       'class' => 'regular-text',
     ));
 
-    echo '<p class="description">' . __('Text of the button that will cancel leaving website.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Text of the button that will cancel leaving website.', 'wp-external-links') . '</p>';
   }
 
   protected function show_button_size(array $args)
   {
     $this->get_html_fields()->number($args['key'], array('class' => 'wpel-field-number', 'unit' => 'px'));
 
-    echo '<p class="description">' . __('Text size of the Exit Confirmation popup button.', 'wp-external-links') . '</p>';
+    echo '<p class="description">' . esc_html__('Text size of the Exit Confirmation popup button.', 'wp-external-links') . '</p>';
   }
 
   /**
@@ -246,7 +246,7 @@ final class WPEL_Exit_Confirmation_Fields extends WPEL_Link_Fields_Base
 
     if (false === $is_valid) {
       // error when user input is not valid conform the UI, probably tried to "hack"
-      $this->add_error(__('Something went wrong. One or more values were invalid.', 'wp-external-links'));
+      $this->add_error(esc_html__('Something went wrong. One or more values were invalid.', 'wp-external-links'));
       return $old_values;
     }
 
