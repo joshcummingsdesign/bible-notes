@@ -144,7 +144,7 @@ class Crawler extends Root
 	}
 
 	/**
-	 * Overwride get_summary to init elements
+	 * Overwrite get_summary to init elements
 	 *
 	 * @since  3.0
 	 * @access public
@@ -188,7 +188,7 @@ class Crawler extends Root
 	}
 
 	/**
-	 * Overwride save_summary
+	 * Overwrite save_summary
 	 *
 	 * @since  3.0
 	 * @access public
@@ -204,7 +204,7 @@ class Crawler extends Root
 
 		parent::save_summary($data, $reload, $overwrite);
 
-		File::save(LITESPEED_STATIC_DIR . '/crawler/' . $instance->_sitemeta, json_encode($data), true);
+		File::save(LITESPEED_STATIC_DIR . '/crawler/' . $instance->_sitemeta, \json_encode($data), true);
 	}
 
 	/**
@@ -1302,7 +1302,7 @@ class Crawler extends Root
 
 		switch ($type) {
 			case self::TYPE_REFRESH_MAP:
-				$this->cls('Crawler_Map')->gen();
+				$this->cls('Crawler_Map')->gen(true);
 				break;
 
 			case self::TYPE_EMPTY:
