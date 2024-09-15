@@ -316,6 +316,10 @@
     },
     "maskUrl": {
       "type": "string"
+    },
+    "ariaLabel": {
+      "type": "string",
+      "default": ""
     }
   }
 }

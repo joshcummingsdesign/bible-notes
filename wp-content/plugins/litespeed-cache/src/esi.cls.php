@@ -364,6 +364,7 @@ class ESI extends Root
 
 		// Add admin_bar esi
 		if (Router::is_logged_in()) {
+			remove_action('wp_body_open', 'wp_admin_bar_render', 0); // Remove default Admin bar. Fix https://github.com/elementor/elementor/issues/25198
 			remove_action('wp_footer', 'wp_admin_bar_render', 1000);
 			add_action('wp_footer', array($this, 'sub_admin_bar_block'), 1000);
 		}

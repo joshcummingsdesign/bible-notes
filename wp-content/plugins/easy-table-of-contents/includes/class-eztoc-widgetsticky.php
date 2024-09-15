@@ -373,7 +373,7 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                                 if ( ezTOC_Option::get ( 'visibility' ) )
                                 {
 
-                                    echo '<a href="#" class="ez-toc-widget-sticky-pull-right ez-toc-widget-sticky-btn ez-toc-widget-sticky-btn-xs ez-toc-widget-sticky-btn-default ez-toc-widget-sticky-toggle" aria-label="Widget Easy TOC toggle icon"><span style="border: 0;padding: 0;margin: 0;position: absolute !important;height: 1px;width: 1px;overflow: hidden;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);clip-path: inset(50%);white-space: nowrap;">Toggle Table of Content</span>' . wp_kses_post(ezTOC::getTOCToggleIcon ()) . '</a>';
+                                    echo '<a href="#" class="ez-toc-widget-sticky-pull-right ez-toc-widget-sticky-btn ez-toc-widget-sticky-btn-xs ez-toc-widget-sticky-btn-default ez-toc-widget-sticky-toggle" aria-label="Widget Easy TOC toggle icon"><span style="border: 0;padding: 0;margin: 0;position: absolute !important;height: 1px;width: 1px;overflow: hidden;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);clip-path: inset(50%);white-space: nowrap;">Toggle Table of Content</span>' . wp_kses_post(ezTOC::get_toc_toggle_icon ()) . '</a>';
                                 }
                                 ?>
 
@@ -392,11 +392,11 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                                 }
                                 $cssIconID = uniqid();
                                 if ( ezTOC_Option::get( 'visibility_on_header_text' ) ) {
-                                    $htmlCSSIcon = '<label for="ez-toc-widget-sticky-cssicon-toggle-item-' . esc_attr($cssIconID) . '" style="cursor:pointer">' . esc_html($header_label) . '<span class="ez-toc-widget-sticky-pull-right ez-toc-widget-sticky-btn ez-toc-widget-sticky-btn-xs ez-toc-widget-sticky-btn-default ez-toc-widget-sticky-toggle"><span style="border: 0;padding: 0;margin: 0;position: absolute !important;height: 1px;width: 1px;overflow: hidden;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);clip-path: inset(50%);white-space: nowrap;">Toggle Table of Content</span>' . esc_html(ezTOC::getTOCToggleIcon( 'widget-with-visibility_on_header_text' )) . '</span></label>';
+                                    $htmlCSSIcon = '<label for="ez-toc-widget-sticky-cssicon-toggle-item-' . esc_attr($cssIconID) . '" style="cursor:pointer">' . esc_html($header_label) . '<span class="ez-toc-widget-sticky-pull-right ez-toc-widget-sticky-btn ez-toc-widget-sticky-btn-xs ez-toc-widget-sticky-btn-default ez-toc-widget-sticky-toggle"><span style="border: 0;padding: 0;margin: 0;position: absolute !important;height: 1px;width: 1px;overflow: hidden;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);clip-path: inset(50%);white-space: nowrap;">Toggle Table of Content</span>' . esc_html(ezTOC::get_toc_toggle_icon( 'widget-with-visibility_on_header_text' )) . '</span></label>';
                                 } else {
                                     //phpcs:ignore  WordPress.Security.EscapeOutput.OutputNotEscaped -- Reason : Already escaped.
                                     echo $header_label;
-                                    $htmlCSSIcon = '<label for="ez-toc-widget-sticky-cssicon-toggle-item-' . esc_attr($cssIconID) . '" class="ez-toc-widget-sticky-pull-right ez-toc-widget-sticky-btn ez-toc-widget-sticky-btn-xs ez-toc-widget-sticky-btn-default ez-toc-widget-sticky-toggle"><span style="border: 0;padding: 0;margin: 0;position: absolute !important;height: 1px;width: 1px;overflow: hidden;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);clip-path: inset(50%);white-space: nowrap;">Toggle Table of Content</span>' . esc_html(ezTOC::getTOCToggleIcon( 'widget-with-visibility_on_header_text' )) . '</label>';
+                                    $htmlCSSIcon = '<label for="ez-toc-widget-sticky-cssicon-toggle-item-' . esc_attr($cssIconID) . '" class="ez-toc-widget-sticky-pull-right ez-toc-widget-sticky-btn ez-toc-widget-sticky-btn-xs ez-toc-widget-sticky-btn-default ez-toc-widget-sticky-toggle"><span style="border: 0;padding: 0;margin: 0;position: absolute !important;height: 1px;width: 1px;overflow: hidden;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);clip-path: inset(50%);white-space: nowrap;">Toggle Table of Content</span>' . esc_html(ezTOC::get_toc_toggle_icon( 'widget-with-visibility_on_header_text' )) . '</label>';
                                 }
                                 //phpcs:ignore  WordPress.Security.EscapeOutput.OutputNotEscaped -- Reason : Already escaped.
                                 echo $htmlCSSIcon;
@@ -430,7 +430,7 @@ if ( ! class_exists ( 'ezTOC_WidgetSticky' ) )
                 wp_register_style ( 'ez-toc-widget-sticky', EZ_TOC_URL . "assets/css/ez-toc-widget-sticky$min.css", array(), $widgetCSSVersion );
                 wp_enqueue_style ( 'ez-toc-widget-sticky', EZ_TOC_URL . "assets/css/ez-toc-widget-sticky$min.css", array(), $widgetCSSVersion );
 
-                wp_add_inline_style ( 'ez-toc-widget-sticky', ezTOC::InlineCountingCSS ( ezTOC_Option::get ( 'heading-text-direction', 'ltr' ), 'ez-toc-widget-sticky-direction', 'ez-toc-widget-sticky-container', 'counter', 'ez-toc-widget-sticky-container' ) );
+                wp_add_inline_style ( 'ez-toc-widget-sticky', ezTOC::inline_counting_css ( ezTOC_Option::get ( 'heading-text-direction', 'ltr' ), 'ez-toc-widget-sticky-direction', 'ez-toc-widget-sticky-container', 'counter', 'ez-toc-widget-sticky-container' ) );
 
                 $widgetJSVersion = ezTOC::VERSION . '-' . filemtime ( EZ_TOC_PATH . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "js" . DIRECTORY_SEPARATOR . "ez-toc-widget-sticky$min.js" );
                 wp_register_script ( 'ez-toc-widget-stickyjs', EZ_TOC_URL . "assets/js/ez-toc-widget-sticky$min.js", array( 'jquery' ), $widgetJSVersion , true);

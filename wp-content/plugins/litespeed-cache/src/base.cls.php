@@ -110,7 +110,7 @@ class Base extends Root
 	const O_DEBUG_IPS = 'debug-ips';
 	const O_DEBUG_LEVEL = 'debug-level';
 	const O_DEBUG_FILESIZE = 'debug-filesize';
-	const O_DEBUG_COOKIE = 'debug-cookie';
+	const O_DEBUG_COOKIE = 'debug-cookie'; // For backwards compatibility, will drop after v7.0
 	const O_DEBUG_COLLAPSE_QS = 'debug-collapse_qs';
 	const O_DEBUG_COLLAPS_QS = 'debug-collapse_qs'; // For backwards compatibility, will drop after v6.5
 	const O_DEBUG_INC = 'debug-inc';
@@ -216,6 +216,7 @@ class Base extends Root
 	const O_MEDIA_LQIP_EXC = 'media-lqip_exc';
 	const O_MEDIA_VPI = 'media-vpi';
 	const O_MEDIA_VPI_CRON = 'media-vpi_cron';
+	const O_IMG_OPTM_JPG_QUALITY = 'img_optm-jpg_quality';
 
 	## -------------------------------------------------- ##
 	## --------------	  Image Optm 	----------------- ##
@@ -229,7 +230,6 @@ class Base extends Root
 	const O_IMG_OPTM_EXIF = 'img_optm-exif';
 	const O_IMG_OPTM_WEBP_ATTR = 'img_optm-webp_attr';
 	const O_IMG_OPTM_WEBP_REPLACE_SRCSET = 'img_optm-webp_replace_srcset';
-	const O_IMG_OPTM_JPG_QUALITY = 'img_optm-jpg_quality';
 
 	## -------------------------------------------------- ##
 	## --------------		Crawler		----------------- ##
@@ -406,7 +406,6 @@ class Base extends Root
 		self::O_DEBUG_IPS => array(),
 		self::O_DEBUG_LEVEL => false,
 		self::O_DEBUG_FILESIZE => 0,
-		self::O_DEBUG_COOKIE => false,
 		self::O_DEBUG_COLLAPSE_QS => false,
 		self::O_DEBUG_INC => array(),
 		self::O_DEBUG_EXC => array(),
@@ -593,7 +592,6 @@ class Base extends Root
 		self::O_DEBUG_IPS => array(),
 		self::O_DEBUG_LEVEL => false,
 		self::O_DEBUG_FILESIZE => 0,
-		self::O_DEBUG_COOKIE => false,
 		self::O_DEBUG_COLLAPSE_QS => false,
 		self::O_DEBUG_INC => array(),
 		self::O_DEBUG_EXC => array(),

@@ -1,9 +1,9 @@
 === LiteSpeed Cache ===
 Contributors: LiteSpeedTech
-Tags: caching, optimize, performance, pagespeed, core web vitals, seo, speed, image optimize, compress, object cache, redis, memcached, database cleaner
-Requires at least: 4.0
-Tested up to: 6.6
-Stable tag: 6.3
+Tags: caching, optimize, performance, pagespeed, seo, image optimize, object cache, redis, memcached, database cleaner
+Requires at least: 4.9
+Tested up to: 6.6.1
+Stable tag: 6.5.0.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -248,7 +248,53 @@ For more detailed information about crawler setup, please see [the Crawler docum
 
 The vast majority of plugins and themes are compatible with LiteSpeed Cache. The most up-to-date compatibility information can be found [in our documentation](https://docs.litespeedtech.com/lscache/lscwp/thirdparty/)
 
+= How can I report security bugs? =
+
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/litespeed-cache)
+
 == Changelog ==
+
+= 6.5.0.2 - Sep 6 2024 =
+* **Debug** Compatibility improvement for WP installations w/o `AUTH_KEY` defined in `wp-config.php`.
+
+= 6.5.0.1 - Sep 4 2024 =
+* 🔥**Debug** Fixed a corner case fatal error when Object Cache is ON but failed to connect, and `wp-content/litespeed` directory is not writable, and debug option is ON.
+
+= 6.5 - Sep 4 2024 =
+*❗**Security** This release includes several debug log improvements for improved security, as listed below. Update strongly recommended.
+* **Debug** Moved debug log to litespeed individual folder `/wp-content/litespeed/debug/`.
+* **Debug** Disallowed visits to `/litespeed/debug/` folder log files in .htaccess.
+* **Debug** Dropped const `LSCWP_DEBUG_PATH` support.
+* **Debug** Renamed `debug.purge.log` to `purge.log`.
+* **Debug** Added dummy `index.php` for debug folder.
+* **Debug** Used random string for log filenames.
+* **Debug** Removed cookies-related info. (Thanks to Rafie)
+* **Debug** Dropped `Log Cookies` option.
+* **Report** Escaped report content to protect it from potential XSS attack. (Islam R alsaid #505746)
+* **ESI** Added nonce for Advanced Custom Fields + Advanced Forms. (David Lapointe Gilbert #439)
+* **Purge** Run ACTION_PURGE_EMPTYCACHE even if cache is disabled in network admin. (Philip #453)
+* **Page Optimize** Disable UCSS exclusion when UCSS is inactived. (#640)
+* **3rd** Fixed undefined warning in WooCommerce Widgets. (Lolosan #719)
+* **3rd** Correct the integration with User Switching. (John Blackbourn #725)
+* **3rd** Fixed Admin Bar Missing issue on DIVI + Elementor frontend. (thyran/robertstaddon PR#727)
+
+= 6.4.1 - Aug 19 2024 =
+* ❗**Security** This release patches a security issue that may affect previous LSCWP versions since v1.9.
+* 🐞**Page Optimize** Fixed HTML minification returning blank page issue. (#706)
+* 🐞**CDN** Fixed a bug when Cloudflare status option is empty. (#684 #992174)
+* **Core** Minimum required WP version escalated to WP v4.9.
+
+= 6.4 - Aug 13 2024 =
+* **Cache** Corrected QC and LSADC cache hit status.
+* **Cloud** Allow partner info removal in QUIC.cloud notification.
+* **Crawler** Separated CSS preparation validation from crawler validation.
+* **GUI** Moved `WordPress Image Quality Control` setting from `Image Optimization` menu to `Page Optimization` menu.
+* **3rd** Add Elementor Edit button back in ESI. (PR#635)
+* **3rd** Fixed Instant click potential conflict w/ other plugins.
+
+= 6.3.0.1 - Jul 29 2024 =
+* 🔥🐞**Rest** Disabled WP default Editor cache for REST requests to fix editor errors. (Shivam)
+* **Cache** Supported `cache_nocacheable.txt` predefined settings.
 
 = 6.3 - Jul 22 2024 =
 * 🌱**Page Optimize** HTML Keep Comments: When minifying HTML do not discard comments that match a specified pattern. (#328853)

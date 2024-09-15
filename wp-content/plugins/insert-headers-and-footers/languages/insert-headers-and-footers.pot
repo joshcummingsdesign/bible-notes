@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPCode Lite 2.2.0\n"
+"Project-Id-Version: WPCode Lite 2.2.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/insert-headers-and-footers\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-07-17T12:07:54+00:00\n"
+"POT-Creation-Date: 2024-08-14T04:30:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: insert-headers-and-footers\n"
@@ -2582,6 +2582,7 @@ msgid "ID"
 msgstr ""
 
 #: includes/admin/pages/class-wpcode-code-snippets-table.php:637
+#: includes/conditional-logic/class-wpcode-conditional-page.php:141
 #: includes/generator/class-wpcode-generator-post-type.php:378
 #: includes/generator/class-wpcode-generator-query.php:225
 #: includes/generator/class-wpcode-generator-query.php:299
@@ -3190,7 +3191,35 @@ msgid "Post specific rules are a Pro feature"
 msgstr ""
 
 #: includes/conditional-logic/class-wpcode-conditional-page.php:125
-msgid "Upgrade today create conditional logic rules for specific pages or posts."
+msgid "Upgrade today to create conditional logic rules for specific pages or posts."
+msgstr ""
+
+#: includes/conditional-logic/class-wpcode-conditional-page.php:130
+msgid "Page Template"
+msgstr ""
+
+#: includes/conditional-logic/class-wpcode-conditional-page.php:131
+msgid "Load the snippet only on pages with a specific template."
+msgstr ""
+
+#: includes/conditional-logic/class-wpcode-conditional-page.php:135
+msgid "Page Template rules are a Pro feature"
+msgstr ""
+
+#: includes/conditional-logic/class-wpcode-conditional-page.php:136
+msgid "Upgrade today to create conditional logic rules for specific page templates."
+msgstr ""
+
+#: includes/conditional-logic/class-wpcode-conditional-page.php:142
+msgid "Load the snippet only on pages with a specific author."
+msgstr ""
+
+#: includes/conditional-logic/class-wpcode-conditional-page.php:146
+msgid "Post Author rules are a Pro feature"
+msgstr ""
+
+#: includes/conditional-logic/class-wpcode-conditional-page.php:147
+msgid "Upgrade today to create conditional logic rules based on the page/post author."
 msgstr ""
 
 #: includes/conditional-logic/class-wpcode-conditional-user.php:37
@@ -5759,10 +5788,58 @@ msgid "Insert snippet every # number of words."
 msgstr ""
 
 #: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:62
-msgid "Word-based content locations are a PRO feature"
+msgid "Insert in the Middle of the Content"
 msgstr ""
 
 #: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:63
+msgid "Insert snippet in the middle of the post content."
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:66
+msgid "Insert after first Quarter (25%)"
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:67
+msgid "Insert snippet after the first quarter of the post content."
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:70
+msgid "Insert after 3rd Quarter (75%)"
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:71
+msgid "Insert snippet after the third quarter of the post content."
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:74
+msgid "Insert after first Third (33%)"
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:75
+msgid "Insert snippet after the first third of the post content."
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:78
+msgid "Insert after second Third (66%)"
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:79
+msgid "Insert snippet after the second third of the post content."
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:82
+msgid "Insert after 80%"
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:83
+msgid "Insert snippet after 80% of the post content."
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:86
+msgid "Word-based content locations are a PRO feature"
+msgstr ""
+
+#: includes/lite/auto-insert/class-wpcode-auto-insert-content.php:87
 msgid "Upgrade to PRO today and get access to automatic word-count based insert locations."
 msgstr ""
 

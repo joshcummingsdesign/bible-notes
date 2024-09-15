@@ -122,8 +122,30 @@ class WPCode_Conditional_Page extends WPCode_Conditional_Type {
 				'options'     => array(),
 				'upgrade'     => array(
 					'title' => __( 'Post specific rules are a Pro feature', 'insert-headers-and-footers' ),
-					'text'  => __( 'Upgrade today create conditional logic rules for specific pages or posts.', 'insert-headers-and-footers' ),
+					'text'  => __( 'Upgrade today to create conditional logic rules for specific pages or posts.', 'insert-headers-and-footers' ),
 					'link'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'edit-snippet', 'conditional-logic', 'post_id' ),
+				),
+			),
+			'page_template' => array(
+				'label'       => __( 'Page Template', 'insert-headers-and-footers' ) . ' (PRO)',
+				'description' => __( 'Load the snippet only on pages with a specific template.', 'insert-headers-and-footers' ),
+				'type'        => 'select',
+				'options'     => array(),
+				'upgrade'     => array(
+					'title' => __( 'Page Template rules are a Pro feature', 'insert-headers-and-footers' ),
+					'text'  => __( 'Upgrade today to create conditional logic rules for specific page templates.', 'insert-headers-and-footers' ),
+					'link'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'edit-snippet', 'conditional-logic', 'page_template' ),
+				),
+			),
+			'post_author'   => array(
+				'label'       => __( 'Author', 'insert-headers-and-footers' ) . ' (PRO)',
+				'description' => __( 'Load the snippet only on pages with a specific author.', 'insert-headers-and-footers' ),
+				'type'        => 'select',
+				'options'     => array(),
+				'upgrade'     => array(
+					'title' => __( 'Post Author rules are a Pro feature', 'insert-headers-and-footers' ),
+					'text'  => __( 'Upgrade today to create conditional logic rules based on the page/post author.', 'insert-headers-and-footers' ),
+					'link'  => wpcode_utm_url( 'https://wpcode.com/lite/', 'edit-snippet', 'conditional-logic', 'post_author' ),
 				),
 			),
 		);

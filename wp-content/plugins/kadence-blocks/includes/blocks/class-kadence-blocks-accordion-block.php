@@ -60,6 +60,9 @@ class Kadence_Blocks_Accordion_Block extends Kadence_Blocks_Abstract_Block {
 		$css->set_style_id( 'kb-' . $this->block_name . $unique_style_id );
 		$css->set_selector( '.kt-accordion-id' . $unique_id . ' .kt-accordion-inner-wrap' );
 		$css->render_gap( $attributes, 'columnGap', 'column-gap', 'columnGapUnit' );
+		if ( isset( $attributes['titleStyles'][0]['marginTop'] ) ) {
+			$css->render_range( $attributes['titleStyles'][0], 'marginTop', 'row-gap' );
+		}
 		if ( ! empty( $attributes['columnLayout'][0] ) && 'row' !== $attributes['columnLayout'][0] ) {
 			switch ( $attributes['columnLayout'][0] ) {
 				case 'two-column':
@@ -76,7 +79,12 @@ class Kadence_Blocks_Accordion_Block extends Kadence_Blocks_Abstract_Block {
 		if ( ! empty( $attributes['columnLayout'][1] ) ) {
 			switch ( $attributes['columnLayout'][1] ) {
 				case 'row':
-					$css->add_property( 'display', 'block' );
+					$css->add_property( 'display', 'block' ); // removes row-gap from one column tablet layouts
+					if ( isset( $attributes['titleStyles'][0]['marginTop'] ) ) { // adds margin top to panes for one column layouts
+						$css->set_selector( '.kt-accordion-id' . $unique_id . ' .kt-accordion-inner-wrap .kt-accordion-pane:not(:first-child)' );
+						$css->render_range( $attributes['titleStyles'][0], 'marginTop', 'margin-top' );
+						$css->set_selector( '.kt-accordion-id' . $unique_id . ' .kt-accordion-inner-wrap' );
+					}
 					break;
 				case 'two-column':
 					$css->add_property( 'display', 'grid' );
@@ -92,7 +100,12 @@ class Kadence_Blocks_Accordion_Block extends Kadence_Blocks_Abstract_Block {
 		if ( ! empty( $attributes['columnLayout'][2] ) ) {
 			switch ( $attributes['columnLayout'][2] ) {
 				case 'row':
-					$css->add_property( 'display', 'block' );
+					$css->add_property( 'display', 'block' ); // removes row gap from one column mobile layouts
+					if ( isset( $attributes['titleStyles'][0]['marginTop'] ) ) { // adds margin top to panes for one column layouts
+						$css->set_selector( '.kt-accordion-id' . $unique_id . ' .kt-accordion-inner-wrap .kt-accordion-pane:not(:first-child)' );
+						$css->render_range( $attributes['titleStyles'][0], 'marginTop', 'margin-top' );
+						$css->set_selector( '.kt-accordion-id' . $unique_id . ' .kt-accordion-inner-wrap' );
+					}
 					break;
 				case 'two-column':
 					$css->add_property( 'display', 'grid' );
@@ -147,16 +160,7 @@ class Kadence_Blocks_Accordion_Block extends Kadence_Blocks_Abstract_Block {
 				'mobile_key'  => 'paddingMobile',
 			);
 			$css->render_measure_output( $title_styles, 'padding', 'padding', $padding_args );
-			$css->set_selector( '.kt-accordion-wrap.kt-accordion-id' . $unique_id . ' > .kt-accordion-inner-wrap > .kt-accordion-pane:not(:first-child) > .kt-accordion-header-wrap' );
-			$css->render_range( $title_styles, 'marginTop', 'margin-top' );
 
-			// Override for Kadence Theme.
-			$css->set_selector( '.single-content .wp-block-kadence-pane>h2:first-child,
-			.single-content .wp-block-kadence-pane>h3:first-child,
-			.single-content .wp-block-kadence-pane>h4:first-child,
-			.single-content .wp-block-kadence-pane>h5:first-child,
-			.single-content .wp-block-kadence-pane>h6:first-child');
-			$css->render_range( $title_styles, 'marginTop', 'margin-top' );
 			$css->set_selector( '.kt-accordion-id' . $unique_id . ' .wp-block-kadence-pane .kt-accordion-header-wrap .kt-blocks-accordion-header' );
 
 			if ( ! empty( $attributes['iconColor']['standard'] ) || ! empty( $title_styles['color'] ) ) {

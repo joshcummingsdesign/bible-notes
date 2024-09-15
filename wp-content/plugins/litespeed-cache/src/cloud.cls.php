@@ -868,7 +868,7 @@ class Cloud extends Base
 			self::debug('Carry_on usage', $json['_carry_on']);
 			// Store generic info
 			foreach (array('usage', 'promo', 'partner', '_error', '_info', '_note', '_success') as $v) {
-				if (!empty($json['_carry_on'][$v])) {
+				if (isset($json['_carry_on'][$v])) {
 					switch ($v) {
 						case 'usage':
 							$usage_svc_tag = in_array($service, array(self::SVC_CCSS, self::SVC_UCSS, self::SVC_VPI)) ? self::SVC_PAGE_OPTM : $service;
@@ -1544,6 +1544,35 @@ class Cloud extends Base
 	public static function err($code)
 	{
 		return array('_res' => 'err', '_msg' => $code);
+	}
+
+	/**
+	 * Return pong for ping to check PHP function availability
+	 * @since 6.5
+	 */
+	public function ping()
+	{
+		$resp = array(
+			'v_lscwp' => Core::VER,
+			'v_php' => PHP_VERSION,
+			'v_wp' => $GLOBALS['wp_version'],
+		);
+		if (!empty($_POST['funcs'])) {
+			foreach ($_POST['funcs'] as $v) {
+				$resp[$v] = function_exists($v) ? 'y' : 'n';
+			}
+		}
+		if (!empty($_POST['classes'])) {
+			foreach ($_POST['classes'] as $v) {
+				$resp[$v] = class_exists($v) ? 'y' : 'n';
+			}
+		}
+		if (!empty($_POST['consts'])) {
+			foreach ($_POST['consts'] as $v) {
+				$resp[$v] = defined($v) ? 'y' : 'n';
+			}
+		}
+		return self::ok($resp);
 	}
 
 	/**

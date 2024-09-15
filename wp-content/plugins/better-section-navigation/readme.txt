@@ -1,12 +1,14 @@
 === Better Section Navigation Widget ===
-Contributors: kenjigarland, drywallbmb, jakemgold, thinkoomph
-Tags: navigation, section, cms, pages, top level, hierarchy
+Contributors: kenjigarland, jakemgold, thinkoomph
+Tags: navigation, section, cms, pages, hierarchy
 Requires at least: 2.8
-Tested up to: 5.7.1
-Stable tag: 1.6
+Tested up to: 6.6.1
+Stable tag: 1.6.1
 Requires PHP: 5.6
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Creates a new widget for listing section-based navigation. Essential for contextual navigation when using WordPress as a CMS! Also implements a function for template developers and a shortcode.
+Creates a new widget for listing section-based navigation -- essential for contextual navigation. Also implements a template function and a shortcode.
 
 == Description ==
 
@@ -89,6 +91,9 @@ Here’s the complete list:
 
 
 == Changelog ==
+
+= 1.6.1 =
+* Restore Simple Section Navigation's handling of the display of child pages *not* descended from the current page. Simple Section Navigation did not display other pages' children unless the "show all pages in section" checkbox was checked, but formerly, Better Section Navigation would show all children of _siblings_ of the current page.
 
 = 1.6 =
 * Add full backward compatibility for Simple Section Navigation. Better Section Navigation is now a drop-in replacement.

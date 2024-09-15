@@ -91,15 +91,15 @@ class Better_Section_Nav extends WP_Widget {
 					// If ancestor excluded, and hide on excluded, leave.
 					return false;
 				}
-				$pageset = get_posts( array(
-					'suppress_filters' => false,
-					'post_parent' => $anc_id,
+				$pageset = get_pages( array(
+					'child_of' => $anc_id,
+					'parent' => $anc_id,
 					'exclude' => $ancestors_me,
 				) );
 				foreach ( $pageset as $page ) {
-					$excludeset = get_posts( array(
-						'suppress_filters' => false,
-						'post_parent' => $page->ID,
+					$excludeset = get_pages( array(
+						'child_of' => $page->ID,
+						'parent' => $page->ID,
 					) );
 					foreach ( $excludeset as $expage ) {
 						$exclude_list .= ',' . $expage->ID;

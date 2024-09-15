@@ -4,7 +4,7 @@ Tags: gutenberg, blocks, page builder, editor, gutenberg blocks
 Donate link: https://www.kadencewp.com/about-us/
 Requires at least: 6.3
 Tested up to: 6.6
-Stable tag: 3.2.50
+Stable tag: 3.2.53
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -173,6 +173,41 @@ Please report security bugs found in the source code of the Kadence Blocks plugi
 Please report security bugs found in the Kadence Blocks plugin's source code through the Patchstack Vulnerability Disclosure Program https://patchstack.com/database/vdp/kadence-blocks. The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Changelog ==
+
+= 3.2.53 =
+Release Date: September 9th 2024
+* Add: ID to from tag in advanced form block for targeting with custom scripts.
+* Fix: Show more block inside query loop.
+* Fix: Countdown repeater not working.
+* Fix: Issue with progress block label position.
+* Fix: Accordion pane spacing issue on front end.
+* Fix: Infobox text alignment in some layouts.
+* Fix: Warning about multiple submit buttons when two advanced forms are on the same page.
+* Fix: Advanced image editor style not matching frontend when inside section.
+* Fix: Advanced image caption not loading google font.
+* Fix: Issues with progress bar label position.
+* Fix: Table of contents line being getting overridden in some situations.
+* Fix: Advanced galleries not showing when inside a section with an alignment set.
+* Fix: Issue with repeating countdown not working.
+* Fix: Escape HTML in countdown block labels.
+
+= 3.2.52 =
+Release Date: August 23rd 2024
+* Fix: Row layout responsive preview in editor when using break left or break right.
+
+= 3.2.51 =
+Release Date: August 22nd 2024
+* Update: Improve accessibility for progress bar block.
+* Update: Improve accessibility for buttons with video popup.
+* Fix: Using Dynamic content in Google Maps block
+* Fix: Carousel not looping in Advanced Gallery block.
+* Fix: Tabs block columns not updating in editor when viewed in Tablet or Mobile.
+* Fix: Prevent invalid HTML with multiple wrapped links in Icon List items.
+* Fix: Caption background color in Advanced Gallery block.
+* Fix: Rendering custom SVGs with group tags.
+* Fix: Issue with row layout break left and break right not showing in the editor.
+* Fix: Spacer height when using vh with default height value.
+* Fix: Border radius with overlay colors on Advanced Image block.
 
 = 3.2.50 =
 Release Date: July 25th 2024

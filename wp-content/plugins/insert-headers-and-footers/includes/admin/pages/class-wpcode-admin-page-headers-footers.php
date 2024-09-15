@@ -289,7 +289,7 @@ class WPCode_Admin_Page_Headers_Footers extends WPCode_Admin_Page {
 
 			// Clear the cache.
 			if ( apply_filters( 'wpcode_clear_cache_on_global_save', true ) ) {
-				wpcode_clear_all_plugins_page_cache();
+				wpcode_clear_all_plugins_page_cache( 'global' );
 			}
 		}
 

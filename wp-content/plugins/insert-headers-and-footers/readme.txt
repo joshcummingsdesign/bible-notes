@@ -4,7 +4,7 @@ Tags: code, css, php, header, code snippets
 Requires at least: 4.6
 Tested up to: 6.6
 Requires PHP: 5.5
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -231,6 +231,10 @@ WPCode comes with a ready-made code snippets library that allows you to replace 
 ... and basically any plugin that adds a functionality which can be added via custom code snippets.
 
 == Changelog ==
+
+= 2.2.1 =
+* Fix: We fixed a bug that was causing the selected conditional logic operator to not be displayed correctly for some rules.
+* Fix: The auto-insert location picker was not opening again in some situations.
 
 = 2.2.0 =
 * New: We updated the conditional logic rules picker for more clarity and ease of use.

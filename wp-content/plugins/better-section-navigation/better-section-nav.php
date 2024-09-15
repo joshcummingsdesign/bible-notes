@@ -1,7 +1,6 @@
 <?php
 /**
  Plugin Name: Better Section Navigation
- Plugin URI: https://cornershopcreative.com/plugins/better-section-navigation/
  Description: Adds a widget (and shortcode and theme function) for section (or
  top level page) based navigation. The title of the widget is the top level
  page within the current page hierarchy. Shows all page siblings (except on the
@@ -9,7 +8,7 @@
  parents and grandparents (up to top level page), and any immediate children of
  the current page. Can also be called via function inside template files or by
  shortcode.
- Version: 1.6
+ Version: 1.6.1
  Author: Cornershop Creative
  Author URI: https://cornershopcreative.com/
  Text Domain: better-section-nav
