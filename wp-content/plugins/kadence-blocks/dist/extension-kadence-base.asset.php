@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('kadence-icons'), 'version' => 'a58b4f754f48b68c0c94');
+<?php return array('dependencies' => array('kadence-icons'), 'version' => 'af0147c94481e937b8e2');

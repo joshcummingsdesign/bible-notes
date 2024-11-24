@@ -295,7 +295,7 @@ final class WPEL_Front extends WPRun_Base_1x0x0
         if ( $title_format ) {
             $title = $link->get_attr( 'title' );
             $text = $link->get_content();
-            $new_title = str_replace( array( '{title}', '{text}', '{text_clean}' ), array( esc_attr( $title ), esc_attr( $text ), esc_attr( strip_tags( $text ) ) ), $title_format );
+            $new_title = str_replace( array( '{title}', '{text}', '{text_clean}' ), array( esc_attr( $title ), esc_attr( $text ), esc_attr( $text ) ), $title_format );
 
             if ( $new_title ) {
                 $link->set_attr( 'title', $new_title );
@@ -456,8 +456,10 @@ final class WPEL_Front extends WPRun_Base_1x0x0
 
             if ( count( $domain_tld ) > 0 ) {
                 $domain_name = $domain_tld[ 0 ];
+            } else if(isset($_SERVER[ 'SERVER_NAME' ])){
+                $domain_name = sanitize_text_field(wp_unslash($_SERVER[ 'SERVER_NAME' ]));
             } else {
-                $domain_name = sanitize_text_field($_SERVER[ 'SERVER_NAME' ]);
+                $domain_name = '';
             }
         }
 

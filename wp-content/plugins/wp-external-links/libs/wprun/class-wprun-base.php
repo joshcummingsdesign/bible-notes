@@ -73,7 +73,6 @@ abstract class WPRun_Base_1x0x0
 
         // check if instance of this class already exists
         if ( key_exists( $class_name, self::$instances ) ) {
-            trigger_error( 'Class "'. esc_html($class_name) .'" was already created.' );
             return;
         }
 
@@ -102,9 +101,7 @@ abstract class WPRun_Base_1x0x0
 
             if ( $method_reflection->isProtected() ) {
                 call_user_func_array( array( $this, $method_name ), $this->arguments );
-            } else {
-                trigger_error( 'Method "'. esc_html($method_name) .'" should be made protected in class "'. esc_html(get_called_class()) .'".' );
-            }
+            } 
         }
 
         // automatically set methods as callback for WP hooks
@@ -122,7 +119,7 @@ abstract class WPRun_Base_1x0x0
         $class_name = get_called_class();
 
         if ( ! isset( self::$instances[ $class_name ] ) ) {
-            trigger_error( 'Instance of "'. esc_html($class_name) .'" was not created.' );
+            return false;
         }
 
         return self::$instances[ $class_name ];
@@ -157,9 +154,7 @@ abstract class WPRun_Base_1x0x0
         if ( is_readable( $template_file_path ) && 0 === strpos($template_file_path, WPEL_Plugin::get_plugin_dir())) {
             // show file
             include $template_file_path;
-        } else {
-            trigger_error( 'Template file "' . esc_html($template_file_path) . '" is not readable or may not exists.' );
-        }
+        } 
     }
 
     /**
@@ -206,7 +201,7 @@ abstract class WPRun_Base_1x0x0
         $return_value = self::magic_call( $method_name, $arguments );
 
         if ( self::RETURN_VOID === $return_value ) {
-            trigger_error( 'Method name "'. esc_html($method_name) .'" does not exists or cannot be called.' );
+            return false;
         }
 
         return $return_value;
@@ -223,7 +218,7 @@ abstract class WPRun_Base_1x0x0
         $return_value = self::magic_call( $method_name, $arguments );
 
         if ( self::RETURN_VOID === $return_value ) {
-            trigger_error( 'Method name "'. esc_html($method_name) .'" does not exists or cannot be called.' );
+            return false;
         }
 
         return $return_value;
@@ -324,7 +319,7 @@ abstract class WPRun_Base_1x0x0
         } elseif ('filter' === $hook_type) {
             add_filter( $wp_hook_name, $callback, $priority, $accepted_args );
         } else {
-            trigger_error( '"' . esc_html($hook_type) . '" is not a valid hookType.' );
+            return false;
         }
     }
 

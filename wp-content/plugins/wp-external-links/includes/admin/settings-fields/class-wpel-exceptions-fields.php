@@ -163,14 +163,11 @@ final class WPEL_Exceptions_Fields extends FWP_Settings_Section_Base_1x0x0
         $this->get_html_fields()->text_area( $key, array(
             'class' => 'large-text',
             'rows'  => 4,
-            'placeholder' => __( 'For example:'. "\n"
-                        .'somedomain.org, sub.domain.net/some-slug'. "\n"
-                        .'http://sub.moredomain.net, http://www.domain.com/other-slug', 'wp-external-links' ),
+            'placeholder' => __( "For example: \n somedomain.org, sub.domain.net/some-slug \n http://sub.moredomain.net, http://www.domain.com/other-slug", 'wp-external-links' ),
         ) );
 
         echo '<p class="description">'
-                . esc_html__( 'Separate url\'s by comma and/or a line break. '
-                .'Write the url\'s as specific as you want them to match.', 'wp-external-links' )
+                . esc_html__( "Separate url's by comma and/or a line break. \n Write the url\'s as specific as you want them to match.", 'wp-external-links' )
                 .'</p>';
     }
 

@@ -18,6 +18,7 @@ WPEL_Plugin::show_template( $default_fields_file, $vars );
 ?>
 
 <p class="description"><?php
+/* translators: %s is replaced with a link to the WP External Links Support tab */
 WPEL_Plugin::wp_kses_wf(sprintf( __('The data-attribute <a href="%s"><code>data-wpel-link</code></a> can be set on individual links to treat them as internal, external or excluded, or to completely ignore links form being processed by this plugin.', 'wp-external-links' ), admin_url('options-general.php?page=wpel-settings-page&tab=support'), 'wp-external-links' ));
 ?></p>
 

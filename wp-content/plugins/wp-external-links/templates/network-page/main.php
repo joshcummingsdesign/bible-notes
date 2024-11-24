@@ -17,7 +17,7 @@
  */
 ?>
 <div class="wrap wpel-network-page wpel-network-page-<?php echo esc_html($vars[ 'current_tab' ]); ?>">
-    <h1><?php esc_html_e(get_admin_page_title(), 'wp-external-links'); ?></h1>
+    <h1><?php esc_html(get_admin_page_title()); ?></h1>
     <?php
         if ( $vars[ 'own_admin_menu' ] ):
             settings_errors();

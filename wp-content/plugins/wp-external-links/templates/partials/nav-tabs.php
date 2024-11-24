@@ -21,7 +21,12 @@ $set_tab_active_class = function ( $tab ) use ( $vars ) {
 
 // disabled
 $first_install = get_option( 'wpel-first-install' );
-$dismiss_url = add_query_arg(array('action' => 'wpel_dismiss_notice', 'notice' => 'rate', 'redirect' => urlencode(sanitize_url($_SERVER['REQUEST_URI']))), admin_url('admin.php'));
+if(isset($_SERVER['REQUEST_URI'])){
+    $redirect_url = sanitize_url(wp_unslash($_SERVER['REQUEST_URI']));
+} else {
+    $redirect_url = '';
+}
+$dismiss_url = add_query_arg(array('action' => 'wpel_dismiss_notice', 'notice' => 'rate', 'redirect' => urlencode($redirect_url)), admin_url('admin.php'));
 $dismiss_url = wp_nonce_url($dismiss_url, 'wpel_dismiss_rate');
 
 if (false && false == get_option( 'wpel-notice-dismissed-rate', false ) && current_time( 'timestamp' ) - $first_install > ( HOUR_IN_SECONDS / 4 ) ) {

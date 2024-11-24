@@ -29,7 +29,7 @@
 <h3><?php esc_html_e( 'Reported issues', 'wp-external-links' ); ?></h3>
 <p><?php WPEL_Plugin::wp_kses_wf(__('When you experience problems using this plugin please look if your problem was <a href="https://wordpress.org/support/plugin/wp-external-links" target="_blank">already reported</a>.', 'wp-external-links' )); ?></p>
 
-<h3><?php esc_html_e(__('Send your issue', 'wp-external-links' )); ?></h3>
+<h3><?php esc_html_e( 'Send your issue', 'wp-external-links' ); ?></h3>
 <p><?php WPEL_Plugin::wp_kses_wf(__('If the issue wasn\'t reported yet then you should <a href="https://wordpress.org/support/plugin/wp-external-links#postform" target="_blank">post your problem</a>. <b>Our average response time is a few hours, and we reply to every message!</b>', 'wp-external-links' )); ?>
     <?php WPEL_Plugin::wp_kses_wf(__( '<br>Make sure you copy/paste the technical information displayed below. Without it we can\'t help you.', 'wp-external-links' )); ?>
 </p>
@@ -56,7 +56,7 @@ foreach ( $plugins as $plugin => $plugin_values ) {
         continue;
     }
 
-    esc_html_e(' - '. $plugin_values[ 'Name' ] .', version: '. $plugin_values[ 'Version' ] . "\n", 'wp-external-links');
+    echo ' - '. esc_html($plugin_values[ 'Name' ]) .', version: '. esc_html($plugin_values[ 'Version' ]) . "\n";
 }
 ?>
 
@@ -73,7 +73,8 @@ foreach ( $vars[ 'tabs' ] as $tab_key => $values ) {
     $option_name = $values[ 'fields' ]->get_setting( 'option_name' );
 
     echo esc_html("'$option_name' => ");
-    var_export( $option_values );
+    //phpcs:ignore as var_export has cleaner formatting
+    var_export( $option_values ); //phpcs:ignore
     echo esc_html( ",\n");
 }
 ?>

@@ -47,7 +47,7 @@ final class WPEL_Network_Admin_Fields extends FWP_Settings_Section_Base_1x0x0
 
         foreach ( $option_names as $option_name ) {
             if ( isset( $_POST[ $option_name ] ) ) {
-                $post_values = sanitize_text_field($_POST[ $option_name ]);
+                $post_values = sanitize_text_field(wp_unslash($_POST[ $option_name ]));
                 $sanitized_values = $this->sanitize( $post_values );
 
                 update_site_option( $option_name, $sanitized_values );
@@ -56,15 +56,16 @@ final class WPEL_Network_Admin_Fields extends FWP_Settings_Section_Base_1x0x0
             }
         }
 
-        $redirect_url = sanitize_url($_POST['_wp_http_referer']);
-
-        wp_safe_redirect( add_query_arg(
-            array(
-                'page' => 'wpel-network-settings-page',
-                'updated' => true
-            )
-            , $redirect_url
-        ) );
+        if(isset($_POST['_wp_http_referer'])){
+            $redirect_url = sanitize_url(wp_unslash($_POST['_wp_http_referer']));
+            wp_safe_redirect( add_query_arg(
+                array(
+                    'page' => 'wpel-network-settings-page',
+                    'updated' => true
+                )
+                , $redirect_url
+            ) );
+        } 
 
         exit;
     }

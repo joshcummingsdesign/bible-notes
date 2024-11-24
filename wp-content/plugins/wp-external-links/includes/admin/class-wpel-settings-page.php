@@ -90,8 +90,9 @@ final class WPEL_Settings_Page extends WPRun_Base_1x0x0
         }
 
         // get current tab
-        if(isset($_GET['tab'])){
-            $this->current_tab = sanitize_text_field($_GET['tab']);
+        //phpcs:ignore because nonce is not needed as this just sets the current tab and can be linked directly
+        if(isset($_GET['tab'])){ //phpcs:ignore
+            $this->current_tab = sanitize_text_field($_GET['tab']); //phpcs:ignore
         }
 
         // set default tab
@@ -177,8 +178,6 @@ final class WPEL_Settings_Page extends WPRun_Base_1x0x0
         if($key == 'icon_type'){
             return false;
         }
-
-        trigger_error('Option value "' . ( $type !== null?esc_html($type) . '=>' : '' ) . esc_html($key) . '" cannot be found.');
     }
 
     /**
@@ -249,6 +248,8 @@ final class WPEL_Settings_Page extends WPRun_Base_1x0x0
     protected function action_admin_enqueue_scripts()
     {
         $current_screen = get_current_screen();
+        $plugin_version = get_option('wpel-version');
+
         if ($current_screen->id == 'toplevel_page_wpel-settings-page' || $current_screen->id == 'settings_page_wpel-settings-page') {
             wp_enqueue_script('jquery-ui-core');
             wp_enqueue_script('jquery-ui-accordion');
@@ -264,8 +265,8 @@ final class WPEL_Settings_Page extends WPRun_Base_1x0x0
             wp_enqueue_style('wp-color-picker');
             wp_enqueue_script('wp-color-picker');
 
-            wp_enqueue_style('jquery-ui-smoothness', plugins_url('/public/css/jquery-ui.css', WPEL_Plugin::get_plugin_file()), false, null);
-            wp_enqueue_style('wpel-admin-font', plugins_url('/public/css/poppins.css', WPEL_Plugin::get_plugin_file()), false, null);
+            wp_enqueue_style('jquery-ui-smoothness', plugins_url('/public/css/jquery-ui.css', WPEL_Plugin::get_plugin_file()), false, $plugin_version);
+            wp_enqueue_style('wpel-admin-font', plugins_url('/public/css/poppins.css', WPEL_Plugin::get_plugin_file()), false, $plugin_version);
         }
 
         wp_enqueue_style('wpel-admin-global-style');

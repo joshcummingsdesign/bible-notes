@@ -4,8 +4,8 @@ Donate link: https://david.dw-perspective.org.uk/donate
 Tags: cache, caching, image cache, minify, performance cache, page speed, image optimizer, compress images, optimize database, clean database
 Requires PHP: 5.6
 Requires at least: 4.5
-Tested up to: 6.6
-Stable tag: 3.5.0
+Tested up to: 6.7
+Stable tag: 3.7.1
 License: GPLv2+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -394,6 +394,40 @@ If none of the above works, disable processing of JavaScript files in the minify
 
 
 == Changelog ==
+
+= 3.7.1 - 20/Nov/2024 =
+
+* TWEAK: Resolved a PHP notice caused by translation loading too early when caching is enabled, introduced in WordPress 6.7
+
+
+= 3.7.0 - 21/Oct/2024 =
+
+* FEATURE: Added an option to automatically preload URLs immediately after cache content is purged
+* FEATURE: Premium - Gather data about table usage by filtering `query` event
+* FIX: Cache - Scheduled preloading wasn't working
+* FIX: Inconsistency in `smush_manager_send_command` function
+* REFACTOR: Smush - Popup styles, remove unused code 
+* TWEAK: Fix fatal implode error when updating to v3.5.0
+* TWEAK: Image compression - Issue with cancelling smush image compression
+* TWEAK: Improve module minification logic
+* TWEAK: Premium - Unused images - Fixed popup when moving images to or restoring images from the trash
+* TWEAK: Premium - Unused images - Placeholder images in unused images section
+* TWEAK: Added `security.md` file with information to report security issues
+
+= 3.6.0 - 12/Sep/2024 =
+
+* FEATURE: Premium - Auto-detect images lacking dimension attributes and add them to improve CLS
+* FIX: Fixed the issue that disabled WebP conversion due to checking all shell commands for WebP compression
+* FIX: Premium - Unused Images - The unused image size deletion functionality does not work when images are not in the /yyyy/mm/ folder
+* REFACTOR: Removed unnecessary static methods in WebP class
+* TWEAK: Image compression - Rolled back to using popup error notices as in versions prior to 3.4.0
+* TWEAK: Added a more descriptive error with resolution proposals for failed gzip compression and browser cache tests
+* TWEAK: Fix broken unused image list thumbnails and download as csv link in Multisite
+* TWEAK: Fix the singleton pattern in Heartbeat class
+* TWEAK: Image compression functionality added to the Media Library page
+* TWEAK: Premium - Cache - Added support for Aelia Currency Switcher plugin
+* TWEAK: Premium - Unusued images - improve clarity in UI for images in post revisions
+* TWEAK: Added additional checks to the `implode()` function to mitigate the risk of fatal errors on certain instances
 
 = 3.5.0 - 14/Aug/2024 =
 
@@ -1570,4 +1604,4 @@ If none of the above works, disable processing of JavaScript files in the minify
 * Fix Interface
 
 == Upgrade Notice ==
-* 3.5.0: One premium feature added. Ability to host analytics scripts locally, a lot of fixes and tweaks - a recommended update for all
+* 3.7.1: Resolved a PHP notice caused by translation loading too early when caching is enabled - a recommended update for all

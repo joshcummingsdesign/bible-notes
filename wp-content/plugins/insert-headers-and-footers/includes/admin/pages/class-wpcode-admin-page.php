@@ -119,6 +119,7 @@ abstract class WPCode_Admin_Page {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'insert-headers-and-footers' ) );
 		}
 		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'all_admin_notices' );
 		add_action( 'wpcode_admin_page', array( $this, 'output' ) );
 		add_action( 'wpcode_admin_page', array( $this, 'output_footer' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'page_scripts' ) );
@@ -147,7 +148,6 @@ abstract class WPCode_Admin_Page {
 	 * @return void
 	 */
 	public function page_hooks() {
-
 	}
 
 	/**
@@ -175,7 +175,6 @@ abstract class WPCode_Admin_Page {
 	 * @return void
 	 */
 	protected function setup_views() {
-
 	}
 
 	/**
@@ -461,7 +460,6 @@ abstract class WPCode_Admin_Page {
 	 * @return void
 	 */
 	public function output_header_bottom() {
-
 	}
 
 	/**
@@ -920,12 +918,12 @@ abstract class WPCode_Admin_Page {
 	 *
 	 * @return void
 	 */
-	public function get_library_markup( $categories, $snippets, $item_method = 'get_library_snippet_item' ) {
+	public function get_library_markup( $categories, $snippets, $item_method = 'get_library_snippet_item', $type = 'library' ) {
 		$selected_category = isset( $categories[0]['slug'] ) ? $categories[0]['slug'] : '*';
 		$count             = 0;
 		foreach ( $snippets as $snippet ) {
 			if ( isset( $snippet['needs_auth'] ) && empty( $snippet['skip_count'] ) ) {
-				$count ++;
+				++$count;
 			}
 		}
 		$categories = $this->add_item_counts( $categories, $snippets );
@@ -934,7 +932,7 @@ abstract class WPCode_Admin_Page {
 		?>
 		<div class="wpcode-items-metabox wpcode-metabox">
 			<?php $this->get_items_list_sidebar( $categories, __( 'All Snippets', 'insert-headers-and-footers' ), __( 'Search Snippets', 'insert-headers-and-footers' ), $selected_category, $count ); ?>
-			<div class="wpcode-items-list">
+			<div class="wpcode-items-list" data-type="<?php echo esc_attr( $type ); ?>">
 				<?php
 				if ( empty( $snippets ) ) {
 					?>
@@ -977,7 +975,7 @@ abstract class WPCode_Admin_Page {
 				if ( ! isset( $category_counts[ $category ] ) ) {
 					$category_counts[ $category ] = 0;
 				}
-				$category_counts[ $category ] ++;
+				++$category_counts[ $category ];
 			}
 		}
 
@@ -1009,17 +1007,20 @@ abstract class WPCode_Admin_Page {
 		$need_auth_count = 0;
 		foreach ( $snippets as $snippet ) {
 			if ( ! empty( $snippet['needs_auth'] ) ) {
-				$need_auth_count ++;
+				++$need_auth_count;
 			}
 		}
 		if ( $need_auth_count > 0 ) {
-			$categories = array_merge( array(
+			$categories = array_merge(
 				array(
-					'name'  => __( 'Available Snippets', 'insert-headers-and-footers' ),
-					'slug'  => 'available',
-					'count' => $total - $need_auth_count,
-				)
-			), $categories );
+					array(
+						'name'  => __( 'Available Snippets', 'insert-headers-and-footers' ),
+						'slug'  => 'available',
+						'count' => $total - $need_auth_count,
+					),
+				),
+				$categories
+			);
 		}
 
 		return $categories;
@@ -1115,6 +1116,8 @@ abstract class WPCode_Admin_Page {
 			</div>
 			<div class="wpcode-library-preview-buttons">
 				<a class="wpcode-button wpcode-button-wide" id="wpcode-preview-use-code"><?php esc_html_e( 'Use Snippet', 'insert-headers-and-footers' ); ?></a>
+				<a class="wpcode-button wpcode-button-secondary wpcode-my-library-buttons" id="wpcode-preview-edit-snippet" target="_blank"><?php esc_html_e( 'Edit in Library', 'wpcode-premium' ); ?></a>
+				<div class="wpcode-preview-updated wpcode-my-library-buttons" id="wpcode-preview-updated"></div>
 			</div>
 		</div>
 		<?php
@@ -1249,7 +1252,6 @@ abstract class WPCode_Admin_Page {
 		$html .= '</div>';
 
 		return $html;
-
 	}
 
 	/**

@@ -32,7 +32,7 @@ abstract class FWP_Register_Hook_Base_1x0x0 extends WPRun_Base_1x0x0
         $wp_hook_function = 'register_'. $this->hook_type .'_hook';
 
         if ( ! function_exists( $wp_hook_function ) ) {
-            trigger_error( 'Register hook function "'. esc_html($wp_hook_function) .'" does not exist.' );
+            return false;
         }
 
         $wp_hook_function(

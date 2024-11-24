@@ -37,7 +37,11 @@ final class WPEL_Plugin extends FWP_Plugin_Base_1x0x0
         wp_send_json_error('You are not allowed to run this action.');
       }
 
-      $notice_name = trim(sanitize_text_field(@$_GET['notice_name']));
+      if(!isset($_GET['notice_name'])){
+        wp_send_json_error('Unknown action.');
+      }
+
+      $notice_name = sanitize_text_field(wp_unslash($_GET['notice_name']));
       $pointers = get_option('wpel-pointers', array());
 
       if ($notice_name != 'welcome') {
@@ -84,6 +88,11 @@ final class WPEL_Plugin extends FWP_Plugin_Base_1x0x0
 
     static function wp_kses_wf($html)
     {
+        if(empty($html)){
+            echo '';
+            return;
+        }
+        
         add_filter('safe_style_css', function ($styles) {
             $styles_wf = array(
                 'text-align',

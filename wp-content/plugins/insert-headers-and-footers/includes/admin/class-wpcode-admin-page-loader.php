@@ -45,6 +45,7 @@ class WPCode_Admin_Page_Loader {
 
 		// Hide submenus.
 		add_filter( 'parent_file', array( $this, 'hide_menus' ), 1020 );
+		add_filter( 'admin_body_class', array( $this, 'add_pro_class_to_admin' ) );
 
 		// Save Screen options.
 		add_filter( 'set-screen-option', array( $this, 'screen_options_set' ), 10, 3 );
@@ -58,6 +59,7 @@ class WPCode_Admin_Page_Loader {
 	 */
 	public function require_files() {
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/trait-wpcode-revisions-display.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/trait-wpcode-my-library-markup.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-headers-footers.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-code-snippets.php';
@@ -70,6 +72,7 @@ class WPCode_Admin_Page_Loader {
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-pixel.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-file-editor.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-search-replace.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-admin-page-duplicator.php';
 	}
 
 	/**
@@ -93,6 +96,7 @@ class WPCode_Admin_Page_Loader {
 		$this->pages['generator']       = 'WPCode_Admin_Page_Generator';
 		$this->pages['file_editor']     = 'WPCode_Admin_Page_File_Editor';
 		$this->pages['search-replace']  = 'WPCode_Admin_Page_Search_Replace';
+		$this->pages['duplicator']      = 'WPCode_Admin_Page_Duplicator';
 		$this->pages['tools']           = 'WPCode_Admin_Page_Tools';
 		$this->pages['settings']        = 'WPCode_Admin_Page_Settings';
 		$this->pages['click']           = 'WPCode_Admin_Page_Click';
@@ -244,6 +248,18 @@ class WPCode_Admin_Page_Loader {
 		return $parent_file;
 	}
 
+    /**
+     * Add a class to the admin body to indicate if the user is using the lite version.
+     *
+     * @return string
+     */
+	public function add_pro_class_to_admin( $classes ) {
+		if ( ! class_exists( 'WPCode_Premium' ) ) {
+			$classes .= ' wpcode-lite-version';
+		}
+		return $classes;
+	}
+
 
 	/**
 	 * Set the per page option for the snippets list screen.
@@ -269,7 +285,6 @@ class WPCode_Admin_Page_Loader {
 		if ( 'wpcode_snippets_per_page' === $option ) {
 			return absint( $value );
 		}
-
 
 		return $status;
 	}

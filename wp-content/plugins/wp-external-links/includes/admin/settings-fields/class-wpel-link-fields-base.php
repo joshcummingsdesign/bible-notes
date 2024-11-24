@@ -198,8 +198,7 @@ abstract class WPEL_Link_Fields_Base extends FWP_Settings_Section_Base_1x0x0
         ) );
 
         echo '<p class="description">'
-                . esc_html__( 'Use this <code>{title}</code> for the original title value '
-                .'and <code>{text}</code> for the link text (or <code>{text_clean}</code> for text stripped of HTML) as shown on the page', 'wp-external-links' )
+                . esc_html__( 'Use this <code>{title}</code> for the original title value and <code>{text}</code> for the link text (or <code>{text_clean}</code> for text stripped of HTML) as shown on the page', 'wp-external-links' )
                 .'</p>';
     }
 
@@ -247,7 +246,10 @@ abstract class WPEL_Link_Fields_Base extends FWP_Settings_Section_Base_1x0x0
 
     protected function show_icon_dashicon( array $args )
     {
-        $dashicons_str = file_get_contents( WPEL_Plugin::get_plugin_dir( '/data/json/dashicons.json' ) );
+        global $wp_filesystem;
+        WPEL_Plugin::wp_init_filesystem();
+        
+        $dashicons_str = $wp_filesystem->get_contents( WPEL_Plugin::get_plugin_dir( '/data/json/dashicons.json' ) );
         $dashicons_json = json_decode( $dashicons_str, true );
         $dashicons = $dashicons_json[ 'icons' ];
 
@@ -263,7 +265,10 @@ abstract class WPEL_Link_Fields_Base extends FWP_Settings_Section_Base_1x0x0
 
     protected function show_icon_fontawesome( array $args )
     {
-        $fa_icons_str = file_get_contents( WPEL_Plugin::get_plugin_dir( '/data/json/fontawesome.json' ) );
+        global $wp_filesystem;
+        WPEL_Plugin::wp_init_filesystem();
+        
+        $fa_icons_str = $wp_filesystem->get_contents( WPEL_Plugin::get_plugin_dir( '/data/json/fontawesome.json' ) );
         $fa_icons_json = json_decode( $fa_icons_str, true );
         $fa_icons = $fa_icons_json[ 'icons' ];
 

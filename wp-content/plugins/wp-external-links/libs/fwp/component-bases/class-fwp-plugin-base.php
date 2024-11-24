@@ -15,7 +15,7 @@ abstract class FWP_Plugin_Base_1x0x0 extends WPRun_Base_1x0x0
      * @var string
      */
     private $plugin_file = null;
-
+    public static $filesystem_initialized = false;
     /**
      * @var string
      */
@@ -63,7 +63,7 @@ abstract class FWP_Plugin_Base_1x0x0 extends WPRun_Base_1x0x0
       update_option( 'wpel-notice-dismissed-rate', true );
 
       if ( !empty( $_GET['redirect'] ) ) {
-        wp_safe_redirect( sanitize_url($_GET['redirect']) );
+        wp_safe_redirect( sanitize_url(wp_unslash($_GET['redirect'])) );
       } else {
         wp_safe_redirect( admin_url() );
       }
@@ -103,5 +103,24 @@ abstract class FWP_Plugin_Base_1x0x0 extends WPRun_Base_1x0x0
     {
         return self::get_instance()->plugin_dir . $path;
     }
+
+    /**
+     * @param string $path Optional
+     * @return string
+     */
+    public static function wp_init_filesystem()
+    {
+        if (! self::$filesystem_initialized) {
+            if (! class_exists('WP_Filesystem')) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+    
+            WP_Filesystem();
+            self::$filesystem_initialized = true;
+        }
+    
+        return true;
+    }
+
 
 }

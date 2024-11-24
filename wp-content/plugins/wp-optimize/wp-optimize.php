@@ -3,9 +3,9 @@
 Plugin Name: WP-Optimize - Clean, Compress, Cache
 Plugin URI: https://getwpo.com
 Description: WP-Optimize makes your site fast and efficient. It cleans the database, compresses images and caches pages. Fast sites attract more traffic and users.
-Version: 3.5.0
+Version: 3.7.1
 Update URI: https://wordpress.org/plugins/wp-optimize/
-Author: David Anderson, Ruhani Rabin, Team Updraft
+Author: TeamUpdraft, DavidAnderson
 Author URI: https://updraftplus.com
 Text Domain: wp-optimize
 Domain Path: /languages
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) die('No direct access allowed');
 
 // Check to make sure if WP_Optimize is already call and returns.
 if (!class_exists('WP_Optimize')) :
-define('WPO_VERSION', '3.5.0');
+define('WPO_VERSION', '3.7.1');
 define('WPO_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WPO_PLUGIN_MAIN_PATH', plugin_dir_path(__FILE__));
 define('WPO_PLUGIN_SLUG', plugin_basename(__FILE__));
@@ -147,6 +147,7 @@ class WP_Optimize {
 			'cache',
 			'compatibility',
 			'includes',
+			'includes/list-tables',
 			'minify',
 			'optimizations',
 			'webp',
@@ -414,9 +415,8 @@ class WP_Optimize {
 
 		$js_variables = $this->wpo_js_translations();
 		$js_variables['loggers_classes_info'] = $this->get_loggers_classes_info();
-
 		wp_localize_script('wp-optimize-admin-js', 'wpoptimize', $js_variables);
-
+		
 		do_action('wpo_premium_scripts_styles', $min_or_not_internal, $min_or_not, $enqueue_version);
 	}
 
@@ -562,15 +562,16 @@ class WP_Optimize {
 		// Loads the task manager
 		$this->get_task_manager();
 
-		// Loads the language file.
-		load_plugin_textdomain('wp-optimize', false, dirname(plugin_basename(__FILE__)) . '/languages');
+		add_action('init', array($this, 'load_language_file'), 0);
 
 		// Load 3rd party plugin compatibilities.
 		$this->load_compatibilities();
 
 		// Load page cache.
 		$this->get_page_cache();
-		$this->init_page_cache();
+		// We use the init hook to avoid the _load_textdomain_just_in_time warning,
+		// which is triggered because we use translations during cache initialization
+		add_action('init', array($this, 'init_page_cache'), 1);
 
 		// Include minify
 		$this->get_minify();
@@ -587,6 +588,15 @@ class WP_Optimize {
 
 		// add_filter('updraftcentral_host_plugins', array($this, 'attach_updraftcentral_host'));
 		// if (file_exists(WPO_PLUGIN_MAIN_PATH.'central/factory.php')) include_once(WPO_PLUGIN_MAIN_PATH.'central/factory.php');
+	}
+
+	/**
+	 * Loads the language file.
+	 *
+	 * @return void
+	 */
+	public function load_language_file() {
+		load_plugin_textdomain('wp-optimize', false, dirname(plugin_basename(__FILE__)) . '/languages');
 	}
 
 	/**
@@ -847,6 +857,7 @@ class WP_Optimize {
 			'select_destination' => __('Select destination', 'wp-optimize'),
 			'show_information' => __('Show information', 'wp-optimize'),
 			'hide_information' => __('Hide information', 'wp-optimize'),
+			'please_wait' => __('Please wait...', 'wp-optimize')
 		));
 	}
 
@@ -1725,38 +1736,6 @@ class WP_Optimize {
 		flush();
 		if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
 		if (function_exists('litespeed_finish_request')) litespeed_finish_request();
-	}
-
-	/**
-	 * Get the current theme's style.css headers
-	 *
-	 * @return array|WP_Error
-	 */
-	public function get_stylesheet_headers() {
-		static $headers;
-		if (isset($headers)) return $headers;
-
-		$style = get_template_directory_uri() . '/style.css';
-
-		/**
-		 * Filters wp_remote_get parameters, when checking if browser cache is enabled.
-		 *
-		 * @param array $request_params Default parameters
-		 */
-		$request_params = apply_filters('wpoptimize_get_stylesheet_headers_args', array('timeout' => 10));
-
-		// trying to load style.css.
-		$response = wp_remote_get($style, $request_params);
-
-		if (is_a($response, 'WP_Error')) return $response;
-
-		$headers = wp_remote_retrieve_headers($response);
-
-		if (method_exists($headers, 'getAll')) {
-			$headers = $headers->getAll();
-		}
-
-		return is_array($headers) ? $headers : array();
 	}
 
 	/**

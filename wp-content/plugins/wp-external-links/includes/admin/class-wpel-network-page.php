@@ -49,8 +49,9 @@ final class WPEL_Network_Page extends WPRun_Base_1x0x0
         );
 
         // get current tab
-        if(isset($_GET['tab'])){
-            $this->current_tab = sanitize_text_field($_GET['tab']);
+        //phpcs:ignore because nonce is not needed as this just sets the current tab and can be linked directly
+        if(isset($_GET['tab'])){ //phpcs:ignore
+            $this->current_tab = sanitize_text_field($_GET['tab']); //phpcs:ignore
         }
 
         // set default tab
@@ -87,8 +88,6 @@ final class WPEL_Network_Page extends WPRun_Base_1x0x0
             $option_values = $this->tabs[ $type ][ 'fields' ]->get_option_values();
             return $option_values[ $key ];
         }
-
-        trigger_error( 'Option value "'. esc_html($key) .'" cannot be found.' );
     }
 
     /**

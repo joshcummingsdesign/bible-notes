@@ -320,6 +320,10 @@
     "ariaLabel": {
       "type": "string",
       "default": ""
+    },
+    "showMaxProgressOnPageLoad": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

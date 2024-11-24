@@ -24,6 +24,14 @@ class WPCode_Snippet_Execute {
 	 * @var array
 	 */
 	public $types;
+
+	/**
+	 * The snippet types info with labels and descriptions.
+	 *
+	 * @var array
+	 */
+	public $types_labels;
+
 	/**
 	 * The snippet executed right now, for error handling.
 	 *
@@ -63,6 +71,7 @@ class WPCode_Snippet_Execute {
 		register_shutdown_function( array( $this, 'maybe_disable_snippet' ) );
 		// Customize WP error message.
 		add_filter( 'wp_php_error_message', array( $this, 'custom_error_message' ), 15, 2 );
+		add_filter( 'wpcode_snippet_output_php', array( $this, 'dont_load_edited_snippet' ), 10, 2 );
 	}
 
 	/**
@@ -82,35 +91,86 @@ class WPCode_Snippet_Execute {
 		$this->types = array(
 			'html'      => array(
 				'class' => 'WPCode_Snippet_Execute_HTML',
-				'label' => __( 'HTML Snippet', 'insert-headers-and-footers' ),
-				// Don't want to instantiate the class until it's needed and we need this to be translatable.
 			),
 			'text'      => array(
 				'class' => 'WPCode_Snippet_Execute_Text',
-				'label' => __( 'Text Snippet', 'insert-headers-and-footers' ),
 			),
 			'blocks'    => array(
 				'class'  => 'WPCode_Snippet_Execute_Blocks',
-				'label'  => __( 'Blocks Snippet (PRO)', 'insert-headers-and-footers' ),
+				'is_pro' => true,
+			),
+			'css'       => array(
+				'class' => 'WPCode_Snippet_Execute_CSS',
+			),
+			'scss'      => array(
+				'class'  => 'WPCode_Snippet_Execute_SCSS',
 				'is_pro' => true,
 			),
 			'js'        => array(
 				'class' => 'WPCode_Snippet_Execute_JS',
-				'label' => __( 'JavaScript Snippet', 'insert-headers-and-footers' ),
 			),
 			'php'       => array(
 				'class' => 'WPCode_Snippet_Execute_PHP',
-				'label' => __( 'PHP Snippet', 'insert-headers-and-footers' ),
 			),
 			'universal' => array(
 				'class' => 'WPCode_Snippet_Execute_Universal',
-				'label' => __( 'Universal Snippet', 'insert-headers-and-footers' ),
-			),
-			'css'       => array(
-				'class' => 'WPCode_Snippet_Execute_CSS',
-				'label' => __( 'CSS Snippet', 'insert-headers-and-footers' ),
 			),
 		);
+	}
+
+	/**
+	 * Load the snippet types on demand.
+	 *
+	 * @return void
+	 */
+	public function load_snippet_types_on_demand() {
+		$this->types = array(
+			'html'      => array(
+				'class'       => 'WPCode_Snippet_Execute_HTML',
+				'label'       => __( 'HTML Snippet', 'insert-headers-and-footers' ),
+				'description' => __( 'Easily insert scripts from other sites or build custom elements using HTML.', 'insert-headers-and-footers' ),
+				// Don't want to instantiate the class until it's needed and we need this to be translatable.
+			),
+			'text'      => array(
+				'class'       => 'WPCode_Snippet_Execute_Text',
+				'label'       => __( 'Text Snippet', 'insert-headers-and-footers' ),
+				'description' => __( 'Create reusable text snippets that you can visually format in a familiar editor.', 'insert-headers-and-footers' ),
+			),
+			'blocks'    => array(
+				'class'       => 'WPCode_Snippet_Execute_Blocks',
+				'label'       => __( 'Blocks Snippet (PRO)', 'insert-headers-and-footers' ),
+				'is_pro'      => true,
+				'description' => __( 'Use the Block Editor to create components that you can insert anywhere in your site.', 'insert-headers-and-footers' ),
+			),
+			'css'       => array(
+				'class'       => 'WPCode_Snippet_Execute_CSS',
+				'label'       => __( 'CSS Snippet', 'insert-headers-and-footers' ),
+				'description' => __( 'Write CSS styles directly in WPCode and easily customize how your website looks.', 'insert-headers-and-footers' ),
+			),
+			'scss'      => array(
+				'class'       => 'WPCode_Snippet_Execute_SCSS',
+				'label'       => __( 'SCSS Snippet (PRO)', 'insert-headers-and-footers' ),
+				'is_pro'      => true,
+				'description' => __( 'Write SCSS styles directly in WPCode and easily customize how your website looks.', 'insert-headers-and-footers' ),
+			),
+			'js'        => array(
+				'class'       => 'WPCode_Snippet_Execute_JS',
+				'label'       => __( 'JavaScript Snippet', 'insert-headers-and-footers' ),
+				'description' => __( 'Add custom JavaScript code to your site to add interactivity or integrate with other services.', 'insert-headers-and-footers' ),
+			),
+			'php'       => array(
+				'class'       => 'WPCode_Snippet_Execute_PHP',
+				'label'       => __( 'PHP Snippet', 'insert-headers-and-footers' ),
+				'description' => __( 'Extend or add functionality using PHP code with full control on where it\'s executed', 'insert-headers-and-footers' ),
+			),
+			'universal' => array(
+				'class'       => 'WPCode_Snippet_Execute_Universal',
+				'label'       => __( 'Universal Snippet', 'insert-headers-and-footers' ),
+				'description' => __( 'Start writing HTML and add PHP code like you would in a .php file with Universal snippets.', 'insert-headers-and-footers' ),
+			),
+		);
+
+		$this->types_labels = true;
 	}
 
 	/**
@@ -154,11 +214,26 @@ class WPCode_Snippet_Execute {
 	 * @return string|false
 	 */
 	public function get_type_execute_class( $type ) {
-		if ( isset( $this->types[ $type ] ) ) {
-			return $this->types[ $type ]['class'];
+		$types = $this->get_types();
+
+		if ( isset( $types[ $type ] ) ) {
+			return $types[ $type ]['class'];
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the types of executors.
+	 *
+	 * @return array
+	 */
+	public function get_types() {
+		if ( ! isset( $this->types_labels ) && did_action( 'init' ) ) {
+			$this->load_snippet_types_on_demand();
+		}
+
+		return $this->types;
 	}
 
 	/**
@@ -181,11 +256,30 @@ class WPCode_Snippet_Execute {
 	 */
 	public function get_options() {
 		$options = array();
-		foreach ( $this->types as $type_key => $type_values ) {
+		$types   = $this->get_types();
+		foreach ( $types as $type_key => $type_values ) {
 			$options[ $type_key ] = $type_values['label'];
 		}
 
 		return apply_filters( 'wpcode_code_type_options', $options );
+	}
+
+	/**
+	 * Get the code types info with labels and descriptions.
+	 *
+	 * @return array
+	 */
+	public function get_code_types() {
+		$code_types = array();
+		$types      = $this->get_types();
+		foreach ( $types as $type_key => $type_values ) {
+			$code_types[ $type_key ] = array(
+				'label'       => $type_values['label'],
+				'description' => $type_values['description'],
+			);
+		}
+
+		return $code_types;
 	}
 
 	/**
@@ -231,6 +325,9 @@ class WPCode_Snippet_Execute {
 					break;
 				case 'css':
 					$mime = 'text/css';
+					break;
+				case 'scss':
+					$mime = 'text/x-scss';
 					break;
 			}
 		}
@@ -539,8 +636,9 @@ class WPCode_Snippet_Execute {
 	 * @return bool
 	 */
 	public function is_type_pro( $key ) {
+		$types = $this->get_types();
 		// Find type by key in the list of types.
-		$pro_types = wp_list_filter( $this->types, array( 'is_pro' => true ) );
+		$pro_types = wp_list_filter( $types, array( 'is_pro' => true ) );
 		if ( isset( $pro_types[ $key ] ) ) {
 			return true;
 		}
@@ -575,6 +673,7 @@ class WPCode_Snippet_Execute {
 			is_admin()
 		);
 	}
+
 	/**
 	 * Add a method to detect suspicious code.
 	 *
@@ -593,5 +692,30 @@ class WPCode_Snippet_Execute {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Callback for the wpcode_snippet_output_php filter to prevent loading the edited snippet.
+	 * This allows us to run actual checks on the code without throwing function redeclare errors or similar
+	 * by executing the same code twice.
+	 *
+	 * @param string         $code The code to be output.
+	 * @param WPCode_Snippet $snippet The snippet object.
+	 *
+	 * @return string
+	 */
+	public function dont_load_edited_snippet( $code, $snippet ) {
+		if ( ! is_admin() ) {
+			return $code;
+		}
+		if ( ! isset( $_POST['wpcode-save-snippet-nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wpcode-save-snippet-nonce'] ), 'wpcode-save-snippet' ) ) {
+			return $code;
+		}
+		// Let's check if $_REQUEST['id'] matches the snippet id.
+		if ( ! isset( $_REQUEST['id'] ) || absint( $_REQUEST['id'] ) !== $snippet->get_id() ) {
+			return $code;
+		}
+
+		return '';
 	}
 }

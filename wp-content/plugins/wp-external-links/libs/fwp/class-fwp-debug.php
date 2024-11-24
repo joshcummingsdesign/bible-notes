@@ -64,7 +64,7 @@ class FWP_Debug_1x0x0 extends WPRun_Base_1x0x0
             $content = $title . ': ';
         }
 
-        $content .= var_export( $entry, true );
+        $content .= var_export( $entry, true ); // phpcs:ignore
     }
 
     /**

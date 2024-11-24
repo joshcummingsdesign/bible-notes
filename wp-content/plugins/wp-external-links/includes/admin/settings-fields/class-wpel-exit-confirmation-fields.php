@@ -128,7 +128,7 @@ final class WPEL_Exit_Confirmation_Fields extends WPEL_Link_Fields_Base
     $this->get_html_fields()->text_area($args['key'], array(
       'class' => 'large-text',
       'rows'  => 4,
-      'placeholder' => __('', 'wp-external-links'),
+      'placeholder' => '',
     ));
 
     echo '<p class="description">' . esc_html__('Text of the Exit Confirmation popup. Leave empty for no text.', 'wp-external-links') . '</p>';
