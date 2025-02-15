@@ -90,6 +90,9 @@ function wpcode_taxonomies_count_drafts( $statuses, $taxonomy ) {
  * @return void
  */
 function wpcode_maybe_remove_core_content_filters( $snippet ) {
+	// Prevent content_save_pre from modifying the snippet content.
+	remove_all_filters( 'content_save_pre' );
+
 	if ( ! function_exists( 'wp_remove_targeted_link_rel_filters' ) || version_compare( get_bloginfo( 'version' ), '6.7', '>=' ) ) {
 		// This function is only available in WP 5.1+.
 		return;

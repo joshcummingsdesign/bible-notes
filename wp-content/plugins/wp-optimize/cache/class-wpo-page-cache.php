@@ -29,10 +29,6 @@ if (!defined('WPO_CACHE_FILES_DIR')) define('WPO_CACHE_FILES_DIR', untrailingsla
 
 require_once dirname(__FILE__) . '/file-based-page-cache-functions.php';
 
-if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
-	require_once dirname(__FILE__) . '/php-5.3-functions.php';
-}
-
 wpo_cache_load_extensions();
 
 if (!class_exists('WPO_Page_Cache')) :
@@ -52,6 +48,13 @@ class WPO_Page_Cache {
 	 * @var mixed
 	 */
 	public $logger;
+
+	/**
+	 * File Logger for this class
+	 *
+	 * @var mixed
+	 */
+	private $file_logger;
 
 	/**
 	 * Instance of this class
@@ -99,10 +102,12 @@ class WPO_Page_Cache {
 		WPO_Cache_Rules::instance();
 		WP_Optimize_Page_Cache_Preloader::instance();
 		$this->logger = new Updraft_PHP_Logger();
+		$this->file_logger = new Updraft_File_Logger(WP_Optimize_Utils::get_log_file_path('cache'));
 
 		add_action('activated_plugin', array($this, 'activate_deactivate_plugin'));
 		add_action('deactivate_plugin', array($this, 'activate_deactivate_plugin'));
 		add_action('wpo_purge_old_cache', array($this, 'purge_old'));
+		add_action('wpo_prune_cache_logs', array($this, 'prune_cache_logs'));
 
 		/**
 		 * Regenerate config file on cache flush.
@@ -141,8 +146,12 @@ class WPO_Page_Cache {
 			if (!wp_next_scheduled('wpo_purge_old_cache')) {
 				wp_schedule_event(time() + (false === $page_cache_length ? '86400' : $page_cache_length), 'wpo_purge_old_cache', 'wpo_purge_old_cache');
 			}
+			if (!wp_next_scheduled('wpo_prune_cache_logs')) {
+				wp_schedule_event(time(), 'weekly', 'wpo_prune_cache_logs');
+			}
 		} else {
 			wp_clear_scheduled_hook('wpo_purge_old_cache');
+			wp_clear_scheduled_hook('wpo_prune_cache_logs');
 		}
 	}
 
@@ -155,7 +164,9 @@ class WPO_Page_Cache {
 
 		$this->update_cache_config();
 
-		$this->purge();
+		$is_cache_purged = $this->purge();
+
+		if ($is_cache_purged) $this->file_log("Full Cache Purge triggered by: plugin activation/deactivation");
 	}
 
 	/**
@@ -188,6 +199,7 @@ class WPO_Page_Cache {
 
 		$cache_size = $this->get_cache_size();
 		$cache_size_info = '<h4>'.__('Page cache', 'wp-optimize').'</h4>';
+		// translators: %d is the number of files in the cache
 		$cache_size_info .= '<span>'.__('Cache size:', 'wp-optimize').' '. WP_Optimize()->format_size($cache_size['size']).' '.sprintf(__('(%d files)', 'wp-optimize'), $cache_size['file_count']).'</span>';
 
 		$menu_items[] = array(
@@ -253,9 +265,12 @@ class WPO_Page_Cache {
 				$post = isset($_GET['post']) ? (int) $_GET['post'] : 0;
 				if ($post > 0) {
 					$success = self::delete_single_post_cache($post);
+					if ($success) $this->file_log("Cache for URL: {{URL}} has been purged, triggered by: " . __METHOD__, $post);
 				}
 			} else {
-				$success = self::delete_cache_by_url(wpo_current_url());
+				$url = wpo_current_url();
+				$success = self::delete_cache_by_url($url);
+				if ($success) $this->file_log("Cache for URL: " . self::remove_query_params($url) . " has been purged, triggered by: " . __METHOD__);
 			}
 
 			// remove nonce from url and reload page.
@@ -265,6 +280,7 @@ class WPO_Page_Cache {
 		} elseif (wp_verify_nonce($_GET['_wpo_purge'], 'wpo_purge_all_pages_cache')) {
 			$success = self::purge();
 			$this->maybe_set_preload_cron_job();
+			if ($success) $this->file_log("Full Cache Purge triggered by: ". __METHOD__);
 
 			// remove nonce from url and reload page.
 			wp_redirect(add_query_arg('wpo_all_pages_cache_purged', $success, remove_query_arg('_wpo_purge')));
@@ -333,8 +349,8 @@ class WPO_Page_Cache {
 					(function(wp) {
 						if (window.wp && wp.hasOwnProperty('data') && 'function' == typeof wp.data.dispatch) {
 							wp.data.dispatch('core/notices').createNotice(
-								'<?php echo $type; ?>',
-								'<?php echo $message; ?>',
+								'<?php echo esc_html($type); ?>',
+								'<?php echo wp_kses_post($message); ?>',
 								{
 									isDismissible: true,
 								}
@@ -344,8 +360,8 @@ class WPO_Page_Cache {
 				});
 			</script>
 		<?php else : ?>
-			<div class="notice wpo-notice notice-<?php echo $type; ?> is-dismissible">
-				<p><?php echo $message; ?></p>
+			<div class="notice wpo-notice notice-<?php echo esc_attr($type); ?> is-dismissible">
+				<p><?php echo wp_kses_post($message); ?></p>
 			</div>
 		<?php
 		endif;
@@ -359,6 +375,7 @@ class WPO_Page_Cache {
 	 * @return WP_Error|bool - true on success, error otherwise
 	 */
 	public function enable($force_enable = false) {
+		global $is_apache;
 		static $already_ran_enable = false;
 
 		if ($already_ran_enable) return $already_ran_enable;
@@ -381,6 +398,13 @@ class WPO_Page_Cache {
 
 		$this->maybe_regenerate_cache_config_file();
 
+		// Enable `.htaccess` rules to serve cached files
+		if ($is_apache && apply_filters('wpo_serve_cache_via_htaccess', false)) {
+			wpo_disable_cache_directories_viewing();
+			wpo_allow_access_to_index_cache_files();
+			$this->update_serve_cache_rules_htaccess_section(true);
+		}
+
 		if (!$force_enable) {
 			$already_ran_enable = true;
 			return true;
@@ -391,6 +415,7 @@ class WPO_Page_Cache {
 			$message .= ' '.__('Please check file and directory permissions on the file paths up to this point, and your PHP error log.', 'wp-optimize');
 
 			if (!defined('WP_CLI') || !WP_CLI) {
+				// translators: %s is the path to advanced-cache.php folder
 				$message .= "\n\n1. ".sprintf(__('Please navigate, via FTP, to the folder - %s', 'wp-optimize'), htmlspecialchars(dirname($this->get_advanced_cache_filename())));
 				$message .= "\n2. ".__('Edit or create a file with the name advanced-cache.php', 'wp-optimize');
 				$message .= "\n3. ".__('Copy and paste the following lines into the file:', 'wp-optimize');
@@ -422,6 +447,8 @@ class WPO_Page_Cache {
 	 * @return bool - true on success, false otherwise
 	 */
 	public function disable() {
+		global $is_apache;
+
 		$ret = true;
 
 		$advanced_cache_file = $this->get_advanced_cache_filename();
@@ -443,8 +470,8 @@ class WPO_Page_Cache {
 		$disabled_advanced_cache = true;
 		// First try to remove (so that it doesn't look to any other plugin like the file is already 'claimed')
 		// We only touch advanched-cache.php and wp-config.php if it appears that we were in control of advanced-cache.php
-		if (!file_exists($advanced_cache_file) || false !== strpos(file_get_contents($advanced_cache_file), 'WP-Optimize advanced-cache.php')) {
-			if (file_exists($advanced_cache_file) && (!unlink($advanced_cache_file) && false === file_put_contents($advanced_cache_file, "<?php\n// WP-Optimize: page cache disabled"))) {
+		if (!file_exists($advanced_cache_file) || false !== strpos(WPO_File_System_Helper::get_file_contents($advanced_cache_file), 'WP-Optimize advanced-cache.php')) {
+			if (file_exists($advanced_cache_file) && (!wp_delete_file($advanced_cache_file) && false === WPO_File_System_Helper::write_to_file($advanced_cache_file, "<?php\n// WP-Optimize: page cache disabled"))) {
 				$disabled_advanced_cache = false;
 				$this->log("The request to the filesystem to remove or empty advanced-cache.php failed");
 				$this->add_warning('error_disabling', __('The request to the filesystem to remove or empty advanced-cache.php failed', 'wp-optimize'));
@@ -457,10 +484,18 @@ class WPO_Page_Cache {
 		}
 
 		// Delete cache to avoid stale cache on next activation
-		$this->purge();
+		$is_cache_purged = $this->purge();
+		if ($is_cache_purged) $this->file_log("Full Cache Purge triggered by: ". __METHOD__);
 
+		// Delete `.htaccess` rules to serve cached files
+		if ($is_apache && apply_filters('wpo_serve_cache_via_htaccess', false)) {
+			$this->update_serve_cache_rules_htaccess_section(false);
+		}
+		
 		// Unschedule cron job to purge old cache
 		wp_clear_scheduled_hook('wpo_purge_old_cache');
+
+		if (!is_wp_error($ret)) wp_clear_scheduled_hook('wpo_prune_cache_logs');
 
 		return $ret;
 	}
@@ -509,7 +544,7 @@ class WPO_Page_Cache {
 		$expires = time() - $page_cache_length;
 		$cache_folder = WPO_CACHE_FILES_DIR . '/' . str_ireplace(array('http://', 'https://'), '', get_site_url());
 		// get all directories that are a direct child of current directory
-		if (is_dir($cache_folder) && is_writable($cache_folder)) {
+		if (is_dir($cache_folder) && wp_is_writable($cache_folder)) {
 			if ($handle = opendir($cache_folder)) {
 				while (false !== ($d = readdir($handle))) {
 					if (0 == strcmp($d, '.') || 0 == strcmp($d, '..')) {
@@ -519,7 +554,7 @@ class WPO_Page_Cache {
 					if ($this->is_front_page_cache($d)) {
 						$modified_time = (int) filemtime("$cache_folder/$d");
 						if ($modified_time <= $expires) {
-							unlink("$cache_folder/$d");
+							wp_delete_file("$cache_folder/$d");
 						}
 						continue;
 					}
@@ -533,7 +568,7 @@ class WPO_Page_Cache {
 					if ($modified_time <= $expires) {
 						$log[] = "deleting cache in $dir";
 						wpo_delete_files($dir, true);
-						if (file_exists($dir)) rmdir($dir);
+						if (file_exists($dir)) WPO_File_System_Helper::delete($dir, true);
 					}
 				}
 				closedir($handle);
@@ -611,15 +646,18 @@ class WPO_Page_Cache {
 		$permissions_str = __('Please check your file permissions.', 'wp-optimize');
 
 		if (!is_dir(WPO_CACHE_DIR) && !wp_mkdir_p(WPO_CACHE_DIR)) {
+			// translators: %s is a directory name
 			return new WP_Error('create_folders', sprintf(__('The request to the filesystem failed: unable to create directory %s.', 'wp-optimize'), str_ireplace(ABSPATH, '', WPO_CACHE_DIR)) .' '. $permissions_str);
 		}
 
 		if (!is_dir(WPO_CACHE_CONFIG_DIR) && !wp_mkdir_p(WPO_CACHE_CONFIG_DIR)) {
+			// translators: %s is a directory name
 			return new WP_Error('create_folders', sprintf(__('The request to the filesystem failed: unable to create directory %s.', 'wp-optimize'), str_ireplace(ABSPATH, '', WPO_CACHE_CONFIG_DIR)) .' '. $permissions_str);
 		}
 		
 		if (!is_dir(WPO_CACHE_FILES_DIR)) {
 			if (!wp_mkdir_p(WPO_CACHE_FILES_DIR)) {
+				// translators: %s is a directory name
 				return new WP_Error('create_folders', sprintf(__('The request to the filesystem failed: unable to create directory %s.', 'wp-optimize'), str_ireplace(ABSPATH, '', WPO_CACHE_FILES_DIR)) .' '. $permissions_str);
 			} else {
 				wpo_disable_cache_directories_viewing();
@@ -728,20 +766,20 @@ EOF;
 		$advanced_cache_filename = $this->get_advanced_cache_filename();
 
 		// If the file content is already up to date, success
-		if (is_file($advanced_cache_filename) && file_get_contents($advanced_cache_filename) === $this->advanced_cache_file_content) {
+		if (is_file($advanced_cache_filename) && WPO_File_System_Helper::get_file_contents($advanced_cache_filename) === $this->advanced_cache_file_content) {
 			$this->advanced_cache_file_writing_error = false;
 			return true;
 		}
 
 		// check if we can't write the advanced cache file
 		// case 1: the directory is read-only and the file doesn't exist
-		if (!is_file($advanced_cache_filename) && !is_writable(dirname($advanced_cache_filename))) {
+		if (!is_file($advanced_cache_filename) && !wp_is_writable(dirname($advanced_cache_filename))) {
 			$this->advanced_cache_file_writing_error = true;
 			return false;
 		}
 
 		// case 2: the file already exists but it's read-only
-		if (is_file($advanced_cache_filename) && !is_writable($advanced_cache_filename)) {
+		if (is_file($advanced_cache_filename) && !wp_is_writable($advanced_cache_filename)) {
 			if (version_compare($this->get_advanced_cache_version(), $this->_minimum_advanced_cache_file_version, '<') || $update_required) {
 				$this->advanced_cache_file_writing_error = true;
 				return false;
@@ -751,7 +789,7 @@ EOF;
 			}
 		}
 
-		if (!file_put_contents($this->get_advanced_cache_filename(), $this->advanced_cache_file_content)) {
+		if (!WPO_File_System_Helper::write_to_file($this->get_advanced_cache_filename(), $this->advanced_cache_file_content)) {
 			$this->advanced_cache_file_writing_error = true;
 			return false;
 		}
@@ -782,7 +820,8 @@ EOF;
 
 		// Purge the cache when the site url or folder changed.
 		if ($is_the_site_url_or_folder_changed) {
-			$this->purge();
+			$is_cache_purged = $this->purge();
+			if ($is_cache_purged) $this->file_log("Full Cache Purge triggered by: ". __METHOD__);
 		}
 
 		if (!$this->write_advanced_cache()) {
@@ -800,7 +839,7 @@ EOF;
 	private function is_the_site_url_or_folder_changed() {
 		if (!is_file($this->get_advanced_cache_filename())) return false;
 
-		$content = file_get_contents($this->get_advanced_cache_filename());
+		$content = WPO_File_System_Helper::get_file_contents($this->get_advanced_cache_filename());
 		
 		if (false === $content) return false;
 
@@ -832,7 +871,7 @@ EOF;
 		if (!is_file($this->get_advanced_cache_filename())) return false;
 
 		$version = false;
-		$content = file_get_contents($this->get_advanced_cache_filename());
+		$content = WPO_File_System_Helper::get_file_contents($this->get_advanced_cache_filename());
 
 		if (preg_match('/WP\-Optimize advanced\-cache\.php \(written by version\: (.+)\)/Ui', $content, $match)) {
 			$version = $match[1];
@@ -862,7 +901,7 @@ EOF;
 			return false;
 		}
 
-		$config_file_string = file_get_contents($config_path);
+		$config_file_string = WPO_File_System_Helper::get_file_contents($config_path);
 
 		// Config file is empty. Maybe couldn't read it?
 		if (empty($config_file_string)) {
@@ -897,7 +936,7 @@ EOF;
 				unset($config_file[$key]);
 			}
 		}
-		if (!file_put_contents($config_path, implode(PHP_EOL, $config_file))) {
+		if (!WPO_File_System_Helper::write_to_file($config_path, implode(PHP_EOL, $config_file))) {
 			return false;
 		}
 		$changed = true;
@@ -916,7 +955,7 @@ EOF;
 		$errors = 0;
 
 		// First check wp-config.php.
-		if (!$this->_get_wp_config() && !is_writable($this->_get_wp_config())) {
+		if (!$this->_get_wp_config() && !wp_is_writable($this->_get_wp_config())) {
 			$this->log("Unable to write to or find wp-config.php; please check file/folder permissions");
 			$this->add_warning('verify_cache', __("Unable to write to or find wp-config.php; please check file/folder permissions.", 'wp-optimize'));
 		}
@@ -924,21 +963,22 @@ EOF;
 		$advanced_cache_file = untrailingslashit(WP_CONTENT_DIR).'/advanced-cache.php';
 		
 		// Now check wp-content. We need to be able to create files of the same user as this file.
-		if ((!file_exists($advanced_cache_file) || false === strpos(file_get_contents($advanced_cache_file), 'WP-Optimize advanced-cache.php')) && !is_writable($advanced_cache_file) && !is_writable(untrailingslashit(WP_CONTENT_DIR))) {
+		if ((!file_exists($advanced_cache_file) || false === strpos(WPO_File_System_Helper::get_file_contents($advanced_cache_file), 'WP-Optimize advanced-cache.php')) && !wp_is_writable($advanced_cache_file) && !wp_is_writable(untrailingslashit(WP_CONTENT_DIR))) {
 			$this->log("Unable to write the file advanced-cache.php inside the wp-content folder; please check file/folder permissions");
 			$this->add_error('verify_cache', __("Unable to write the file advanced-cache.php inside the wp-content folder; please check file/folder permissions", 'wp-optimize'));
 			$errors++;
 		}
 
 		if (file_exists(WPO_CACHE_FILES_DIR)) {
-			if (!is_writable(WPO_CACHE_FILES_DIR)) {
+			if (!wp_is_writable(WPO_CACHE_FILES_DIR)) {
 				$this->log("Unable to write inside the cache files folder; please check file/folder permissions");
+				// translators: %s is cache folder path
 				$this->add_warning('verify_cache', sprintf(__("Unable to write inside the cache files folder (%s); please check file/folder permissions (no cache files will be able to be created otherwise)", 'wp-optimize'), WPO_CACHE_FILES_DIR));
 			}
 		}
 		
 		if (file_exists(WPO_CACHE_CONFIG_DIR)) {
-			if (!is_writable(WPO_CACHE_CONFIG_DIR)) {
+			if (!wp_is_writable(WPO_CACHE_CONFIG_DIR)) {
 				$this->log("Unable to write inside the cache configuration folder; please check file/folder permissions");
 				// If the config exists, only send a warning. Otherwise send an error.
 				$type = 'warning';
@@ -946,6 +986,7 @@ EOF;
 					$type = 'error';
 					$errors++;
 				}
+				// translators: %s is cache config folder path
 				$this->add_error('verify_cache', sprintf(__("Unable to write inside the cache configuration folder (%s); please check file/folder permissions", 'wp-optimize'), WPO_CACHE_CONFIG_DIR), $type);
 			}
 		}
@@ -1444,7 +1485,7 @@ EOF;
 	 * Output PageSpeed Ninja Gzip notice.
 	 */
 	public function show_pagespeedninja_gzip_notice() {
-		echo '<div id="wp-optimize-pagespeedninja-gzip-notice" class="error wpo-notice"><p><b>'.__('WP-Optimize:', 'wp-optimize').'</b> '.__('Please disable the feature "Gzip compression" in PageSpeed Ninja to prevent conflicts.', 'wp-optimize').'</p></div>';
+		echo '<div id="wp-optimize-pagespeedninja-gzip-notice" class="error wpo-notice"><p><b>'.esc_html__('WP-Optimize:', 'wp-optimize').'</b> '.esc_html__('Please disable the feature "Gzip compression" in PageSpeed Ninja to prevent conflicts.', 'wp-optimize').'</p></div>';
 	}
 
 	/**
@@ -1465,13 +1506,14 @@ EOF;
 	 * Output Far Future Expiration Gzip notice.
 	 */
 	public function show_farfutureexpiration_gzip_notice() {
-		echo '<div id="wp-optimize-pagespeedninja-gzip-notice" class="error wpo-notice"><p><b>'.__('WP-Optimize:', 'wp-optimize').'</b> '.__('Please disable the feature "Gzip compression" in Far Future Expiration to prevent conflicts.', 'wp-optimize').'</p></div>';
+		echo '<div id="wp-optimize-pagespeedninja-gzip-notice" class="error wpo-notice"><p><b>'.esc_html__('WP-Optimize:', 'wp-optimize').'</b> '.esc_html__('Please disable the feature "Gzip compression" in Far Future Expiration to prevent conflicts.', 'wp-optimize').'</p></div>';
 	}
 
 	/**
 	 * This is a notice to show users that writing `advanced-cache.php` failed
 	 */
 	public function show_admin_notice_advanced_cache() {
+		// translators: %s is advanced-cache.php file path
 		$message = sprintf(__('The request to write the file %s failed.', 'wp-optimize'), htmlspecialchars($this->get_advanced_cache_filename()));
 		$message .= ' '.__('Please check file and directory permissions on the file paths up to this point, and your PHP error log.', 'wp-optimize');
 		WP_Optimize()->include_template('notices/cache-notice.php', false, array('message' => $message));
@@ -1497,11 +1539,13 @@ EOF;
 		$interval = WP_Optimize_Page_Cache_Preloader::instance()->get_continue_preload_cron_interval();
 		$schedules['wpo_page_cache_preload_continue_interval'] = array(
 			'interval' => $interval,
+			// translators: %d is the number of minutes
 			'display' => sprintf(__('%d minutes', 'wp-optimize'), round($interval / 60, 1))
 		);
 
 		$schedules['wpo_use_cache_lifespan'] = array(
 			'interval' => $page_cache_length,
+			// translators: %s is the cache lifespan
 			'display' => sprintf(__('Same as cache lifespan: %s', 'wp-optimize'), WPO_Cache_Config::instance()->get_option('page_cache_length_value').' '.WPO_Cache_Config::instance()->get_option('page_cache_length_unit'))
 		);
 
@@ -1558,6 +1602,18 @@ EOF;
 	}
 
 	/**
+	 * Remove query params from request url
+	 *
+	 * @param string $url The request url.
+	 * @return string Returns url without query params.
+	 */
+	private static function remove_query_params($url) {
+		$parsed_url = wp_parse_url($url);
+		if (!$parsed_url) return '';
+		return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'];
+	}
+
+	/**
 	 * Check configuration for auto preloading after cache deletion
 	 *
 	 * @return bool
@@ -1565,8 +1621,102 @@ EOF;
 	public function should_auto_preload_purged_contents() {
 		$wpo_cache = WP_Optimize()->get_page_cache();
 		$wpo_cache_options = $wpo_cache->config->get();
-		
+
 		return $wpo_cache_options['auto_preload_purged_contents'];
+	}
+
+	/**
+	 * Logging of interesting messages related to Cache Purging
+	 *
+	 * @param string $message
+	 * @param int $post_id
+	 */
+	public function file_log($message, $post_id = 0) {
+		if (!empty($post_id)) {
+			if (false !== strpos($message, '{{URL}}')) {
+				$message = str_replace('{{URL}}', get_permalink($post_id), $message);
+			}
+			if (false !== strpos($message, '{{title}}')) {
+				$message = str_replace('{{title}}', '"' . get_the_title($post_id) . '"', $message);
+			}
+		}
+		$this->file_logger->info($message);
+	}
+
+	/**
+	 * Prunes the log file
+	 */
+	public function prune_cache_logs() {
+		$this->file_log("Pruning the Cache log file");
+		$this->file_logger->prune_logs();
+	}
+
+	/**
+	 * Update .htaccess file to serve cached files directly.
+	 *
+	 * @param bool $enable
+	 */
+	public function update_serve_cache_rules_htaccess_section($enable) {
+		$htaccess = new WP_Optimize_Htaccess();
+
+		$section_title = 'WP-Optimize rules to serve cached files';
+
+		if ($enable) {
+			if (!$htaccess->is_commented_section_exists($section_title)) {
+				$htaccess->update_commented_section($this->prepare_apache_cache_handle_section(), $section_title, true);
+				$htaccess->write_file();
+			}
+		} elseif ($htaccess->is_commented_section_exists($section_title)) {
+			$htaccess->remove_commented_section($section_title);
+			$htaccess->write_file();
+		}
+
+	}
+
+	/**
+	 * Get the .htaccess section with rules to serve cached files
+	 *
+	 * @return array
+	 */
+	private function prepare_apache_cache_handle_section() {
+
+		$site_root = $this->get_site_root_path();
+
+		return array(
+			array(
+				'<IfModule mod_rewrite.c>',
+				'RewriteEngine On',
+				'RewriteCond %{REQUEST_METHOD} GET|HEAD',
+				'RewriteCond %{QUERY_STRING} =""',
+				'RewriteCond %{HTTP:Cookie} =""',
+				'RewriteCond %{REQUEST_URI} !^/(wp-(?:admin|login|register|comments-post|cron|json))/ [NC]',
+				'RewriteCond %{HTTP_USER_AGENT} !(android|blackberry|ipad|iphone|ipod|windows.phone|iEMobile|opera.mini|opera.mobile|webos|symbian|windows.mobile|kindle|googlebot.mobile) [NC]',
+				'RewriteCond %{DOCUMENT_ROOT}'.$site_root.'wp-content/cache/wpo-cache/%{HTTP_HOST}%{REQUEST_URI}index.html -f',
+				'RewriteRule ^(.*)$ '.$site_root.'wp-content/cache/wpo-cache/%{HTTP_HOST}%{REQUEST_URI}index.html [L]',
+				array(
+					'<IfModule mod_headers.c>',
+					'Header always set X-WP-Optimize-Cache-Header "Loaded from WP-Optimize cache" env=REDIRECT_STATUS',
+					'</IfModule>',
+				),
+				'</IfModule>',
+			),
+		);
+	}
+
+	/**
+	 * Get relative site root path, if site is placed in the subdirectory then it returns /subdirectory otherwise /
+	 *
+	 * @return string
+	 */
+	private function get_site_root_path($default = '/') {
+		$site_root = wp_parse_url(site_url());
+		if (isset($site_root['path'])) {
+			$site_root = trailingslashit($site_root['path']);
+		} else {
+			$site_root = $default;
+		}
+
+		return $site_root;
 	}
 }
 

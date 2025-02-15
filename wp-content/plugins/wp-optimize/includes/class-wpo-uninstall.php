@@ -15,12 +15,13 @@ class WPO_Uninstall {
 		WP_Optimize()->get_minify()->plugin_uninstall();
 		WP_Optimize()->get_options()->wipe_settings();
 		WP_Optimize()->delete_transients_and_semaphores();
+		WP_Optimize()->get_table_management()->delete_plugin_tables();
 		Updraft_Tasks_Activation::uninstall(WPO_PLUGIN_SLUG);
 		self::delete_wpo_folder();
 		
 		$htaccess_file = self::get_upload_basedir() . '.htaccess';
 		if (is_file($htaccess_file) && 0 === filesize($htaccess_file)) {
-			unlink($htaccess_file);
+			wp_delete_file($htaccess_file);
 		}
 		
 		wp_clear_scheduled_hook('process_smush_tasks');
@@ -73,7 +74,7 @@ class WPO_Uninstall {
 			$files = @scandir($wpo_folder); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- suppress warning if it arises due to race condition
 			if (false === $files) return;
 			if (2 === count($files)) {
-				@rmdir($wpo_folder); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- suppress error due to file permission issues
+				WPO_File_System_Helper::delete($wpo_folder);
 			}
 		}
 	}

@@ -746,7 +746,7 @@ var WP_Optimize_Smush = function() {
 			'attachment_id': $(this).data('attachment-id'),
 			skip_notice: true
 		};
-		block_ui(wposmush.converting_to_webp);
+		block_ui(wposmush.converting_to_webp, {}, 0, true);
 		smush_manager_send_command('convert_to_webp_format', data, function(response) {
 			if (response.error) {
 				block_ui(response.error, {}, 2000);
@@ -1076,6 +1076,10 @@ var WP_Optimize_Smush = function() {
 				callback: function(resp) {
 
 					summary = resp.session_stats;
+					// Prevent pops with undefined headers
+					if (!resp.session_stats) {
+						return;
+					}
 
 					if (0 != resp.completed_task_count) {
 						summary += '<hr>' + resp.summary;

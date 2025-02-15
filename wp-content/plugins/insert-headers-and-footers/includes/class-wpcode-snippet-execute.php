@@ -126,47 +126,55 @@ class WPCode_Snippet_Execute {
 	public function load_snippet_types_on_demand() {
 		$this->types = array(
 			'html'      => array(
-				'class'       => 'WPCode_Snippet_Execute_HTML',
-				'label'       => __( 'HTML Snippet', 'insert-headers-and-footers' ),
-				'description' => __( 'Easily insert scripts from other sites or build custom elements using HTML.', 'insert-headers-and-footers' ),
+				'class'        => 'WPCode_Snippet_Execute_HTML',
+				'filter_label' => 'HTML',
+				'label'        => __( 'HTML Snippet', 'insert-headers-and-footers' ),
+				'description'  => __( 'Easily insert scripts from other sites or build custom elements using HTML.', 'insert-headers-and-footers' ),
 				// Don't want to instantiate the class until it's needed and we need this to be translatable.
 			),
 			'text'      => array(
-				'class'       => 'WPCode_Snippet_Execute_Text',
-				'label'       => __( 'Text Snippet', 'insert-headers-and-footers' ),
-				'description' => __( 'Create reusable text snippets that you can visually format in a familiar editor.', 'insert-headers-and-footers' ),
+				'class'        => 'WPCode_Snippet_Execute_Text',
+				'filter_label' => 'Text',
+				'label'        => __( 'Text Snippet', 'insert-headers-and-footers' ),
+				'description'  => __( 'Create reusable text snippets that you can visually format in a familiar editor.', 'insert-headers-and-footers' ),
 			),
 			'blocks'    => array(
-				'class'       => 'WPCode_Snippet_Execute_Blocks',
-				'label'       => __( 'Blocks Snippet (PRO)', 'insert-headers-and-footers' ),
-				'is_pro'      => true,
-				'description' => __( 'Use the Block Editor to create components that you can insert anywhere in your site.', 'insert-headers-and-footers' ),
+				'class'        => 'WPCode_Snippet_Execute_Blocks',
+				'filter_label' => 'Blocks',
+				'label'        => __( 'Blocks Snippet (PRO)', 'insert-headers-and-footers' ),
+				'is_pro'       => true,
+				'description'  => __( 'Use the Block Editor to create components that you can insert anywhere in your site.', 'insert-headers-and-footers' ),
 			),
 			'css'       => array(
-				'class'       => 'WPCode_Snippet_Execute_CSS',
-				'label'       => __( 'CSS Snippet', 'insert-headers-and-footers' ),
-				'description' => __( 'Write CSS styles directly in WPCode and easily customize how your website looks.', 'insert-headers-and-footers' ),
+				'class'        => 'WPCode_Snippet_Execute_CSS',
+				'filter_label' => 'CSS',
+				'label'        => __( 'CSS Snippet', 'insert-headers-and-footers' ),
+				'description'  => __( 'Write CSS styles directly in WPCode and easily customize how your website looks.', 'insert-headers-and-footers' ),
 			),
 			'scss'      => array(
-				'class'       => 'WPCode_Snippet_Execute_SCSS',
-				'label'       => __( 'SCSS Snippet (PRO)', 'insert-headers-and-footers' ),
-				'is_pro'      => true,
-				'description' => __( 'Write SCSS styles directly in WPCode and easily customize how your website looks.', 'insert-headers-and-footers' ),
+				'class'        => 'WPCode_Snippet_Execute_SCSS',
+				'filter_label' => 'SCSS',
+				'label'        => __( 'SCSS Snippet (PRO)', 'insert-headers-and-footers' ),
+				'is_pro'       => true,
+				'description'  => __( 'Write SCSS styles directly in WPCode and easily customize how your website looks.', 'insert-headers-and-footers' ),
 			),
 			'js'        => array(
-				'class'       => 'WPCode_Snippet_Execute_JS',
-				'label'       => __( 'JavaScript Snippet', 'insert-headers-and-footers' ),
-				'description' => __( 'Add custom JavaScript code to your site to add interactivity or integrate with other services.', 'insert-headers-and-footers' ),
+				'class'        => 'WPCode_Snippet_Execute_JS',
+				'filter_label' => 'JavaScript',
+				'label'        => __( 'JavaScript Snippet', 'insert-headers-and-footers' ),
+				'description'  => __( 'Add custom JavaScript code to your site to add interactivity or integrate with other services.', 'insert-headers-and-footers' ),
 			),
 			'php'       => array(
-				'class'       => 'WPCode_Snippet_Execute_PHP',
-				'label'       => __( 'PHP Snippet', 'insert-headers-and-footers' ),
-				'description' => __( 'Extend or add functionality using PHP code with full control on where it\'s executed', 'insert-headers-and-footers' ),
+				'class'        => 'WPCode_Snippet_Execute_PHP',
+				'filter_label' => 'PHP',
+				'label'        => __( 'PHP Snippet', 'insert-headers-and-footers' ),
+				'description'  => __( 'Extend or add functionality using PHP code with full control on where it\'s executed', 'insert-headers-and-footers' ),
 			),
 			'universal' => array(
-				'class'       => 'WPCode_Snippet_Execute_Universal',
-				'label'       => __( 'Universal Snippet', 'insert-headers-and-footers' ),
-				'description' => __( 'Start writing HTML and add PHP code like you would in a .php file with Universal snippets.', 'insert-headers-and-footers' ),
+				'class'        => 'WPCode_Snippet_Execute_Universal',
+				'filter_label' => 'Universal',
+				'label'        => __( 'Universal Snippet', 'insert-headers-and-footers' ),
+				'description'  => __( 'Start writing HTML and add PHP code like you would in a .php file with Universal snippets.', 'insert-headers-and-footers' ),
 			),
 		);
 
@@ -279,7 +287,7 @@ class WPCode_Snippet_Execute {
 			);
 		}
 
-		return $code_types;
+		return apply_filters( 'wpcode_code_types_for_display', $code_types );
 	}
 
 	/**
@@ -374,10 +382,6 @@ class WPCode_Snippet_Execute {
 
 		$error = false;
 
-		if ( ! empty( $snippet->attributes ) ) {
-			extract( $snippet->attributes, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
-		}
-
 		// Don't allow executing suspicious code.
 		if ( self::is_code_not_allowed( $code ) ) {
 			$code = '';
@@ -386,7 +390,7 @@ class WPCode_Snippet_Execute {
 		$this->line_reference = $line_reference;
 
 		try {
-			eval( $code ); // phpcs:ignore Squiz.PHP.Eval.Discouraged
+			$this->run_eval( $code );
 		} catch ( Error $e ) {
 			$error = array(
 				'message' => $e->getMessage(),
@@ -399,6 +403,20 @@ class WPCode_Snippet_Execute {
 		}
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Execute the code in a separate method to avoid overriding variable names but still being able to catch errors.
+	 *
+	 * @param string $code The code to execute.
+	 *
+	 * @return void
+	 */
+	public function run_eval( $code ) {
+		if ( ! empty( $this->snippet_executed->attributes ) ) {
+			extract( $this->snippet_executed->attributes, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		}
+		eval( $code ); // phpcs:ignore Squiz.PHP.Eval.Discouraged
 	}
 
 	/**

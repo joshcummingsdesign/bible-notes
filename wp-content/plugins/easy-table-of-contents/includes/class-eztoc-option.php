@@ -315,6 +315,13 @@ if ( ! class_exists( 'ezTOC_Option' ) ) {
 							'type' => 'checkbox',
 							'default' => false,
 						),
+						'visibility_hide_by_device' => array(
+							'id' => 'visibility_hide_by_device',
+							'name' => esc_html__( 'Initial View on Device', 'easy-table-of-contents' ),
+							'type' => 'inlinecheckboxes',
+							'options' => array('mobile'=>'Mobile','desktop'=>'Desktop'),
+							'default' => array('mobile','desktop'),
+						),
 						'show_hierarchy' => array(
 							'id' => 'show_hierarchy',
 							'name' => esc_html__( 'Show as Hierarchy', 'easy-table-of-contents' ),
@@ -728,6 +735,13 @@ if ( ! class_exists( 'ezTOC_Option' ) ) {
 							'type' => 'checkbox',
 							'default' => false,
 						),
+						'schema_sitenav_yoast_compat' => array(
+							'id' => 'schema_sitenav_yoast_compat',
+							'name' => esc_html__( 'Merge with Yoast Schema', 'easy-table-of-contents' ),
+							'desc' => esc_html__( 'Merge SiteNavigation Schema with Yoast Schema', 'easy-table-of-contents' ),
+							'type' => 'checkbox',
+							'default' => false,
+						),
 						'smooth_scroll_offset' => array(
 							'id' => 'smooth_scroll_offset',
 							'name' => esc_html__( 'Smooth Scroll Offset', 'easy-table-of-contents' ),
@@ -856,6 +870,44 @@ text
 							'default' => 'No heading found',
 							'class'=>'js_v'
 						),
+						'truncate_headings' => array(
+							'id' => 'truncate_headings',
+							'name' => esc_html__( 'Shorten Heading', 'easy-table-of-contents' ),
+							'type' => 'select',
+							'options' => array(
+								'' => esc_html__( 'Disabled (default)', 'easy-table-of-contents' ),
+								'words' => esc_html__( 'By words', 'easy-table-of-contents' ),
+								'special' => esc_html__( 'By special character', 'easy-table-of-contents' ),
+								 
+							),
+							'default' => '',
+						),
+						'truncate_headings_words' => array(
+							'id' => 'truncate_headings_words',
+							'name' => esc_html__( 'Words', 'easy-table-of-contents' ),
+							'desc' => '<br/>' . esc_html__( 'This will show text from begining upto the given number of words', 'easy-table-of-contents' ),
+							'type' => 'text',
+							'default' => '5',
+							'size'=>'medium',
+							'class'=>'eztoc_thw'
+						),
+						'truncate_headings_special' => array(
+							'id' => 'truncate_headings_special',
+							'name' => esc_html__( 'Special Character', 'easy-table-of-contents' ),
+							'desc' => '<br/>' . esc_html__( 'This will show text from begining upto the given special character', 'easy-table-of-contents' ),
+							'type' => 'text',
+							'default' => ':',
+							'size'=>'medium',
+							'class'=>'eztoc_thw'
+
+						),
+						'disable_toc_links' => array(
+							'id' => 'disable_toc_links',
+							'name' => esc_html__( 'Remove TOC links', 'easy-table-of-contents' ),
+							'desc' => esc_html__( 'This will remove anchor link present in TOC heading', 'easy-table-of-contents' ),
+							'type' => 'checkbox',
+							'default' => false,
+						),
 					)
 				),
                 'shortcode' => apply_filters(
@@ -929,7 +981,7 @@ text
                             'id'   => 'shortcode-second-paragraph',
                             'name' => esc_html__( 'Supported Attributes', 'easy-table-of-contents' ),
                             'desc' => sprintf(
-                            			wp_kses_post( '<p><code>[header_label="Title"]</code> – title for the table of contents</p><p><code>[display_header_label="no"]</code> – no title for the table of contents</p><p><code>[toggle_view="no"]</code> – no toggle for the table of contents</p><p><code>[initial_view="hide"]</code> – initially hide the table of contents</p><p><code>[initial_view="show"]</code> – initially show the table of contents</p><p><code>[display_counter="no"]</code> – no counter for the table of contents</p><p><code>[post_types="post,page"]</code> – post types seperated by ,(comma)</p><p><code>[post_in="1,2"]</code> – ID’s of the posts|pages seperated by ,(comma)</p><p><code>[device_target="desktop"]</code> – mobile or desktop device support for the table of contents</p><p><code>[view_more="5"]</code> – 5, is the number of headings loads on first view, before user interaction (PRO)</p>', 'easy-table-of-contents' )
+                            			wp_kses_post( '<p><code>[header_label="Title"]</code> – title for the table of contents</p><p><code>[display_header_label="no"]</code> – no title for the table of contents</p><p><code>[toggle_view="no"]</code> – no toggle for the table of contents</p><p><code>[initial_view="hide"]</code> – initially hide the table of contents</p><p><code>[initial_view="show"]</code> – initially show the table of contents</p><p><code>[display_counter="no"]</code> – no counter for the table of contents</p><p><code>[post_types="post,page"]</code> – post types seperated by ,(comma)</p><p><code>[post_in="1,2"]</code> – ID’s of the posts|pages seperated by ,(comma)</p><p><code>[device_target="desktop"]</code> – mobile or desktop device support for the table of contents</p><p><code>[view_more="5"]</code> – 5, is the number of headings loads on first view, before user interaction (PRO)</p><p><code>[class="custom_toc"]</code> – add your own class to the TOC</p><p><code>[exclude="Test"]</code> – exclude heading from TOC which contain text "Test"</p><p><code>[heading_levels="2,3"]</code> - Show only heading h2 and h3 </p>', 'easy-table-of-contents' )
                             		),
                             'type' => 'descriptive_text',
                         ),
@@ -1350,6 +1402,7 @@ text
 				'avoid_anch_jump'                    => false,
 				'remove_special_chars_from_title'    => false,
 				'visibility_hide_by_default'         => false,
+				'visibility_hide_by_device '         => array('mobile','desktop'),
 				'width'                              => 'auto',
 				'width_custom'                       => 275,
 				'width_custom_units'                 => 'px',
@@ -1824,6 +1877,46 @@ text
 				<?php } 
 			}
 		}
+
+		/**
+ * Inline Checkbox Callback
+ *
+ * Renders inline checkboxes with specific values (e.g., "mobile" and "desktop").
+ *
+ * @access public
+ * @since  1.0
+ * @static
+ *
+ * @param array $args Arguments passed by the setting.
+ * @param null  $value Current value of the setting.
+ */
+public static function inlinecheckboxes( $args, $value = null ) {
+
+    if ( is_null( $value ) ) {
+        $value = self::get( $args['id'], $args['default'] );
+    }
+
+    if ( ! empty( $args['options'] ) ) {
+        foreach ( $args['options'] as $key => $option ): ?>
+            <label for="ez-toc-settings[<?php echo esc_attr( $args['id'] ); ?>][<?php echo esc_attr( $key ); ?>]" style="margin-right: 15px;">
+                <input name="ez-toc-settings[<?php echo esc_attr( $args['id'] ); ?>][<?php echo esc_attr( $key); ?>]"
+                    id="ez-toc-settings[<?php echo esc_attr( $args['id'] ); ?>][<?php echo esc_attr( $key ); ?>]"
+                    type="checkbox"
+                    value="<?php echo esc_attr( $key ); ?>"
+                    <?php echo checked( in_array( $key, (array) $value, true ), true, false ); ?>
+                />
+                <?php echo esc_html( $option ); ?>
+            </label>
+        <?php endforeach;
+
+        if ( isset( $args['desc'] ) && strlen( $args['desc'] ) > 0 ) { ?>
+            <p class="description">
+                <?php echo wp_kses_post( $args['desc'] ); ?>
+            </p>
+        <?php }
+    }
+}
+
 
 		/**
 		 * Radio Callback

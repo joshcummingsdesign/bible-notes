@@ -16,7 +16,7 @@ class WP_Optimize_Minify_Fonts {
 		// https://www.googleapis.com/webfonts/v1/webfonts?sort=alpha
 		$google_fonts_file = WPO_PLUGIN_MAIN_PATH.'google-fonts.json';
 		if (is_file($google_fonts_file) && is_readable($google_fonts_file)) {
-			return json_decode(file_get_contents($google_fonts_file), true);
+			return json_decode(WPO_File_System_Helper::get_file_contents($google_fonts_file), true);
 		}
 		return array();
 	}
@@ -51,7 +51,7 @@ class WP_Optimize_Minify_Fonts {
 		$merge = self::build();
 		$config = wp_optimize_minify_config();
 		/**
-		 * Filters wether to add display=swap to Google fonts urls
+		 * Filters whether to add display=swap to Google fonts urls
 		 *
 		 * @param boolean $display - Default to true
 		 */

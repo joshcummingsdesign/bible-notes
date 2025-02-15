@@ -16,7 +16,6 @@ class WP_Optimize_Minify_Commands {
 	 * @return array
 	 */
 	public function get_minify_cached_files($data = array()) {
-		if (!WPO_MINIFY_PHP_VERSION_MET) return array('error' => __('WP-Optimize Minify requires a higher PHP version', 'wp-optimize'));
 		$stamp = isset($data['stamp']) ? $data['stamp'] : 0;
 		$files = WP_Optimize_Minify_Cache_Functions::get_cached_files($stamp, false);
 		$files['js'] = array_map(array('WP_Optimize_Minify_Cache_Functions', 'format_file_logs'), $files['js']);
@@ -31,7 +30,6 @@ class WP_Optimize_Minify_Commands {
 	 * @return array
 	 */
 	public function purge_all_minify_cache() {
-		if (!WPO_MINIFY_PHP_VERSION_MET) return array('error' => __('WP-Optimize Minify requires a higher PHP version', 'wp-optimize'));
 		WP_Optimize_Minify_Cache_Functions::purge();
 		WP_Optimize_Minify_Cache_Functions::cache_increment();
 		$others = WP_Optimize_Minify_Cache_Functions::purge_others();
@@ -53,7 +51,6 @@ class WP_Optimize_Minify_Commands {
 	 * @return array
 	 */
 	public function minify_increment_cache() {
-		if (!WPO_MINIFY_PHP_VERSION_MET) return array('error' => __('WP-Optimize Minify requires a higher PHP version', 'wp-optimize'));
 		WP_Optimize_Minify_Cache_Functions::cache_increment();
 		$files = $this->get_minify_cached_files();
 		return array(
@@ -68,8 +65,6 @@ class WP_Optimize_Minify_Commands {
 	 * @return array
 	 */
 	public function purge_minify_cache() {
-		if (!WPO_MINIFY_PHP_VERSION_MET) return array('error' => __('WP-Optimize Minify requires a higher PHP version', 'wp-optimize'));
-		
 		if (!WP_Optimize()->get_minify()->can_purge_cache() && !(defined('WP_CLI') && WP_CLI)) {
 			return array(
 				'error' => __('You do not have permission to purge the cache', 'wp-optimize')
@@ -93,7 +88,7 @@ class WP_Optimize_Minify_Commands {
 		
 		$notice = WP_Optimize_Minify_Functions::apply_strip_tags_for_messages_array($notice, '');
 
-		$notice = json_encode($notice); // encode
+		$notice = wp_json_encode($notice); // encode
 
 		return array(
 			'result' => 'caches cleared',
@@ -112,7 +107,6 @@ class WP_Optimize_Minify_Commands {
 	 * @return array
 	 */
 	public function delete_minify_cache_file($filename) {
-		if (!WPO_MINIFY_PHP_VERSION_MET) return array('error' => __('WP-Optimize Minify requires a higher PHP version', 'wp-optimize'), 'result' => '', 'files' => '');
 		if (!WP_Optimize()->get_minify()->can_purge_cache()) return array('error' => __('You do not have permission to purge the cache', 'wp-optimize'), 'result' => '', 'files' => '');
 		
 		$response = array(
@@ -291,7 +285,7 @@ class WP_Optimize_Minify_Commands {
 		);
 
 		// loop through wpo-minify cache directory and get the meta.json files, combine into a single json file
-		if (is_dir(WPO_CACHE_MIN_FILES_DIR) && is_writable(dirname(WPO_CACHE_MIN_FILES_DIR))) {
+		if (is_dir(WPO_CACHE_MIN_FILES_DIR) && wp_is_writable(dirname(WPO_CACHE_MIN_FILES_DIR))) {
 			if ($handle = opendir(WPO_CACHE_MIN_FILES_DIR)) {
 				while (false !== ($d = readdir($handle))) {
 					if (0 === strcmp($d, '.') || 0 === strcmp($d, '..') || !is_numeric($d)) {
@@ -305,7 +299,7 @@ class WP_Optimize_Minify_Commands {
 							}
 							$maybe_file_path = $cache_min_folder . '/' . $maybe_file;
 							if (is_file($maybe_file_path) && 'meta.json' === basename($maybe_file_path)) {
-								$combined_metas['meta_logs'][$d] = json_decode(file_get_contents($maybe_file_path));
+								$combined_metas['meta_logs'][$d] = json_decode(WPO_File_System_Helper::get_file_contents($maybe_file_path));
 							}
 						}
 						closedir($cache_min_folder_handle);
@@ -342,7 +336,7 @@ class WP_Optimize_Minify_Commands {
 		$file = $cache_dir.'/'.$filename;
 
 		if (file_exists($file.'.json')) {
-			$log = json_decode(file_get_contents($file.'.json'));
+			$log = json_decode(WPO_File_System_Helper::get_file_contents($file.'.json'));
 			$data['filename'] = $filename;
 			$data['log'] = $log;
 		}
@@ -357,7 +351,7 @@ class WP_Optimize_Minify_Commands {
 	 */
 	private function check_and_delete($file) {
 		if (file_exists($file)) {
-			unlink($file);
+			wp_delete_file($file);
 		}
 	}
 

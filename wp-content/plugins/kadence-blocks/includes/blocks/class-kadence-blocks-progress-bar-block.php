@@ -36,6 +36,13 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 	 *
 	 * @var string
 	 */
+	protected static $progress_bars = [];
+
+	/**
+	 * Block determines in scripts need to be loaded for block.
+	 *
+	 * @var string
+	 */
 	protected $has_script = true;
 
 	/**
@@ -48,6 +55,13 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 
 		return self::$instance;
 	}
+	/**
+	 * Class Constructor.
+	 */
+	public function __construct() {
+		parent::__construct();
+		add_action( 'wp_footer', [ $this, 'data_enqueue' ], 9 );
+	}
 
 	/**
 	 * Builds CSS for block.
@@ -59,14 +73,11 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 	 */
 	public function build_css( $attributes, $css, $unique_id, $unique_style_id ) {
 
-		wp_enqueue_script( 'kadence-blocks-' . $this->block_name );
-		wp_enqueue_script( 'kadence-blocks-scroll-magic' );
-
 		$css->set_style_id( 'kb-' . $this->block_name . $unique_style_id );
 
 		$css->set_selector( '.kb-progress-bar-container' . $unique_id );
 
-		$css->render_responsive_size( $attributes, array( 'containerMaxWidth', 'tabletContainerMaxWidth', 'mobileContainerMaxWidth' ), 'width', 'containerMaxWidthUnits' );
+		$css->render_responsive_size( $attributes, [ 'containerMaxWidth', 'tabletContainerMaxWidth', 'mobileContainerMaxWidth' ], 'width', 'containerMaxWidthUnits' );
 		$css->render_measure_output( $attributes, 'margin', 'margin' );
 
 		if ( ! isset( $attributes['barType'] ) || ( isset( $attributes['barType'] ) && 'line' === $attributes['barType'] ) ) {
@@ -93,7 +104,7 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 		$css->render_measure_output( $attributes, 'labelPadding', 'padding' );
 
 		$is_inside = ! isset( $attributes['labelPosition'] ) || ( isset( $attributes['labelPosition'] ) && $attributes['labelPosition'] === 'inside' );
-		$barType = !empty( $attributes['barType'] ) ? $attributes['barType'] : 'line';
+		$barType   = ! empty( $attributes['barType'] ) ? $attributes['barType'] : 'line';
 
 		if ( ! empty( $attributes['hAlign'] ) ) {
 			$this->responsive_alignment( $attributes['hAlign'], $css );
@@ -101,7 +112,7 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 			$css->add_property( 'justify-content', 'space-between' );
 		}
 
-		if( $is_inside && $barType === 'line' ) {
+		if ( $is_inside && $barType === 'line' ) {
 			$css->add_property( 'width', '100%' );
 		}
 
@@ -126,28 +137,28 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 
 		$css->set_selector( '.kb-progress-bar-container' . $unique_id . ' .kb-progress-label-wrap .kt-progress-percent' );
 
-		if( isset( $attributes['numberFont'], $attributes['labelFont'] ) ) {
+		if ( isset( $attributes['numberFont'], $attributes['labelFont'] ) ) {
 			$default_font = $this->get_default_font();
-			$diff = $this->arrayRecursiveDiff( $attributes['numberFont'], $default_font );
-			$attributes['numberFont'] = array_merge( $attributes['labelFont'], $diff );
+			$diff         = $this->array_recursive_diff( $attributes['numberFont'], $default_font );
 
+			$attributes['numberFont'] = array_merge( $attributes['labelFont'], $diff );
 			$css->render_typography( $attributes, 'numberFont' );
-		}  else if ( isset( $attributes['numberFont'] ) ) {
+		} elseif ( isset( $attributes['numberFont'] ) ) {
 			$css->render_typography( $attributes, 'numberFont' );
-		} else if ( isset( $attributes['labelFont'] ) ) {
+		} elseif ( isset( $attributes['labelFont'] ) ) {
 			$css->render_typography( $attributes, 'labelFont' );
 		}
 
 		if ( isset( $attributes['barType'] ) && 'line-mask' == $attributes['barType'] ) {
 			// We assume square masks for all this math.
 
-			$iterations = $attributes['maskIterations'] ?? 5;
-			$mask = ! empty( $attributes['maskSvg'] ) ? $attributes['maskSvg'] : 'star';
+			$iterations    = $attributes['maskIterations'] ?? 5;
+			$mask          = ! empty( $attributes['maskSvg'] ) ? $attributes['maskSvg'] : 'star';
 			$mask_base_url = KADENCE_BLOCKS_URL . 'includes/assets/images/masks/';
-			$mask_url = $mask_base_url . $mask . '.svg';
+			$mask_url      = $mask_base_url . $mask . '.svg';
 			// $mask_gap = $attributes['maskGap'] ?? 10;
-			$progress_width = ! empty( $attributes['progressWidth'] ) ? absint( $attributes['progressWidth'] ) : 2;
-			$mask_height = ! empty( $progress_width ) ? ( absint( $progress_width ) * 11.5 ) : 80;
+			$progress_width     = ! empty( $attributes['progressWidth'] ) ? absint( $attributes['progressWidth'] ) : 2;
+			$mask_height        = ! empty( $progress_width ) ? ( absint( $progress_width ) * 11.5 ) : 80;
 			$mask_height_tablet = ! empty( $attributes['progressWidthTablet'] ) ? ( absint( $attributes['progressWidthTablet'] ) * 11.5 ) : 0;
 			$mask_height_mobile = ! empty( $attributes['progressWidthMobile'] ) ? ( absint( $attributes['progressWidthMobile'] ) * 11.5 ) : 0;
 			// $mask_gap_aspect_ratio_adjustment = ( $iterations + 1 ) * ( $mask_gap / $mask_height );
@@ -160,18 +171,18 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 				}
 			}
 
-			$mask_image_string = trim( str_repeat( 'url(' . $mask_url . '),', $iterations ), ',' );
-			$mask_repeat_string = trim( str_repeat( 'no-repeat,', $iterations ), ',' );
-			$mask_position_array = $iterations > 1 ? range( 0, 100, 100 / ( $iterations - 1 ) ) : array( 0 );
+			$mask_image_string    = trim( str_repeat( 'url(' . $mask_url . '),', $iterations ), ',' );
+			$mask_repeat_string   = trim( str_repeat( 'no-repeat,', $iterations ), ',' );
+			$mask_position_array  = $iterations > 1 ? range( 0, 100, 100 / ( $iterations - 1 ) ) : [ 0 ];
 			$mask_position_string = trim( implode( '%,', $mask_position_array ) . '%', ',' );
 			// $mask_position_string = 'calc(0% + ' . $mask_gap . 'px), calc(25% + ' . ( $mask_gap * 2 ) . 'px), calc(50% + ' . ( $mask_gap * 3 ) . 'px), calc(75% + ' . ( $mask_gap * 4 ) . 'px), calc(100% + ' . ( $mask_gap * 5 ) . 'px)';
 			$mask_aspect_ratio_string = $iterations . '/1';
 			// $mask_aspect_ratio_string = $iterations + $mask_gap_aspect_ratio_adjustment . '/1';
-			$mask_height_string = $mask_height . 'px';
+			$mask_height_string        = $mask_height . 'px';
 			$mask_height_tablet_string = $mask_height_tablet ? $mask_height_tablet . 'px' : '';
 			$mask_height_mobile_string = $mask_height_mobile ? $mask_height_mobile . 'px' : '';
 
-			$css->set_selector( '#kb-progress-bar' . $unique_id );
+			$css->set_selector( '.kb-progress-bar-container' . $unique_id . ' .kb-progress-bar-' . $unique_id );
 			$css->add_property( '-webkit-mask-image', $mask_image_string );
 			$css->add_property( 'mask-image', $mask_image_string );
 
@@ -207,42 +218,31 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 
 		$css = new Kadence_Blocks_CSS();
 
-		$simple_id = str_replace( '-', '', esc_attr( $unique_id ) );
-
-		$bar_types = array(
-			'line'       => 'Line',
-			'circle'     => 'Circle',
-			'semicircle' => 'SemiCircle'
-		);
-
+		$simple_id      = str_replace( '-', '', esc_attr( $unique_id ) );
 		$progress_color = ! empty( $attributes['progressColor'] ) ? $css->sanitize_color( $attributes['progressColor'], $attributes['progressOpacity'] ) : 'var(--global-palette1, #2B6CB0)';
 		$bar_background = ! empty( $attributes['barBackground'] ) ? $css->sanitize_color( $attributes['barBackground'], $attributes['barBackgroundOpacity'] ) : 'var(--global-palette7, #EDF2F7)';
 
-		$prefix       = isset( $attributes['numberPrefix'] ) ? esc_attr( $attributes['numberPrefix'] ) : '';
-		$suffix       = isset( $attributes['numberSuffix'] ) ? esc_attr( $attributes['numberSuffix'] ) : '';
-		$progress_min = 0;
+		$prefix          = isset( $attributes['numberPrefix'] ) ? esc_attr( $attributes['numberPrefix'] ) : '';
+		$suffix          = isset( $attributes['numberSuffix'] ) ? esc_attr( $attributes['numberSuffix'] ) : '';
+		$progress_min    = 0;
 		$progress_amount = ! empty( $attributes['progressAmount'] ) ? $attributes['progressAmount'] : 0;
-		$progress_max = ! empty( $attributes['progressMax'] ) ? $attributes['progressMax'] : 100;
-		$is_relative  = isset( $attributes['numberIsRelative'] ) ? $attributes['numberIsRelative'] : false;
-		$decimal      = ! empty( $attributes['decimal'] ) ? $attributes['decimal'] : 'none';
-		$delay        = isset( $attributes['delayUntilInView'] ) ? $attributes['delayUntilInView'] : true;
-		$stroke_widths = array(
+		$progress_max    = ! empty( $attributes['progressMax'] ) ? $attributes['progressMax'] : 100;
+		$is_relative     = $attributes['numberIsRelative'] ?? false;
+		$decimal         = ! empty( $attributes['decimal'] ) ? $attributes['decimal'] : 'none';
+		$delay           = $attributes['delayUntilInView'] ?? true;
+		$stroke_widths   = [
 			! empty( $attributes['progressWidth'] ) ? $attributes['progressWidth'] : 2,
 			! empty( $attributes['progressWidthTablet'] ) ? $attributes['progressWidthTablet'] : ( ! empty( $attributes['progressWidth'] ) ? $attributes['progressWidth'] : 2 ),
 			! empty( $attributes['progressWidthMobile'] ) ? $attributes['progressWidthMobile'] : ( ! empty( $attributes['progressWidthTablet'] ) ? $attributes['progressWidthTablet'] : ( ! empty( $attributes['progressWidth'] ) ? $attributes['progressWidth'] : 2 ) ),
-		);
+		];
 
 		$content = '<div class="kb-progress-bar-container kb-progress-bar-container' . $unique_id . ' kb-progress-bar-type-' . $attributes['barType'] . ' ' . ( ! empty( $attributes['align'] ) ? 'align' . $attributes['align'] : '' ) . '">';
 
 		$content .= $this->get_label( $attributes, 'above' );
 
 		$progress_args = [
-			'id' => 'kb-progress-bar' . esc_attr( $unique_id ),
-			'class' => 'kb-progress-bar',
+			'class' => 'kb-progress-bar kb-progress-bar-' . esc_attr( $unique_id ),
 		];
-		if ( ! empty( $attributes['label'] ) && ( ! isset( $attributes['displayLabel'] ) || ( isset( $attributes['displayLabel'] ) && $attributes['displayLabel'] !== false ) ) ) {
-			$progress_args['aria-labelledby'] = 'kt-progress-label' . esc_attr( $unique_id );
-		}
 		$mask = ! empty( $attributes['maskSvg'] ) ? $attributes['maskSvg'] : 'star';
 		if ( ! empty( $attributes['ariaLabel'] ) ) {
 			$progress_args['aria-label'] = $attributes['ariaLabel'];
@@ -255,121 +255,87 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 			$progress_div_attributes[] = $key . '="' . esc_attr( $value ) . '"';
 		}
 		$progress_attributes = implode( ' ', $progress_div_attributes );
-		// $content .= '<div id="kb-progress-bar' . esc_attr( $unique_id ) . '" class="kb-progress-bar" aria-labelledby="kt-progress-label' . esc_attr( $attributes['uniqueID'] ) . '" aria-label="' . ( empty( $attributes['label'] ) ? __( 'Progress', 'kadence-blocks' ) : esc_attr( strip_tags( $attributes['label'] ) ) ) . '">' . ( $this->get_label( $attributes, 'inside' ) ) . '</div>';
+		$bar_type_for_script = $attributes['barType'] == 'line-mask' ? 'line' : $attributes['barType'];
+		$progress_real       = $progress_amount <= $progress_max ? $progress_amount : $progress_max;
+
+		$progress_bar_script_args = [
+			'unique_id'     => $unique_id,
+			'simple_id'     => $simple_id,
+			'type'          => $bar_type_for_script,
+			'progressColor' => $progress_color,
+			'barBackground' => $bar_background,
+			'stokeWidths'   => $stroke_widths,
+			'decimal'       => $decimal,
+			'delay'         => $delay,
+			'duration'      => ! empty( $attributes['duration'] ) ? $attributes['duration'] : 1,
+			'easing'        => ! empty( $attributes['easing'] ) ? $attributes['easing'] : 'linear',
+			'prefix'        => $prefix,
+			'suffix'        => $suffix,
+			'progress_real' => $progress_real,
+			'progress_max'  => $progress_max,
+			'is_relative'   => $is_relative,
+		];
+
 		$inside_label = $this->get_label( $attributes, 'inside' );
 
-		$content .= sprintf( '<div %1$s>%2$s</div>', $progress_attributes, $inside_label );
+		$static_content = '';
+		if ( apply_filters( 'kadence-blocks-progress-bar-static', false, $attributes, $block_instance ) ) {
+			$static_content = $this->get_content_svg( $progress_bar_script_args );
+		} else {
+			self::$progress_bars[ $unique_id ] = $progress_bar_script_args;
+		}
+
+		$content .= sprintf( '<div %1$s>%2$s%3$s</div>', $progress_attributes, $inside_label, $static_content );
 		$content .= $this->get_label( $attributes, 'below' );
 
 		$content .= '</div>';
 
-		$bar_type_for_script = $attributes['barType'] == 'line-mask' ? 'line' : $attributes['barType'];
-
-		$content .= '<script>
-			function reportWindowSize() {
-			  let barContainer = document.querySelector("#kb-progress-bar' . $unique_id . '");
-			  let type = "' . $bar_type_for_script . '";
-			  let barSvg = barContainer.querySelector("svg");
-			  if ( ! barSvg ) {
-			  	return;
-			  }
-			  let barPaths = barSvg.querySelectorAll("path");
-			  let path1 = barPaths[0];
-			  let path2 = barPaths[1];
-			  let stokeWidths = [' . implode( ',', $stroke_widths ) . '];
-			  if( window.innerWidth < 768 ) {
-			    if( type === "line" ){
-			        barSvg.setAttribute( "viewBox", "0 0 100 " + stokeWidths[2]);
-	                path1.setAttribute( "d", "M 0," + ( stokeWidths[2] / 2) + " L 100," + ( stokeWidths[2] / 2));
-	                path2.setAttribute( "d", "M 0," + ( stokeWidths[2] / 2) + " L 100," + ( stokeWidths[2] / 2));
-				}
-			    path1.setAttribute( "stroke-width", stokeWidths[2]);
-                path2.setAttribute( "stroke-width", stokeWidths[2]);
-			  } else if( window.innerWidth < 1025 ) {
-                if( type === "line" ){
-			        barSvg.setAttribute( "viewBox", "0 0 100 " + stokeWidths[1]);
-	                path1.setAttribute( "d", "M 0," + ( stokeWidths[1] / 2) + " L 100," + ( stokeWidths[1] / 2));
-	                path2.setAttribute( "d", "M 0," + ( stokeWidths[1] / 2) + " L 100," + ( stokeWidths[1] / 2));
-			    }
-                path1.setAttribute( "stroke-width", stokeWidths[1]);
-                path2.setAttribute( "stroke-width", stokeWidths[1]);
-			  } else {
-			    if( type === "line" ){
-			        barSvg.setAttribute( "viewBox", "0 0 100 " + stokeWidths[0]);
-	                path1.setAttribute( "d", "M 0," + ( stokeWidths[0] / 2) + " L 100," + ( stokeWidths[0] / 2));
-                    path2.setAttribute( "d", "M 0," + ( stokeWidths[0] / 2) + " L 100," + ( stokeWidths[0] / 2));
-			    }
-                path1.setAttribute( "stroke-width", stokeWidths[0]);
-                path2.setAttribute( "stroke-width", stokeWidths[0]);
-			  }
-			}
-			window.onresize = reportWindowSize;
-			var waitForProgressBar' . $simple_id . ' = setInterval(function () {
-				if (typeof ProgressBar !== "undefined" ) {
-					clearInterval(waitForProgressBar' . $simple_id . ');
-					let responsiveStrokeSizes = [' . implode( ',', $stroke_widths ) . '];
-					let initialStroke;
-				    if( window.innerWidth < 768 ) {
-				        initialStroke = responsiveStrokeSizes[2];
-			        } else if( window.innerWidth < 1025 ) {
-                        initialStroke = responsiveStrokeSizes[1];
-				    } else {
-                        initialStroke = responsiveStrokeSizes[0];
-                    }
-					let progressBar' . $simple_id . ' = new ProgressBar.' . $bar_types[ $bar_type_for_script ] . '("#kb-progress-bar' . $unique_id . '", {
-						color: "' . $progress_color . '",
-						trailColor: "' . $bar_background . '",
-						duration: "' . ( $attributes['duration'] * 1000 ) . '",
-						easing: "' . $attributes['easing'] . '",
-						strokeWidth: initialStroke,
-					});';
-
-		if ( $delay ) {
-			$content .= '
-				let progressBarController' . $simple_id . ' = new ScrollMagic.Controller();
-				let desiredAnimation = new ScrollMagic.Scene({triggerElement: "#kb-progress-bar' . $unique_id . '"});
-				desiredAnimation.triggerHook(0.88);
-				desiredAnimation.addTo( progressBarController' . $simple_id . ' );
-				desiredAnimation.on("start", function (e) {';
-		}
-		$progress_real = $progress_amount <= $progress_max ? $progress_amount : $progress_max;
-		$content .= 'progressBar' . $simple_id . '.animate(
-							' . $progress_real / $progress_max . ' ,
-				            {
-								 duration: ' . ( $attributes['duration'] * 1000 ) . ',
-	                             step: function(state, bar) {
-	                                let value = 0;
-                                    let elementContainer = document.getElementById("kb-progress-bar' . $unique_id . '");
-	                                let elementAbove = document.getElementById("current-progress-above' . $unique_id . '");
-	                                let elementInside = document.getElementById("current-progress-inside' . $unique_id . '");
-	                                let elementBelow = document.getElementById("current-progress-below' . $unique_id . '");
-	                                if( ' . ( $is_relative ? 'true' : 'false' ) . ' ) {
-	                                    value = Math.round(bar.value() * 100 );
-	                                } else {
-	                                    value = Math.round(bar.value() * ' . $progress_max . ');
-	                                }
-									' . ( $is_relative ? 'value = bar.value() * 100;' : 'value = bar.value() * ' . $progress_max . ';' ) . '
-									' . ( $decimal === 'one' ? 'value = Math.round( value * 10) / 10;value = value.toFixed(1);' : ( $decimal === 'two' ? 'value = Math.round( value * 100) / 100;value = value.toFixed(2);' : 'value = Math.round( value );' ) ) . '
-
-									if( elementAbove ){
-										elementAbove.innerHTML = "' . $prefix . '" + value + "' . $suffix . '";
-									} else if ( elementInside ){
-										elementInside.innerHTML = "' . $prefix . '" + value + "' . $suffix . '";
-									} else if ( elementBelow ){
-										elementBelow.innerHTML = "' . $prefix . '" + value + "' . $suffix . '";
-									}
-								 }
-				            } ,
-				            function(){}
-				        );';
-
-		if ( $delay ) {
-			$content .= '});';
-		}
-
-		$content .= '} }, 125); </script>';
-
+		wp_enqueue_script( 'kadence-blocks-' . $this->block_name );
 		return $content;
+	}
+	/**
+	 * Get HTML for displaying the svg.
+	 *
+	 * @param array $args the arguments for the progress bar.
+	 *
+	 * @return string HTML that creates the svg on the front end.
+	 */
+	private function get_content_svg( $args ) {
+		$svg          = '';
+		$stroke_width = ! empty( $args['stokeWidths'][0] ) ? $args['stokeWidths'][0] : 2;
+		switch ( $args['type'] ) {
+			case 'line':
+				$view_box_str = '0 0 100 ' . $stroke_width;
+				$path_center  = $stroke_width / 2;
+				$path_str     = 'M 0, ' . $path_center . ' L 100, ' . $path_center;
+				$path_offset  = 100 - ( ( $args['progress_real'] / $args['progress_max'] ) * 100 );
+				$svg          = '<svg viewBox="' . esc_attr( $view_box_str ) . '" preserveAspectRatio="none" style="display: block; width: 100%;">';
+				$svg         .= '<path d="' . esc_attr( $path_str ) . '" stroke="' . esc_attr( $args['barBackground'] ) . '" stroke-width="' . esc_attr( $stroke_width ) . '" fill-opacity="0"></path>';
+				$svg         .= '<path d="' . esc_attr( $path_str ) . '" stroke="' . esc_attr( $args['progressColor'] ) . '" stroke-width="' . esc_attr( $stroke_width ) . '" fill-opacity="0" style="stroke-dasharray: 100, 100; stroke-dashoffset: ' . esc_attr( $path_offset ) . ';"></path>';
+				$svg         .= '</svg>';
+				break;
+			case 'semicircle':
+				$r           = 50 - ( $stroke_width / 2 );
+				$r2          = $r * 2;
+				$length      = round( 2 * 3.141592653589793 * $r, 2 ) / 2;
+				$path_str    = 'M 50,50 m -' . $r . ',0 a ' . $r . ',' . $r . ' 0 1 1 ' . $r2 . ',0';
+				$path_offset = $length - ( ( $args['progress_real'] / $args['progress_max'] ) * $length );
+				$svg         = '<svg viewBox="0 0 100 50" style="display: block; width: 100%;">';
+				$svg        .= '<path d="' . esc_attr( $path_str ) . '" stroke="' . esc_attr( $args['barBackground'] ) . '" stroke-width="' . esc_attr( $stroke_width ) . '" fill-opacity="0"></path>';
+				$svg        .= '<path d="' . esc_attr( $path_str ) . '" stroke="' . esc_attr( $args['progressColor'] ) . '" stroke-width="' . esc_attr( $stroke_width ) . '" fill-opacity="0" style="stroke-dasharray:' . esc_attr( $length ) . ', ' . esc_attr( $length ) . '; stroke-dashoffset: ' . esc_attr( $path_offset ) . ';"></path></svg>';
+				break;
+			case 'circle':
+				$r           = 50 - ( $stroke_width / 2 );
+				$r2          = $r * 2;
+				$length      = round( 2 * 3.141592653589793 * $r, 2 );
+				$path_offset = $length - ( ( $args['progress_real'] / $args['progress_max'] ) * $length );
+				$path_str    = 'M 50,50 m 0,-' . $r . ' a ' . $r . ',' . $r . ' 0 1 1 0,' . $r2 . ' a ' . $r . ',' . $r . ' 0 1 1 0,-' . $r2 . '';
+				$svg         = '<svg viewBox="0 0 100 100" style="display: block; width: 100%;">';
+				$svg        .= '<path d="' . esc_attr( $path_str ) . '" stroke="' . esc_attr( $args['barBackground'] ) . '" stroke-width="' . esc_attr( $stroke_width ) . '" fill-opacity="0"></path>';
+				$svg        .= '<path d="' . esc_attr( $path_str ) . '" stroke="' . esc_attr( $args['progressColor'] ) . '" stroke-width="' . esc_attr( $stroke_width ) . '" fill-opacity="0" style="stroke-dasharray:' . esc_attr( $length ) . ', ' . esc_attr( $length ) . '; stroke-dashoffset: ' . esc_attr( $path_offset ) . ';"></path></svg>';
+				break;
+		}
+		return $svg;
 	}
 
 	/**
@@ -420,13 +386,17 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 			return '';
 		}
 
-		$prefix   = isset( $attributes['numberPrefix'] ) ? $attributes['numberPrefix'] : '';
-		$suffix   = isset( $attributes['numberSuffix'] ) ? $attributes['numberSuffix'] : '';
-		$starting = !empty( $attributes['progressMax'] ) && !empty( $attributes['showMaxProgressOnPageLoad'] ) ? $attributes['progressMax'] : 0;
+		$prefix          = $attributes['numberPrefix'] ?? '';
+		$suffix          = $attributes['numberSuffix'] ?? '';
+		$progress_amount = ! empty( $attributes['progressAmount'] ) ? $attributes['progressAmount'] : 0;
+		$progress_max    = ! empty( $attributes['progressMax'] ) ? $attributes['progressMax'] : 100;
 
-		$position = isset( $attributes['labelPosition'] ) ? $attributes['labelPosition'] : 'above';
+		$progress_real = $progress_amount <= $progress_max ? $progress_amount : $progress_max;
+		$starting      = ! empty( $progress_real ) && ! empty( $attributes['showMaxProgressOnPageLoad'] ) ? $progress_real : 0;
 
-		return '<span id="current-progress-' . $position . $attributes['uniqueID'] . '" class="kt-progress-percent">' . $prefix . $starting . $suffix . '</span>';
+		$position = $attributes['labelPosition'] ?? 'above';
+
+		return '<span id="current-progress-' . $position . $attributes['uniqueID'] . '" class="kb-current-progress-' . $position . ' kt-progress-percent">' . $prefix . $starting . $suffix . '</span>';
 	}
 
 	/**
@@ -453,78 +423,92 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 	}
 
 	private function get_default_font() {
-		return array(
-			"color"         => "",
-			"level"         => 6,
-			"size"          => array(
-				"",
-				"",
-				""
-			),
-			"sizeType"      => "px",
-			"lineHeight"    => array(
-				"",
-				"",
-				""
-			),
-			"linetype"      => "px",
-			"letterSpacing" => array(
-				"",
-				"",
-				""
-			),
-			"textTransform" => "",
-			"family"        => "",
-			"google"        => false,
-			"style"         => "",
-			"weight"        => "",
-			"variant"       => "",
-			"subset"        => "",
-			"loadGoogle"    => true,
-			"padding"       => array(
+		return [
+			'color'         => '',
+			'level'         => 6,
+			'size'          => [
+				'',
+				'',
+				'',
+			],
+			'sizeType'      => 'px',
+			'lineHeight'    => [
+				'',
+				'',
+				'',
+			],
+			'linetype'      => 'px',
+			'letterSpacing' => [
+				'',
+				'',
+				'',
+			],
+			'textTransform' => '',
+			'family'        => '',
+			'google'        => false,
+			'style'         => '',
+			'weight'        => '',
+			'variant'       => '',
+			'subset'        => '',
+			'loadGoogle'    => true,
+			'padding'       => [
 				0,
 				0,
 				0,
-				0
-			),
-			"margin"        => array(
+				0,
+			],
+			'margin'        => [
 				0,
 				0,
 				0,
-				0
-			)
-		);
+				0,
+			],
+		];
 	}
 
 	/**
 	 * array_diff_assoc doesn't work on multidimensional arrays, so we need to use this function.
 	 * If any sub-key value is different, to entire parent key is returned.
 	 *
-	 * @param $aArray1
-	 * @param $aArray2
+	 * @param $a_array
+	 * @param $b_array
 	 *
 	 * @return array
 	 */
-	private function arrayRecursiveDiff($aArray1, $aArray2) {
-		$aReturn = array();
+	private function array_recursive_diff( $a_array, $b_array ) {
+		$a_return = [];
 
-		foreach ($aArray1 as $mKey => $mValue) {
-			if (array_key_exists($mKey, $aArray2)) {
-				if (is_array($mValue)) {
-					$aRecursiveDiff = $this->arrayRecursiveDiff($mValue, $aArray2[$mKey]);
-					if (count($aRecursiveDiff)) { $aReturn[$mKey] = $mValue; }
-				} else {
-					if ($mValue != $aArray2[$mKey]) {
-						$aReturn[$mKey] = $mValue;
+		foreach ( $a_array as $m_key => $m_value ) {
+			if ( array_key_exists( $m_key, $b_array ) ) {
+				if ( is_array( $m_value ) ) {
+					$a_recursive_diff = $this->array_recursive_diff( $m_value, $b_array[ $m_key ] );
+					if ( count( $a_recursive_diff ) ) {
+						$a_return[ $m_key ] = $m_value;
 					}
+				} elseif ( $m_value != $b_array[ $m_key ] ) {
+						$a_return[ $m_key ] = $m_value;
 				}
 			} else {
-				$aReturn[$mKey] = $mValue;
+				$a_return[ $m_key ] = $m_value;
 			}
 		}
-		return $aReturn;
+		return $a_return;
 	}
-
+	/**
+	 * Enqueue the block's items.
+	 */
+	public function data_enqueue() {
+		if ( empty( self::$progress_bars ) ) {
+			return;
+		}
+		wp_localize_script(
+			'kadence-blocks-' . $this->block_name,
+			'kadence_blocks_progress_bars',
+			[
+				'items' => wp_json_encode( self::$progress_bars ),
+			]
+		);
+	}
 	/**
 	 * Registers scripts and styles.
 	 */
@@ -540,9 +524,9 @@ class Kadence_Blocks_Progress_Bar_Block extends Kadence_Blocks_Abstract_Block {
 			return;
 		}
 
-		wp_register_script( 'kadence-blocks-' . $this->block_name, KADENCE_BLOCKS_URL . 'includes/assets/js/progressBar.min.js', array(), KADENCE_BLOCKS_VERSION, false );
-		wp_register_script( 'kadence-blocks-scroll-magic', KADENCE_BLOCKS_URL . 'includes/assets/js/scroll-magic.min.js', array(), KADENCE_BLOCKS_VERSION, false );
-
+		wp_register_script( 'kadence-blocks-scroll-magic', KADENCE_BLOCKS_URL . 'includes/assets/js/scroll-magic.min.js', [], KADENCE_BLOCKS_VERSION, true );
+		wp_register_script( 'kadence-blocks-progress', KADENCE_BLOCKS_URL . 'includes/assets/js/progressBar.min.js', [], KADENCE_BLOCKS_VERSION, true );
+		wp_register_script( 'kadence-blocks-' . $this->block_name, KADENCE_BLOCKS_URL . 'includes/assets/js/kb-progress-bars.min.js', [ 'kadence-blocks-scroll-magic', 'kadence-blocks-progress' ], KADENCE_BLOCKS_VERSION, true );
 	}
 }
 

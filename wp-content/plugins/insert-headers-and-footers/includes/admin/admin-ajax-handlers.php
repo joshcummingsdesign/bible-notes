@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_action( 'wp_ajax_wpcode_update_snippet_status', 'wpcode_update_snippet_status' );
+add_action( 'wp_ajax_wpcode_filter_snippets_by_type', 'wpcode_filter_snippets_by_type' );
 add_action( 'wp_ajax_wpcode_search_terms', 'wpcode_search_terms' );
 add_action( 'wp_ajax_wpcode_generate_snippet', 'wpcode_generate_snippet' );
 add_action( 'wp_ajax_wpcode_save_generated_snippet', 'wpcode_save_generated_snippet' );
@@ -41,12 +42,10 @@ function wpcode_update_snippet_status() {
 			)
 		);
 		$active = false;
-	} else {
-		if ( $active ) {
+	} elseif ( $active ) {
 			$snippet->activate();
-		} else {
-			$snippet->deactivate();
-		}
+	} else {
+		$snippet->deactivate();
 	}
 
 	if ( ! isset( $snippet->active ) || $active !== $snippet->active ) {
@@ -66,6 +65,65 @@ function wpcode_update_snippet_status() {
 	exit;
 }
 
+/**
+ * Filter snippets by type.
+ *
+ * @return void
+ */
+function wpcode_filter_snippets_by_type() {
+
+	check_ajax_referer( 'wpcode_admin' );
+
+	// If the current user can't edit snippets they should not be trying this.
+	if ( ! current_user_can( 'wpcode_edit_snippets' ) ) {
+		wp_send_json_error();
+	}
+
+	if ( ! isset( $_POST['snippet_type'] ) ) {
+        wp_send_json_error();
+	}
+
+	require_once WPCODE_PLUGIN_PATH . 'includes/admin/pages/class-wpcode-code-snippets-table.php';
+
+	$snippet_type = isset( $_POST['snippet_type'] ) ? sanitize_text_field( wp_unslash( $_POST['snippet_type'] ) ) : '';
+	$location     = isset( $_POST['location'] ) ? sanitize_text_field( wp_unslash( $_POST['location'] ) ) : '';
+	$search_term  = isset( $_POST['s'] ) ? sanitize_text_field( wp_unslash( $_POST['s'] ) ) : '';
+
+	$screen_id      = 'toplevel_page_wpcode';
+	$current_screen = convert_to_screen( $screen_id );
+	set_current_screen( $screen_id );
+
+	$snippets_table = new WPCode_Code_Snippets_Table();
+
+	// Used screen object to set up table.
+	$snippets_table->screen = $current_screen;
+
+	$_GET['type']     = $snippet_type;
+	$_GET['location'] = $location;
+	$_GET['s']        = $search_term;
+
+	$snippets_table->prepare_items();
+	$count = $snippets_table->get_total_items();
+
+	// Output table HTML.
+	ob_start();
+	?>
+    <input type="hidden" name="page" value="wpcode"/>
+	<?php
+	$snippets_table->search_box( __( 'Search Snippets', 'insert-headers-and-footers' ), 'wpcode_snippet_search' );
+	$snippets_table->views();
+	$snippets_table->display();
+
+	$table_html = ob_get_clean();
+
+	// Send success response.
+	wp_send_json_success(
+		array(
+			'html'  => $table_html,
+			'count' => $count,
+		)
+	);
+}
 /**
  * Ajax handler to search for terms through all the public taxonomies.
  *
@@ -200,7 +258,6 @@ function wpcode_save_generated_snippet() {
 			),
 		)
 	);
-
 }
 
 /**

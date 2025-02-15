@@ -2998,6 +2998,7 @@ class Component implements Component_Interface, Templating_Component_Interface {
 				'tumblr'=> '#32506d',
 				'tiktok'=> '#69C9D0',
 				'discord'=> '#7289DA',
+                'threads'=> '#000000',
 			);
 			$socials_final = array();
 			if ( is_array( $items ) && ! empty( $items ) ) {

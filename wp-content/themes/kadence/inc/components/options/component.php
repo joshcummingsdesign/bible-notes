@@ -2642,6 +2642,7 @@ class Component implements Component_Interface, Templating_Component_Interface {
 
 					// enable_preload css style sheets.
 					'enable_preload' => false,
+					'disable_sitemap' => false,
 					'breadcrumb_engine' => '',
 					'breadcrumb_home_icon' => false,
 					// Post Archive.

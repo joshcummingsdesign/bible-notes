@@ -511,7 +511,7 @@ class WP_Optimize_Minify_Functions {
 			// If $media_query contains print, and $remove_print_mediatypes is true, return empty string
 			if ($remove_print_mediatypes && false !== strpos($media_query, 'print') && apply_filters('wpo_minfy_remove_print_mediatypes_import', true, $url, $media_query, $matches[0], $file_url)) return ($debug ? '/*! Info: the import of "'.$url.'" was removed because the setting remove_print_mediatypes is enabled. */' : '');
 
-			$purl = parse_url($url);
+			$purl = wp_parse_url($url);
 			// If there's no host, the url is relative to $file_url, so prepend with the base url.
 			if (!isset($purl['host'])) {
 				$url = dirname($file_url).'/'.$url;
@@ -606,7 +606,7 @@ class WP_Optimize_Minify_Functions {
 				$log['debug'] = "$print_handle failed. Tried wp_remote_get and local file_get_contents.";
 			}
 			$return = array('request' => $dreq, 'log' => $log, 'code' => '', 'status' => false);
-			return json_encode($return);
+			return wp_json_encode($return);
 		}
 
 		if ('js' == $type) {
@@ -622,11 +622,11 @@ class WP_Optimize_Minify_Functions {
 		}
 		$log['success'] = true;
 		$return = array('request' => $dreq, 'log' => $log, 'code' => $code, 'status' => true);
-		return json_encode($return);
+		return wp_json_encode($return);
 	}
 
 	/**
-	 * Get the content of an asset, wether local or remote
+	 * Get the content of an asset, whether local or remote
 	 *
 	 * @param string $url
 	 * @return array
@@ -646,7 +646,7 @@ class WP_Optimize_Minify_Functions {
 			}
 			clearstatcache();
 			if (file_exists($f)) {
-				$content = file_get_contents($f);
+				$content = WPO_File_System_Helper::get_file_contents($f);
 				// check for php code, skip if found
 				if ("<?php" != strtolower(substr($content, 0, 5)) && false === stripos($content, "<?php")) {
 					return array('content' => $content, 'method' => 'local');
@@ -873,7 +873,7 @@ class WP_Optimize_Minify_Functions {
 		}
 
 		/**
-		 * Wether to exclude the content or not from the minifying process.
+		 * Whether to exclude the content or not from the minifying process.
 		 */
 		return apply_filters('wpo_minify_exclude_contents', false);
 	}

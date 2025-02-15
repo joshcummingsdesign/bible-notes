@@ -359,17 +359,17 @@ class Kadence_Blocks_Advancedgallery_Block extends Kadence_Blocks_Abstract_Block
 
 		$imageRadiusUnit = isset($attributes['imageRadiusUnit']) ? $attributes['imageRadiusUnit'] : 'px';
 		if ( isset( $attributes['imageRadius'] ) && is_array( $attributes['imageRadius'] ) && isset( $attributes['imageRadius'][0] ) && is_numeric( $attributes['imageRadius'][0] ) ) {
-			$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item .kb-gal-image-radius' );
+			$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item .kb-gal-image-radius, .kb-gallery-id-' . $unique_id . ' .kb-slide-item .kb-gal-image-radius img' );
 			$css->add_property('border-radius', $attributes['imageRadius'][0] . $imageRadiusUnit . ' ' . ( is_numeric( $attributes['imageRadius'][1] ) ? $attributes['imageRadius'][1] : 0 ) . $imageRadiusUnit . ' '  . ( is_numeric( $attributes['imageRadius'][2] ) ? $attributes['imageRadius'][2] : 0 ) . $imageRadiusUnit . ' '  . ( is_numeric( $attributes['imageRadius'][3] ) ? $attributes['imageRadius'][3] : 0 ) . $imageRadiusUnit . ';'  );
 		}
 		if ( isset( $attributes['tabletImageRadius'] ) && is_array( $attributes['tabletImageRadius'] ) && isset( $attributes['tabletImageRadius'][0] ) && is_numeric( $attributes['tabletImageRadius'][0] ) ) {
 			$css->set_media_state( 'tablet' );
-			$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item .kb-gal-image-radius' );
+			$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item .kb-gal-image-radius, .kb-gallery-id-' . $unique_id . ' .kb-slide-item .kb-gal-image-radius img' );
 			$css->add_property('border-radius', $attributes['tabletImageRadius'][0] . $imageRadiusUnit . ' '  . ( is_numeric( $attributes['tabletImageRadius'][1] ) ? $attributes['tabletImageRadius'][1] : 0 ) . $imageRadiusUnit . ' ' . ( is_numeric( $attributes['tabletImageRadius'][2] ) ? $attributes['tabletImageRadius'][2] : 0 ) . $imageRadiusUnit . ' ' . ( is_numeric( $attributes['tabletImageRadius'][3] ) ? $attributes['tabletImageRadius'][3] : 0 ) . $imageRadiusUnit . ';'  );
 		}
 		if ( isset( $attributes['mobileImageRadius'] ) && is_array( $attributes['mobileImageRadius'] ) && isset( $attributes['mobileImageRadius'][0] ) && is_numeric( $attributes['mobileImageRadius'][0] ) ) {
 			$css->set_media_state( 'mobile' );
-			$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item .kb-gal-image-radius' );
+			$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item .kb-gal-image-radius, .kb-gallery-id-' . $unique_id . ' .kb-slide-item .kb-gal-image-radius img' );
 			$css->add_property('border-radius', $attributes['mobileImageRadius'][0] . $imageRadiusUnit . ' ' . ( is_numeric( $attributes['mobileImageRadius'][1] ) ? $attributes['mobileImageRadius'][1] : 0 ) . $imageRadiusUnit . ' ' . ( is_numeric( $attributes['mobileImageRadius'][2] ) ? $attributes['mobileImageRadius'][2] : 0 ) . $imageRadiusUnit . ' ' . ( is_numeric( $attributes['mobileImageRadius'][3] ) ? $attributes['mobileImageRadius'][3] : 0 ) . $imageRadiusUnit . ';' );
 		}
 		$css->set_media_state( 'desktop' );
@@ -391,12 +391,12 @@ class Kadence_Blocks_Advancedgallery_Block extends Kadence_Blocks_Abstract_Block
 			}
 			if ( isset( $attributes['shadow'] ) && is_array( $attributes['shadow'] ) && is_array( $attributes['shadow'][ 0 ] ) ) {
 				$shadow = $attributes['shadow'][ 0 ];
-				$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item .kb-gal-image-radius' );
+				$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item .kb-gal-image-radius, .kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-thumb-item .kb-gal-image-radius' );
 				$css->add_property('box-shadow', $shadow['hOffset'] . 'px ' . $shadow['vOffset'] . 'px ' . $shadow['blur'] . 'px ' . $shadow['spread'] . 'px ' . $css->render_color( $shadow['color'], $shadow['opacity'] ) );
 			}
 			if ( isset( $attributes['shadowHover'] ) && is_array( $attributes['shadowHover'] ) && is_array( $attributes['shadowHover'][ 0 ] ) ) {
 				$shadow_hover = $attributes['shadowHover'][ 0 ];
-				$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item:hover .kb-gal-image-radius' );
+				$css->set_selector('.kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-item:hover .kb-gal-image-radius, .kb-gallery-id-' . $unique_id . ' .kadence-blocks-gallery-thumb-item:hover .kb-gal-image-radius' );
 				$css->add_property('box-shadow', $shadow_hover['hOffset'] . 'px ' . $shadow_hover['vOffset'] . 'px ' . $shadow_hover['blur'] . 'px ' . $shadow_hover['spread'] . 'px ' . $css->render_color( $shadow_hover['color'], $shadow_hover['opacity'] ) );
 
 			} else {
@@ -858,6 +858,26 @@ class Kadence_Blocks_Advancedgallery_Block extends Kadence_Blocks_Abstract_Block
 			array(
 				'moreText' => __( 'See more', 'kadence-blocks' ),
 				'lightBoxAriaLabel' => __('Display this image in a lightbox', 'kadence-blocks'),
+			)
+		);
+		wp_localize_script(
+			'kadence-blocks-splide-init',
+			'kb_splide',
+			array(
+				'i18n' => array(
+					'prev' => __( 'Previous slide', 'kadence-blocks' ),
+					'next' => __( 'Next slide', 'kadence-blocks' ),
+					'first' => __( 'Go to first slide', 'kadence-blocks' ),
+					'last' => __( 'Go to last slide', 'kadence-blocks' ),
+					'slideX' => __( 'Go to slide %s', 'kadence-blocks' ),
+					'pageX' => __( 'Go to page %s', 'kadence-blocks' ),
+					'play' => __( 'Start autoplay', 'kadence-blocks' ),
+					'pause' => __( 'Pause autoplay', 'kadence-blocks' ),
+					'carousel' => __( 'carousel', 'kadence-blocks' ),
+					'slide' => __( 'slide', 'kadence-blocks' ),
+					'select' => __( 'Select a slide to show', 'kadence-blocks' ),
+					'slideLabel' => __( '%s of %s', 'kadence-blocks' ),
+				),
 			)
 		);
 	}

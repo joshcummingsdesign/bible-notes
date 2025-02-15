@@ -677,6 +677,11 @@ a.wpo-info__trigger span.dashicons {
   font-weight: bold;
 }
 
+p.wpo-description-show-links {
+  z-index: 999;
+  position: relative;
+}
+
 /* TABS */
 #wp-optimize-wrap h2.nav-tab-wrapper {
   margin-bottom: 0;
@@ -1673,55 +1678,6 @@ body.rtl #wp-optimize-wrap .wpo-table-list-filter {
   }
 }
 
-.tablesorter-headerRow th {
-  vertical-align: top;
-}
-
-th:not(.sorter-false) .tablesorter-header-inner {
-  color: #0074ab;
-}
-th:not(.sorter-false) .tablesorter-header-inner::after {
-  content: "";
-  font-family: "dashicons";
-  font-size: 20px;
-  line-height: 20px;
-  height: 20px;
-  width: 20px;
-  display: none;
-  vertical-align: bottom;
-}
-
-th.tablesorter-header.tablesorter-headerAsc,
-th.tablesorter-header.tablesorter-headerDesc {
-  font-weight: 500;
-  border-bottom-color: #0272AA;
-}
-th.tablesorter-header.tablesorter-headerAsc .tablesorter-header-inner::after,
-th.tablesorter-header.tablesorter-headerDesc .tablesorter-header-inner::after {
-  display: inline-block;
-}
-
-th.tablesorter-header.tablesorter-headerDesc .tablesorter-header-inner::after {
-  content: "\f140";
-}
-
-th.tablesorter-header.tablesorter-headerAsc .tablesorter-header-inner::after {
-  content: "\f142";
-}
-
-th.tablesorter-header:focus {
-  outline: none;
-  box-shadow: 0 0 3px rgba(0, 116, 171, 0.78);
-}
-th.tablesorter-header:focus:not(.tablesorter-headerAsc):not(.tablesorter-headerDesc) .tablesorter-header-inner::after {
-  content: "\f142";
-  opacity: 0.5;
-}
-
-.tablesorter.hasFilters tr.filtered {
-  display: none;
-}
-
 .wpo-text__dim .dashicons-info {
   margin-top: 2px;
   margin-right: 5px;
@@ -1846,7 +1802,7 @@ textarea.cache-settings {
   color: #9B3600;
 }
 #wp-optimize-wrap .processed .wpo_min_log .wpo_min_file_error a:hover {
-  color: #682400;
+  color: rgb(104, 36.2322580645, 0);
 }
 #wp-optimize-wrap .processed .wpo_min_log .wpo_min_file_debug {
   color: #9c9c9c;
@@ -1866,7 +1822,7 @@ textarea.cache-settings {
 #wp-optimize-wrap .wpo-page:not(.is-enabled) .wpo-minify-features {
   display: none;
 }
-#wp-optimize-wrap .wpo-page[data-whichpage=wpo_minify]:not(.is-enabled) .nav-tab-wrapper > a:not([data-tab=status]):not([role=toggle-menu]) {
+#wp-optimize-wrap .wpo-page[data-whichpage=wpo_minify]:not(.is-enabled) .nav-tab-wrapper > a:not([data-tab=status]):not([data-tab=analytics]):not([role=toggle-menu]) {
   display: none;
 }
 #wp-optimize-wrap .wpo-minify-features {

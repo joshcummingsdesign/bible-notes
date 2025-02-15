@@ -18,6 +18,11 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	public $per_page;
 
 	/**
+	 * @var string $requested_type The requested type of the snippet.
+	 */
+	public $requested_type;
+
+	/**
 	 * Number of snippets in different views.
 	 *
 	 * @var array
@@ -48,6 +53,19 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		// Default number of snippets to show per page.
 		$this->per_page = $this->get_items_per_page( 'wpcode_snippets_per_page', (int) apply_filters( 'wpcode_code_snippets_per_page', 20 ) );
 		$this->view     = $this->get_current_view();
+		$this->process_request_parameters();
+	}
+
+	/**
+	 * Adjust query arguments based on GET parameters.
+	 */
+	protected function process_request_parameters() {
+		if ( isset( $_GET['type'] ) && ! empty( $_GET['type'] ) ) {
+			// Store the type in a class property or use it immediately in query preparations.
+			$this->requested_type = sanitize_text_field( wp_unslash( $_GET['type'] ) );
+		} else {
+			$this->requested_type = null;
+		}
 	}
 
 	/**
@@ -308,7 +326,7 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 			$user = get_user_by( 'id', $post_lock );
 
 			$currently_editing = sprintf(
-				/* translators: %s: User display name */
+			/* translators: %s: User display name */
 				esc_html__( '%s is currently editing', 'insert-headers-and-footers' ),
 				esc_html( $user->display_name )
 			);
@@ -466,11 +484,13 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	 */
 	public function prepare_items() {
 
-		// Set up the columns.
 		$columns = $this->get_columns();
+		$hidden  = get_user_option( 'manage' . $this->screen->id . 'columnshidden' );
 
-		// Hidden columns (none).
-		$hidden = get_hidden_columns( $this->screen );
+		// Check if $hidden is false and set it to an empty array if so.
+		if ( false === $hidden ) {
+			$hidden = array();
+		}
 
 		$sortable = array(
 			'name'     => array( 'title', false ),
@@ -491,6 +511,12 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$page = $this->get_pagenum();
+
+		// Reset page to 1 if a search or filter is being applied.
+		if ( isset( $_REQUEST['submitted'] ) ) {
+			$page = 1;
+		}
+
 		if ( isset( $_GET['order'] ) ) {
 			$order = 'asc' === $_GET['order'] ? 'ASC' : 'DESC';
 		} else {
@@ -555,6 +581,14 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 			$args['tax_query'][] = array(
 				'taxonomy' => 'wpcode_type',
 				'terms'    => array( sanitize_text_field( wp_unslash( $_GET['type'] ) ) ),
+				'field'    => 'slug',
+			);
+		}
+
+		if ( ! empty( $this->requested_type ) ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'wpcode_type',
+				'terms'    => array( $this->requested_type ),
 				'field'    => 'slug',
 			);
 		}
@@ -703,7 +737,6 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	 * @param array $args Get snippets arguments.
 	 */
 	private function update_count( $args ) {
-
 		/**
 		 * Allow counting snippets filtered by a given search criteria.
 		 *
@@ -721,43 +754,41 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 			return;
 		}
 
-		// Count all snippets.
-		$counts                  = wp_count_posts( $this->get_post_type() );
-		$this->count['all']      = array_sum( array( $counts->publish, $counts->draft ) );
-		$this->count['active']   = $counts->publish;
-		$this->count['inactive'] = $counts->draft;
-		$this->count['trash']    = $counts->trash;
+		$count_args = array(
+			'post_type'      => $this->get_post_type(),
+			'posts_per_page' => - 1,  // no pagination for counting.
+		);
 
-		if ( wpcode()->error->get_error_count() > 0 ) {
-			// Grab a count of all the snippets with the '_wpcode_last_error' meta key.
-			$threw_error              = get_posts(
-				array(
-					'post_type'      => $this->get_post_type(),
-					'post_status'    => array( 'draft', 'publish' ),
-					'posts_per_page' => - 1,
-					'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-						'relation' => 'OR',
-						array(
-							'key'     => '_wpcode_last_error',
-							'compare' => 'EXISTS',
-						),
-					),
-				)
-			);
-			$this->count['has_error'] = count( $threw_error );
-		} else {
-			$this->count['has_error'] = 0;
+		// Apply the same filters as used in `prepare_items()`.
+		if ( ! empty( $args['tax_query'] ) ) {
+			$count_args['tax_query'] = $args['tax_query'];
 		}
 
-		/**
-		 * Filters snippets count data after counting all snippets.
-		 *
-		 * This filter executes only if the result of `wpcode_code_snippets_table_update_count` filter
-		 * doesn't contain `all` key.
-		 *
-		 * @param array $count Contains counts of snippets in different views.
-		 * @param array $args Arguments of the `get_posts`.
-		 */
+		// Initialize counts.
+		$this->count = array(
+			'all'      => 0,
+			'active'   => 0,
+			'inactive' => 0,
+			'trash'    => 0,
+		);
+
+		// Calculate counts for each relevant status.
+		$status_counts = array(
+			'publish' => 'active',
+			'draft'   => 'inactive',
+			'trash'   => 'trash',
+		);
+
+		foreach ( $status_counts as $status => $view ) {
+			$count_args['post_status'] = $status;
+			$count_query               = new WP_Query( $count_args );
+			$this->count[ $view ]      = $count_query->found_posts;
+
+			if ( $status !== 'trash' ) {
+				$this->count['all'] += $count_query->found_posts;
+			}
+		}
+
 		$this->count = (array) apply_filters( 'wpcode_code_snippets_table_update_count_all', $this->count, $args );
 	}
 
@@ -790,8 +821,10 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 
 		if ( is_admin() && isset( $_GET['s'] ) ) {
 			$where = preg_replace(
-				"/\(\s*" . $wpdb->posts . ".post_title\s+LIKE\s*(\'[^\']+\')\s*\)/",
-				"(" . $wpdb->posts . ".post_title LIKE $1) OR (" . $wpdb->postmeta . ".meta_value LIKE $1)", $where );
+				'/\(\s*' . $wpdb->posts . ".post_title\s+LIKE\s*(\'[^\']+\')\s*\)/",
+				'(' . $wpdb->posts . '.post_title LIKE $1) OR (' . $wpdb->postmeta . '.meta_value LIKE $1)',
+				$where
+			);
 		}
 
 		return $where;
@@ -807,7 +840,7 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	public function meta_search_distinct( $distinct ) {
 
 		if ( is_admin() && isset( $_GET['s'] ) ) {
-			return "DISTINCT";
+			return 'DISTINCT';
 		}
 
 		return $distinct;
@@ -834,18 +867,103 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	 */
 	protected function pagination( $which ) {
 
-		if ( $this->has_items() ) {
-			parent::pagination( $which );
-
+		if ( empty( $this->_pagination_args['total_pages'] ) || $this->_pagination_args['total_pages'] <= 1 ) {
 			return;
 		}
 
-		printf(
-			'<div class="tablenav-pages one-page">
-				<span class="displaying-num">%s</span>
-			</div>',
-			esc_html__( '0 items', 'insert-headers-and-footers' )
+		$total_items  = $this->_pagination_args['total_items'];
+		$total_pages  = $this->_pagination_args['total_pages'];
+		$current_page = $this->get_pagenum();
+
+		// If form was submitted, reset to page 1.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['submitted'] ) && 'formSubmited' === $_GET['submitted'] ) {
+			$current_page = 1;
+		}
+
+		// Construct URL base arguments.
+		$page_args = array( 'page' => 'wpcode' );
+		foreach ( array( 'type', 'filter_action', 'location', 'view' ) as $param ) {
+			if ( ! empty( $_GET[ $param ] ) ) {
+				$page_args[ $param ] = sanitize_text_field( wp_unslash( $_GET[ $param ] ) );
+			}
+		}
+
+		// Construct the base URL for pagination.
+		$base_url = add_query_arg( $page_args, admin_url( 'admin.php' ) ) . '&paged=%';
+
+		$pagination_links_class = 'pagination-links';
+		if ( ! empty( $this->_pagination_args['infinite_scroll'] ) ) {
+			$pagination_links_class .= ' hide-if-js';
+		}
+
+		// Prepare the pagination links.
+		$page_links = array();
+
+		$disable_first = ( 1 === $current_page );
+		$disable_last  = ( $current_page === $total_pages );
+		$disable_prev  = $disable_first;
+		$disable_next  = $disable_last;
+
+		if ( $disable_first ) {
+			$page_links[] = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&laquo;</span>';
+		} else {
+			$page_links[] = sprintf(
+				'<a class="first-page button" href="%s">%s</a>',
+				esc_url( add_query_arg( 'paged', 1, $base_url ) ),
+				'&laquo;'
+			);
+		}
+
+		if ( $disable_prev ) {
+			$page_links[] = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&lsaquo;</span>';
+		} else {
+			$page_links[] = sprintf(
+				'<a class="prev-page button" href="%s">%s</a>',
+				esc_url( add_query_arg( 'paged', max( 1, $current_page - 1 ), $base_url ) ),
+				'&lsaquo;'
+			);
+		}
+
+		// Pagination input with hidden fields for filter parameters.
+		$page_links[] = sprintf(
+			'<span class="paging-input">
+                        <label for="current-page-selector" class="screen-reader-text">%s</label>
+                        <input class="current-page" id="current-page-selector" type="text" value="%d" size="%d" aria-describedby="table-paging" />
+                        <span class="tablenav-paging-text"> ' . esc_html__( 'of' ) . ' <span class="total-pages">%s</span></span>
+                    </span>',
+			esc_html__( 'Current Page' ),
+			esc_html( $current_page ),
+			strlen( $total_pages ),
+			number_format_i18n( $total_pages )
 		);
+
+		if ( $disable_next ) {
+			$page_links[] = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&rsaquo;</span>';
+		} else {
+			$page_links[] = sprintf(
+				'<a class="next-page button" href="%s">%s</a>',
+				esc_url( add_query_arg( 'paged', min( $total_pages, $current_page + 1 ), $base_url ) ),
+				'&rsaquo;'
+			);
+		}
+
+		if ( $disable_last ) {
+			$page_links[] = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&raquo;</span>';
+		} else {
+			$page_links[] = sprintf(
+				'<a class="last-page button" href="%s">%s</a>',
+				esc_url( add_query_arg( 'paged', $total_pages, $base_url ) ),
+				'&raquo;'
+			);
+		}
+
+		// Output the pagination.
+		echo '<div class="tablenav-pages">';
+		echo '<span class="displaying-num">' . sprintf( _n( '%s item', '%s items', absint( $total_items ), 'insert-headers-and-footers' ), number_format_i18n( $total_items ) ) . '</span>';
+		echo '<span class="' . esc_attr( $pagination_links_class ) . '">';
+		echo implode( "\n", wp_unslash( $page_links ) );
+		echo '</span></div>';
 	}
 
 	/**
@@ -858,7 +976,6 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	protected function extra_tablenav( $which ) {
 		if ( 'top' === $which && 'trash' !== $this->view ) {
 			echo '<div class="actions alignleft">';
-			$this->type_dropdown( $this->get_post_type() );
 			$this->location_dropdown( $this->get_post_type() );
 
 			submit_button( __( 'Filter', 'insert-headers-and-footers' ), '', 'filter_action', false, array( 'id' => 'wpcode-filter-submit' ) );
@@ -869,47 +986,6 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 			}
 			echo '</div>';
 		}
-	}
-
-	/**
-	 * The dropdown to filter by the code type.
-	 *
-	 * @param string $post_type The post type.
-	 *
-	 * @return void
-	 */
-	protected function type_dropdown( $post_type ) {
-		if ( ! is_object_in_taxonomy( $post_type, 'wpcode_type' ) ) {
-			return;
-		}
-
-		$used_types = get_terms(
-			array(
-				'taxonomy'   => 'wpcode_type',
-				'hide_empty' => false,
-			)
-		);
-
-		if ( ! $used_types ) {
-			return;
-		}
-
-		$displayed_type = isset( $_GET['type'] ) ? sanitize_text_field( wp_unslash( $_GET['type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		?>
-		<label for="filter-by-type" class="screen-reader-text"><?php esc_html_e( 'Filter by code type', 'insert-headers-and-footers' ); ?></label>
-		<select name="type" id="filter-by-type">
-			<option<?php selected( $displayed_type, '' ); ?> value=""><?php esc_html_e( 'All types', 'insert-headers-and-footers' ); ?></option>
-			<?php
-			foreach ( $used_types as $used_type ) {
-
-				$pretty_name = wpcode()->execute->get_type_label( $used_type->slug );
-				?>
-				<option<?php selected( $displayed_type, $used_type->slug ); ?> value="<?php echo esc_attr( $used_type->slug ); ?>"><?php echo esc_html( $pretty_name ); ?></option>
-				<?php
-			}
-			?>
-		</select>
-		<?php
 	}
 
 	/**
@@ -959,9 +1035,11 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_views() {
-		$views = array(
-			'all' => $this->view_markup( 'all', __( 'All', 'insert-headers-and-footers' ) ),
-		);
+		$views = array();
+
+		if ( $this->count['all'] ) {
+			$views['all'] = $this->view_markup( 'all', __( 'All', 'insert-headers-and-footers' ) );
+		}
 		if ( $this->count['active'] ) {
 			$views['active'] = $this->view_markup( 'active', __( 'Active', 'insert-headers-and-footers' ) );
 		}
@@ -970,9 +1048,6 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		}
 		if ( $this->count['trash'] && ! wpcode_testing_mode_enabled() ) {
 			$views['trash'] = $this->view_markup( 'trash', __( 'Trash', 'insert-headers-and-footers' ) );
-		}
-		if ( $this->count['has_error'] ) {
-			$views['has_error'] = $this->view_markup( 'has_error', __( 'Errors', 'insert-headers-and-footers' ) );
 		}
 
 		return $views;
@@ -987,6 +1062,9 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 	 * @return string
 	 */
 	private function view_markup( $slug, $label ) {
+
+		$start_url = admin_url( 'admin.php' );
+		// Start with a clean URL by removing specific query arguments.
 		$base_url = remove_query_arg(
 			array(
 				'view',
@@ -997,14 +1075,43 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 				'enabled',
 				'disabled',
 				's',
-			)
+			),
+			$start_url
 		);
-		$url      = 'all' === $slug ? remove_query_arg( 'view', $base_url ) : add_query_arg( 'view', $slug, $base_url );
-		$class    = $this->view === $slug ? ' class="current"' : '';
-		$count    = isset( $this->count[ $slug ] ) ? $this->count[ $slug ] : 0;
 
-		return sprintf( '<a href="%1$s"%2$s>%3$s&nbsp;<span class="count">(%4$d)</span></a>', esc_url( $url ), $class, esc_html( $label ), esc_html( $count ) );
+		$base_url       = add_query_arg( 'page', 'wpcode', $base_url );
+		$current_params = $_GET;
+
+		// Remove the same specific query arguments from current params to ensure they are not reintroduced.
+		$params_to_remove = array(
+			'view',
+			'trashed',
+			'duplicated',
+			'untrashed',
+			'deleted',
+			'enabled',
+			'disabled',
+			's'
+		);
+		foreach ( $params_to_remove as $param ) {
+			unset( $current_params[ $param ] );
+		}
+
+		$current_params['view'] = $slug;
+
+		$url   = add_query_arg( $current_params, $base_url );
+		$class = ( $slug === $this->view ) ? 'current' : '';
+		$count = isset( $this->count[ $slug ] ) ? $this->count[ $slug ] : 0;
+
+		return sprintf(
+			'<a href="%1$s" class="%2$s">%3$s <span class="count">(%4$d)</span></a>',
+			esc_url( $url ),
+			esc_attr( $class ),
+			esc_html( $label ),
+			esc_html( $count )
+		);
 	}
+
 
 	/**
 	 * Get an admin URL.

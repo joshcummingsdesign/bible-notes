@@ -167,6 +167,7 @@
         {
           "icon": "fe_aperture",
           "size": 50,
+          "unit": "px",
           "width": 2,
           "title": "",
           "color": "",
@@ -187,24 +188,28 @@
           "border": "",
           "hoverBorder": "",
           "borderRadius": 0,
+          "borderRadiusUnit": "px",
           "borderWidth": [
             0,
             0,
             0,
             0
           ],
+          "borderWidthUnit": "px",
           "padding": [
             10,
             10,
             10,
             10
           ],
+          "paddingUnit": "px",
           "margin": [
             0,
             15,
             0,
             15
-          ]
+          ],
+          "marginUnit": "px"
         }
       ]
     },
@@ -233,6 +238,10 @@
         "",
         ""
       ]
+    },
+    "titleMinHeightUnit": {
+      "type": "string",
+      "default": "px"
     },
     "titleTagType": {
       "type": "string",
@@ -308,6 +317,10 @@
         "",
         ""
       ]
+    },
+    "textMinHeightUnit": {
+      "type": "string",
+      "default": "px"
     },
     "textFont": {
       "type": "array",
@@ -451,7 +464,36 @@
           "spread": 0,
           "blur": 0,
           "hOffset": 0,
-          "vOffset": 0
+          "vOffset": 0,
+          "inset": false
+        }
+      ]
+    },
+    "tabletShadow": {
+      "type": "array",
+      "default": [
+        {
+          "color": "",
+          "opacity": "",
+          "spread": "",
+          "blur": "",
+          "hOffset": "",
+          "vOffset": "",
+          "inset": ""
+        }
+      ]
+    },
+    "mobileShadow": {
+      "type": "array",
+      "default": [
+        {
+          "color": "",
+          "opacity": "",
+          "spread": "",
+          "blur": "",
+          "hOffset": "",
+          "vOffset": "",
+          "inset": ""
         }
       ]
     },
@@ -464,7 +506,36 @@
           "spread": 0,
           "blur": 14,
           "hOffset": 0,
-          "vOffset": 0
+          "vOffset": 0,
+          "inset": false
+        }
+      ]
+    },
+    "tabletShadowHover": {
+      "type": "array",
+      "default": [
+        {
+          "color": "",
+          "opacity": "",
+          "spread": "",
+          "blur": "",
+          "hOffset": "",
+          "vOffset": "",
+          "inset": ""
+        }
+      ]
+    },
+    "mobileShadowHover": {
+      "type": "array",
+      "default": [
+        {
+          "color": "",
+          "opacity": "",
+          "spread": "",
+          "blur": "",
+          "hOffset": "",
+          "vOffset": "",
+          "inset": ""
         }
       ]
     },

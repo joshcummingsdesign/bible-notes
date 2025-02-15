@@ -109,14 +109,14 @@ class WP_Optimize_Minify_Front_End {
 	}
 
 	/**
-	 * Wether to run the feature on a page or not
+	 * Whether to run the feature on a page or not
 	 *
 	 * @param string $context - Optional, The context where the check is done
 	 * @return boolean
 	 */
 	public function run_on_page($context = 'default') {
 		/**
-		 * Filters wether the functionality is ran on the current page.
+		 * Filters whether the functionality is ran on the current page.
 		 *
 		 * @param boolean $run_on_page
 		 * @param string  $context - Optional, The feature where the check is done
@@ -155,7 +155,7 @@ class WP_Optimize_Minify_Front_End {
 		$href = WP_Optimize_Minify_Functions::get_hurl($href);
 		
 		if ($this->options['debug']) {
-			echo "<!-- wpo_min DEBUG: Inline CSS processing start $handle / $href -->\n";
+			echo "<!-- wpo_min DEBUG: Inline CSS processing start ". esc_html($handle) . " / " . esc_html($href) . " -->\n";
 		}
 		
 
@@ -242,7 +242,7 @@ class WP_Optimize_Minify_Front_End {
 					if (false === $json) {
 						$json = WP_Optimize_Minify_Functions::download_and_minify($href, null, $this->options['enable_css_minification'], 'css', $handle);
 						if ($this->options['debug']) {
-							echo "<!-- wpo_min DEBUG: Uncached file processing now for $handle / $href -->\n";
+							echo "<!-- wpo_min DEBUG: Uncached file processing now for " . esc_html($handle) . " / " . esc_html($href) . " -->\n";
 						}
 						WP_Optimize_Minify_Cache_Functions::set_transient($tkey, $json);
 					}
@@ -256,11 +256,13 @@ class WP_Optimize_Minify_Front_End {
 						// https://developers.google.com/web/updates/2016/02/font-display
 						$res['code'] = str_ireplace('font-style:normal;', 'font-display:block;font-style:normal;', $res['code']);
 
-						echo '<style class="optimize_css_1" type="text/css" media="all">'.$res['code'].'</style>' . "\n";
+						echo '<style class="optimize_css_1" type="text/css" media="all">';
+						echo $res['code']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is already escaped
+						echo '</style>' . "\n";
 						return false;
 					} else {
 						if ($this->options['debug']) {
-							echo "<!-- wpo_min DEBUG: Google fonts request failed for $href -->\n";
+							echo "<!-- wpo_min DEBUG: Google fonts request failed for " . esc_html($href) . " -->\n";
 						}
 						return $html;
 					}
@@ -294,7 +296,7 @@ class WP_Optimize_Minify_Front_End {
 		if (false === $json) {
 			$json = WP_Optimize_Minify_Functions::download_and_minify($href, null, $this->options['enable_css_minification'], 'css', $handle);
 			if ($this->options['debug']) {
-				echo "<!-- wpo_min DEBUG: Uncached file processing now for $handle / $href -->" . "\n";
+				echo "<!-- wpo_min DEBUG: Uncached file processing now for " . esc_html($handle) . " / " . esc_html($href) . " -->" . "\n";
 			}
 			WP_Optimize_Minify_Cache_Functions::set_transient($tkey, $json);
 		}
@@ -304,7 +306,9 @@ class WP_Optimize_Minify_Front_End {
 		
 		// inline it + other inlined children styles
 		if (null !== $res && false != $res['status']) {
-			echo '<style class="optimize_css_2" type="text/css" media="'.$media.'">'.$res['code'].'</style>' . "\n";
+			echo '<style class="optimize_css_2" type="text/css" media="'.esc_attr($media).'">';
+			echo $res['code'];  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is already escaped
+			echo '</style>' . "\n";
 			
 			// get inline_styles for this handle, minify and print
 			$inline_styles = array();
@@ -315,7 +319,9 @@ class WP_Optimize_Minify_Front_End {
 				if (is_string($inline_styles)) {
 					$code = WP_Optimize_Minify_Functions::get_css($href, $inline_styles, $this->options['enable_css_minification']);
 					if (!empty($code) && false != $code) {
-						echo '<style class="optimize_css_3" type="text/css" media="'.$media.'">'.$code.'</style>' . "\n";
+						echo '<style class="optimize_css_3" type="text/css" media="'.esc_attr($media).'">';
+						echo $code; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is already escaped
+						echo '</style>' . "\n";
 					}
 				}
 				
@@ -324,7 +330,9 @@ class WP_Optimize_Minify_Front_End {
 					foreach ($inline_styles as $st) {
 						$code = WP_Optimize_Minify_Functions::get_css($href, $st, $this->options['enable_css_minification']);
 						if (!empty($code) && false != $code) {
-							echo '<style class="optimize_css_4" type="text/css" media="'.$media.'">'.$code.'</style>' . "\n";
+							echo '<style class="optimize_css_4" type="text/css" media="'.esc_attr($media).'">';
+							echo $code; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is already escaped
+							echo '</style>' . "\n";
 						}
 					}
 				}
@@ -334,7 +342,7 @@ class WP_Optimize_Minify_Front_End {
 			return false;
 		} else {
 			if ($this->options['debug']) {
-				echo "<!-- wpo_min DEBUG: $handle / $href returned an empty from minification -->" . "\n";
+				echo "<!-- wpo_min DEBUG: " . esc_html($handle) . " / " . esc_html($href) . " returned an empty from minification -->" . "\n";
 			}
 			return $html;
 		}
@@ -447,9 +455,13 @@ class WP_Optimize_Minify_Front_End {
 	 */
 	public function add_critical_path() {
 		if (is_front_page() && !empty($this->options['critical_path_css_is_front_page'])) {
-			echo '<style id="critical-path-is-front-page" type="text/css" media="all">' . "\n" . $this->options['critical_path_css_is_front_page'] . "\n" . '</style>' . "\n";
+			echo '<style id="critical-path-is-front-page" type="text/css" media="all">' . "\n";
+			echo $this->options['critical_path_css_is_front_page'] . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is already escaped
+			echo '</style>' . "\n";
 		} elseif (!empty($this->options['critical_path_css'])) {
-			echo '<style id="critical-path-global" type="text/css" media="all">' . "\n" . $this->options['critical_path_css'] . "\n" . '</style>' . "\n";
+			echo '<style id="critical-path-global" type="text/css" media="all">' . "\n";
+			echo $this->options['critical_path_css'] . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is already escaped
+			echo '</style>' . "\n";
 		}
 	}
 
@@ -583,7 +595,7 @@ class WP_Optimize_Minify_Front_End {
 			);
 
 			// google fonts to the top (collect and skip process array)
-			if (WP_Optimize_Minify_Functions::is_google_font($href)) {
+			if (!$disable_google_fonts_processing && WP_Optimize_Minify_Functions::is_google_font($href)) {
 				if ($this->options['remove_googlefonts']) {
 					$done = array_merge($done, array($handle));
 					continue;
@@ -628,7 +640,7 @@ class WP_Optimize_Minify_Front_End {
 					if (null === $json || false === $json || empty($json['code'])) {
 						$res = WP_Optimize_Minify_Functions::download_and_minify($href, null, $minify_css, 'css', null);
 						if ($this->options['debug']) {
-							echo "<!-- wpo_min DEBUG: Uncached file processing now for $href -->\n";
+							echo "<!-- wpo_min DEBUG: Uncached file processing now for " . esc_html($href) . " -->\n";
 						}
 						WP_Optimize_Minify_Cache_Functions::set_transient($tkey, $res);
 						// decode
@@ -640,10 +652,12 @@ class WP_Optimize_Minify_Front_End {
 						// add font-display
 						// https://developers.google.com/web/updates/2016/02/font-display
 						$json['code'] = str_ireplace('font-style:normal;', 'font-display:block;font-style:normal;', $json['code']);
-						echo '<style type="text/css" media="all">'.$json['code'].'</style>' . "\n";
+						echo '<style type="text/css" media="all">';
+						echo $json['code']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is already escaped
+						echo '</style>' . "\n";
 						$done = array_merge($done, array($handle));
 					} else {
-						echo "<!-- GOOGLE FONTS REQUEST FAILED for $href -->"  . "\n";
+						echo "<!-- GOOGLE FONTS REQUEST FAILED for " . esc_html($href) . " -->"  . "\n";
 						// inlining failed, so enqueue again
 						wp_enqueue_style($handle, $href, array(), null);
 					}
@@ -699,7 +713,7 @@ class WP_Optimize_Minify_Front_End {
 				|| ($process_css && 'inherit' == $this->options['fawesome_method'] && WP_Optimize_Minify_Functions::is_font_awesome($href))
 				|| ($process_css && !$disable_google_fonts_processing && 'inherit' == $this->options['gfonts_method'] && WP_Optimize_Minify_Functions::is_google_font($href))
 			) {
-				// colect inline css for this handle
+				// collect inline css for this handle
 				if (isset($wp_styles->registered[$handle]->extra['after']) && is_array($wp_styles->registered[$handle]->extra['after'])) {
 					$inline_css[$handle] = WP_Optimize_Minify_Functions::minify_css_string(implode('', $wp_styles->registered[$handle]->extra['after'])); // save
 					$wp_styles->registered[$handle]->extra['after'] = null; // dequeue
@@ -774,7 +788,7 @@ class WP_Optimize_Minify_Front_End {
 				if (!file_exists($file)) {
 					
 					// code and log initialization
-					$log_header = "PROCESSED on ".date('r')." from ".home_url(add_query_arg(null, null));
+					$log_header = "PROCESSED on ".gmdate('r')." from ".home_url(add_query_arg(null, null));
 					$log = array(
 						'header' => $log_header,
 						'files' => array()
@@ -803,7 +817,7 @@ class WP_Optimize_Minify_Front_End {
 								$enable_minification = $this->options['enable_css_minification'] && !WP_Optimize_Minify_Functions::is_minified_css_js_filename($href);
 								$json = WP_Optimize_Minify_Functions::download_and_minify($href, null, $enable_minification, 'css', $handle, $version);
 								if ($this->options['debug']) {
-									echo "<!-- wpo_min DEBUG: Uncached file processing now for $handle / $href / $version -->" . "\n";
+									echo "<!-- wpo_min DEBUG: Uncached file processing now for " . esc_html($handle) . " / " . esc_html($href) . " / " . esc_html($version) . " -->" . "\n";
 								}
 								WP_Optimize_Minify_Cache_Functions::set_transient($tkey, $json);
 							}
@@ -852,14 +866,14 @@ class WP_Optimize_Minify_Front_End {
 					if (!empty($code)) {
 						// Only generate meta.json file if cache is reset
 						if (!empty($meta_log['invalidation_reason'])) {
-							file_put_contents($meta_json_file, json_encode($meta_log));
+							WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
 						}
 						WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 					}
 				} else {
 					$log_file = $file.'.json';
 					if (file_exists($log_file)) {
-						$saved_log = json_decode(file_get_contents($log_file));
+						$saved_log = json_decode(WPO_File_System_Helper::get_file_contents($log_file));
 						if (is_object($saved_log) && property_exists($saved_log, 'files')) {
 							$files = (array) $saved_log->files;
 							foreach ($header[$i]['handles'] as $handle) {
@@ -895,7 +909,7 @@ class WP_Optimize_Minify_Front_End {
 						}
 					} else {
 						// file could not be generated, output something meaningful
-						echo "<!-- ERROR: WP-Optimize Minify was not allowed to save its cache on - ".str_replace(ABSPATH, '', $file)." -->";
+						echo "<!-- ERROR: WP-Optimize Minify was not allowed to save its cache on - ".esc_html(str_replace(ABSPATH, '', $file))." -->";
 						echo "<!-- Please check if the path above is correct and ensure your server has write permission there! -->";
 					}
 				}
@@ -1053,7 +1067,7 @@ class WP_Optimize_Minify_Front_End {
 				if (!file_exists($file)) {
 					
 					// code and log initialization
-					$log_header = "PROCESSED on ".date('r')." from ".home_url(add_query_arg(null, null));
+					$log_header = "PROCESSED on ".gmdate('r')." from ".home_url(add_query_arg(null, null));
 					$log = array(
 						'header' => $log_header,
 						'files' => array()
@@ -1086,7 +1100,7 @@ class WP_Optimize_Minify_Front_End {
 								$enable_minification = $minify_js && !WP_Optimize_Minify_Functions::is_minified_css_js_filename($href);
 								$json = WP_Optimize_Minify_Functions::download_and_minify($href, null, $enable_minification, 'js', $handle, $version);
 								if ($this->options['debug']) {
-									echo "<!-- wpo_min DEBUG: Uncached file processing now for $handle / $href / $version -->\n";
+									echo "<!-- wpo_min DEBUG: Uncached file processing now for " . esc_html($handle) . " / " . esc_html($href) . " / " . esc_html($version) . " -->\n";
 								}
 								WP_Optimize_Minify_Cache_Functions::set_transient($tkey, $json);
 							}
@@ -1157,14 +1171,14 @@ class WP_Optimize_Minify_Front_End {
 					if (!empty($code)) {
 						// Only generate meta.json file if cache is reset
 						if (!empty($meta_log['invalidation_reason'])) {
-							file_put_contents($meta_json_file, json_encode($meta_log));
+							WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
 						}
 						WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 					}
 				} else {
 					$log_file = $file.'.json';
 					if (file_exists($log_file)) {
-						$saved_log = json_decode(file_get_contents($log_file));
+						$saved_log = json_decode(WPO_File_System_Helper::get_file_contents($log_file));
 						if (is_object($saved_log) && property_exists($saved_log, 'files')) {
 							$files = (array) $saved_log->files;
 							foreach ($footer[$i]['handles'] as $handle) {
@@ -1228,7 +1242,7 @@ class WP_Optimize_Minify_Front_End {
 					}
 				} else {
 					// file could not be generated, output something meaningful
-					echo "<!-- ERROR: WP-Optimize Minify was not allowed to save its cache on - ".str_replace(ABSPATH, '', $file)." -->";
+					echo "<!-- ERROR: WP-Optimize Minify was not allowed to save its cache on - ".esc_html(str_replace(ABSPATH, '', $file))." -->";
 					echo "<!-- Please check if the path above is correct and ensure your server has write permission there! -->";
 				}
 				
@@ -1411,7 +1425,7 @@ class WP_Optimize_Minify_Front_End {
 				if (!file_exists($file)) {
 					
 					// code and log initialization
-					$log_header = "PROCESSED on ".date('r')." from ".home_url(add_query_arg(null, null));
+					$log_header = "PROCESSED on ".gmdate('r')." from ".home_url(add_query_arg(null, null));
 					$log = array(
 						'header' => $log_header,
 						'files' => array()
@@ -1441,7 +1455,7 @@ class WP_Optimize_Minify_Front_End {
 								$enable_minification = $minify_js && !WP_Optimize_Minify_Functions::is_minified_css_js_filename($href);
 								$json = WP_Optimize_Minify_Functions::download_and_minify($href, null, $enable_minification, 'js', $handle, $version);
 								if ($this->options['debug']) {
-									echo "<!-- wpo_min DEBUG: Uncached file processing now for $handle / $href / $version -->" . "\n";
+									echo "<!-- wpo_min DEBUG: Uncached file processing now for " . esc_html($handle) . " / " . esc_html($href) . " / " . esc_html($version) . " -->" . "\n";
 								}
 								WP_Optimize_Minify_Cache_Functions::set_transient($tkey, $json);
 							}
@@ -1514,14 +1528,14 @@ class WP_Optimize_Minify_Front_End {
 					if (!empty($code)) {
 						// Only generate meta.json file if cache is reset
 						if (!empty($meta_log['invalidation_reason'])) {
-							file_put_contents($meta_json_file, json_encode($meta_log));
+							WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
 						}
 						WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 					}
 				} else {
 					$log_file = $file.'.json';
 					if (file_exists($log_file)) {
-						$saved_log = json_decode(file_get_contents($log_file));
+						$saved_log = json_decode(WPO_File_System_Helper::get_file_contents($log_file));
 						if (is_object($saved_log) && property_exists($saved_log, 'files')) {
 							$files = (array) $saved_log->files;
 							foreach ($header[$i]['handles'] as $handle) {
@@ -1588,7 +1602,7 @@ class WP_Optimize_Minify_Front_End {
 					}
 				} else {
 					// file could not be generated, output something meaningful
-					echo "<!-- ERROR: WP-Optimize minify was not allowed to save its cache on - ".str_replace(ABSPATH, '', $file)." -->";
+					echo "<!-- ERROR: WP-Optimize minify was not allowed to save its cache on - ".esc_html(str_replace(ABSPATH, '', $file))." -->";
 					echo "<!-- Please check if the path above is correct and ensure your server has write permission there! -->";
 					echo "<!-- If you found a bug, please report this on https://wordpress.org/support/plugin/wp-optimize/ -->";
 				}
@@ -1804,7 +1818,7 @@ class WP_Optimize_Minify_Front_End {
 				|| empty($href)
 			) {
 					
-				// colect inline css for this handle
+				// collect inline css for this handle
 				if (isset($wp_styles->registered[$handle]->extra['after']) && is_array($wp_styles->registered[$handle]->extra['after'])) {
 					$inline_css[$handle] = WP_Optimize_Minify_Functions::minify_css_string(implode('', $wp_styles->registered[$handle]->extra['after'])); // save
 					$wp_styles->registered[$handle]->extra['after'] = null; // dequeue
@@ -1874,7 +1888,7 @@ class WP_Optimize_Minify_Front_End {
 				if (!file_exists($file)) {
 
 					// code and log initialization
-					$log_header = "PROCESSED on ".date('r')." from ".home_url(add_query_arg(null, null));
+					$log_header = "PROCESSED on ".gmdate('r')." from ".home_url(add_query_arg(null, null));
 					$log = array(
 						'header' => $log_header,
 						'files' => array()
@@ -1902,7 +1916,7 @@ class WP_Optimize_Minify_Front_End {
 								$enable_minification = $minify_css && !WP_Optimize_Minify_Functions::is_minified_css_js_filename($href);
 								$json = WP_Optimize_Minify_Functions::download_and_minify($href, null, $enable_minification, 'css', $handle, $version);
 								if ($this->options['debug']) {
-									echo "<!-- wpo_min DEBUG: Uncached file processing now for $handle / $href / $version -->" . "\n";
+									echo "<!-- wpo_min DEBUG: Uncached file processing now for " . esc_html($handle) . " / " . esc_html($href) . " / " . esc_html($version) . " -->" . "\n";
 								}
 								WP_Optimize_Minify_Cache_Functions::set_transient($tkey, $json);
 							}
@@ -1951,14 +1965,14 @@ class WP_Optimize_Minify_Front_End {
 					if (!empty($code)) {
 						// Only generate meta.json file if cache is reset
 						if (!empty($meta_log['invalidation_reason'])) {
-							file_put_contents($meta_json_file, json_encode($meta_log));
+							WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
 						}
 						WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 					}
 				} else {
 					$log_file = $file.'.json';
 					if (file_exists($log_file)) {
-						$saved_log = json_decode(file_get_contents($log_file));
+						$saved_log = json_decode(WPO_File_System_Helper::get_file_contents($log_file));
 						if (is_object($saved_log) && property_exists($saved_log, 'files')) {
 							$files = (array) $saved_log->files;
 							foreach ($footer[$i]['handles'] as $handle) {
@@ -1986,14 +2000,14 @@ class WP_Optimize_Minify_Front_End {
 
 						// inline if the file is smaller than 20KB or option has been enabled
 						if (filesize($file) < 20000 && $this->options['inline_css']) {
-							$this->inline_css(file_get_contents($file), $handle, $file_url, $footer[$i]['media']);
+							$this->inline_css(WPO_File_System_Helper::get_file_contents($file), $handle, $file_url, $footer[$i]['media']);
 						} else {
 							// enqueue it
 							wp_enqueue_style("wpo_min-footer-$i", $file_url, array(), null, $footer[$i]['media']);
 						}
 					} else {
 						// file could not be generated, output something meaningful
-						echo "<!-- ERROR: WP-Optimize Minify was not allowed to save its cache on - ".str_replace(ABSPATH, '', $file)." -->";
+						echo "<!-- ERROR: WP-Optimize Minify was not allowed to save its cache on - ".esc_html(str_replace(ABSPATH, '', $file))." -->";
 						echo "<!-- Please check if the path above is correct and ensure your server has write permission there! -->";
 					}
 				}
@@ -2050,7 +2064,7 @@ class WP_Optimize_Minify_Front_End {
 			}
 
 			// code and log initialization
-			$log_header = "PROCESSED on ".date('r')." from ".home_url(add_query_arg(null, null));
+			$log_header = "PROCESSED on ".gmdate('r')." from ".home_url(add_query_arg(null, null));
 			$log = array(
 				'header' => $log_header,
 				'files' => array()
@@ -2071,7 +2085,7 @@ class WP_Optimize_Minify_Front_End {
 				$enable_minification = $minify_js && !WP_Optimize_Minify_Functions::is_minified_css_js_filename($href);
 				$json = WP_Optimize_Minify_Functions::download_and_minify($href, null, $enable_minification, 'js', $handle_no_slash, $version);
 				if ($this->options['debug']) {
-					echo "<!-- wpo_min DEBUG: Uncached file processing now for $handle / $href / $version -->\n";
+					echo "<!-- wpo_min DEBUG: Uncached file processing now for " . esc_html($handle) . " / " . esc_html($href) . " / " . esc_html($version) . " -->\n";
 				}
 				WP_Optimize_Minify_Cache_Functions::set_transient($tkey, $json);
 			}
@@ -2102,7 +2116,7 @@ class WP_Optimize_Minify_Front_End {
 
 			// Only generate meta.json file if cache is reset
 			if (!empty($meta_log['invalidation_reason'])) {
-				file_put_contents($meta_json_file, json_encode($meta_log));
+				WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
 			}
 			WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 
@@ -2114,7 +2128,7 @@ class WP_Optimize_Minify_Front_End {
 			$buffer = str_replace($script['url'], $file_url, $buffer);
 			if (!empty($json_map) && isset($json_map['imports'][$handle])) {
 				$json_map_update['imports'][$handle] = $file_url;
-				$buffer = str_replace(json_encode($json_map), json_encode($json_map_update), $buffer);
+				$buffer = str_replace(wp_json_encode($json_map), wp_json_encode($json_map_update), $buffer);
 			}
 		}
 
@@ -2364,10 +2378,10 @@ class WP_Optimize_Minify_Front_End {
 		
 		// return header files or fallback
 		if ($b == $a && file_exists($a)) {
-			return file_get_contents($a);
+			return WPO_File_System_Helper::get_file_contents($a);
 		}
 		if ($b != $a && file_exists($b)) {
-			return file_get_contents($b);
+			return WPO_File_System_Helper::get_file_contents($b);
 		}
 		
 		return false;

@@ -140,12 +140,14 @@
 					} );
 		
 					// Handle keyboard accessibility for traversing menu.
-					SUBMENUS[ i ].addEventListener( 'keydown', function( e ) {
-						// These specific selectors help us only select items that are visible.
-						var focusSelector = 'ul.toggle-show > li > a, ul.toggle-show > li > .dropdown-nav-special-toggle';
-		
+					SUBMENUS[ i ].addEventListener( 'keydown', function( e ) {		
 						// 9 is tab KeyMap
 						if ( 9 === e.keyCode ) {
+							var focusSelector =
+							'ul.toggle-show > li > a, ul.toggle-show > li > .dropdown-nav-special-toggle';
+							if ( SUBMENUS[ i ].parentNode.classList.contains('kadence-menu-mega-enabled') ) {
+								focusSelector = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]';
+							}
 							if ( e.shiftKey ) {
 								// Means we're tabbing out of the beginning of the submenu.
 								if ( window.kadence.isfirstFocusableElement (SUBMENUS[ i ], document.activeElement, focusSelector ) ) {
@@ -155,6 +157,12 @@
 							} else if ( window.kadence.islastFocusableElement( SUBMENUS[ i ], document.activeElement, focusSelector ) ) {
 								window.kadence.toggleSubMenu( SUBMENUS[ i ].parentNode, false );
 							}
+						}
+						// 27 is keymap for esc key.
+						if ( e.keyCode === 27 ) {
+							window.kadence.toggleSubMenu( SUBMENUS[ i ].parentNode, false );
+							// Move the focus back to the toggle.
+							SUBMENUS[ i ].parentNode.querySelector('.dropdown-nav-special-toggle').focus();
 						}
 					} );
 		
@@ -188,9 +196,11 @@
 			*/
 			if ( parentMenuItemToggled ) {
 				// Toggle "off" the submenu.
-				parentMenuItem.classList.remove( 'menu-item--toggled-on' );
-				subMenu.classList.remove( 'toggle-show' );
-				toggleButton.setAttribute( 'aria-label', ( dropdown_label ? kadenceConfig.screenReader.expandOf + ' ' + dropdown_label : kadenceConfig.screenReader.expand ) );
+				setTimeout(function () {
+					parentMenuItem.classList.remove( 'menu-item--toggled-on' );
+					subMenu.classList.remove( 'toggle-show' );
+					toggleButton.setAttribute( 'aria-label', ( dropdown_label ? kadenceConfig.screenReader.expandOf + ' ' + dropdown_label : kadenceConfig.screenReader.expand ) );
+				}, 5);
 
 				// Make sure all children are closed.
 				var subMenuItemsToggled = parentMenuItem.querySelectorAll( '.menu-item--toggled-on' );

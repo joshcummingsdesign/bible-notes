@@ -110,7 +110,10 @@
   },
   "usesContext": [
     "kadence/listIcon",
-    "kadence/listIconWidth"
+    "kadence/listIconWidth",
+    "kadence/dynamicSource",
+    "kadence/repeaterRowData",
+    "kadence/repeaterRow"
   ],
   "supports": {
     "ktdynamic": true,

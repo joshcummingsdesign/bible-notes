@@ -50,7 +50,7 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 		add_action( 'load-toplevel_page_wpcode', array( $this, 'add_per_page_option' ) );
 		// Hide some columns by default.
 		add_filter( 'default_hidden_columns', array( $this, 'hide_columns' ), 10, 2 );
-
+		add_filter( 'wpcode_admin_js_data', array( $this, 'prepare_admin_js_localization_data' ) );
 		add_filter( 'screen_settings', array( $this, 'add_custom_screen_option' ), 10, 2 );
 		// Hide the duplicated parameter from the URL.
 		add_filter( 'removable_query_args', array( $this, 'remove_query_arg_from_url' ) );
@@ -141,7 +141,7 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 				if ( ! $snippet->active ) {
 					// If failed to activate don't count it.
 					unset( $ids[ $key ] );
-					$failed ++;
+					++ $failed;
 				}
 			}
 		}
@@ -187,7 +187,6 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 			)
 		);
 		exit;
-
 	}
 
 	/**
@@ -223,6 +222,106 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 	}
 
 	/**
+	 * Custom Footer for this page.
+	 *
+	 * @return void
+	 */
+	public function output_footer() {
+		parent::output_footer();
+		?>
+		<div id="wpcode-loader">
+			<div class="wpcode-loader-overlay">
+				<img src="<?php echo esc_url( WPCODE_PLUGIN_URL ) . 'admin/images/spinner.svg'; ?>" alt="">
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Get the snippet types for the filters in a normalized format.
+	 *
+	 * @return array
+	 */
+	public function get_snippet_types_for_filters() {
+		$types        = wpcode()->execute->get_types();
+		$snippet_type = isset( $_GET['type'] ) ? sanitize_text_field( wp_unslash( $_GET['type'] ) ) : false;
+
+		$type_buttons = array(
+			array(
+				'is_pro' => false,
+				'label'  => esc_html__( 'All Snippets', 'insert-headers-and-footers' ),
+				'class'  => ! $snippet_type ? 'active' : '',
+				'type'   => '',
+			)
+		);
+
+		foreach ( $types as $type_key => $type ) {
+			$type_buttons[] = array(
+				'is_pro' => isset( $type['is_pro'] ) ? $type['is_pro'] : false,
+				'label'  => $type['filter_label'],
+				'class'  => $snippet_type === $type_key ? 'active' : '',
+				'type'   => $type_key,
+			);
+		}
+
+		return $this->prepare_type_buttons( $type_buttons );
+	}
+
+	/**
+	 * Reorder the buttons and add version-specific info.
+	 *
+	 * @param array $type_buttons The type buttons.
+	 *
+	 * @return array
+	 */
+	protected function prepare_type_buttons( $type_buttons ) {
+
+		// Reorder items so pro items are always last.
+		usort(
+			$type_buttons,
+			function ( $a, $b ) {
+				if ( $a['is_pro'] === $b['is_pro'] ) {
+					return 0;
+				}
+
+				return $a['is_pro'] ? 1 : - 1;
+			}
+		);
+
+		// Let's go through the items and add the pro class and update the label.
+		foreach ( $type_buttons as $key => $type ) {
+			if ( ! $type['is_pro'] ) {
+				continue;
+			}
+			$type_buttons[ $key ]['label'] = sprintf( '%s (PRO)', $type['label'] );
+			$type_buttons[ $key ]['class'] .= ' wpcode_pro_type_lite';
+		}
+
+		return $type_buttons;
+	}
+
+	/**
+	 * Generate buttons for available snippet types.
+	 *
+	 * @return string HTML for the buttons.
+	 */
+	public function get_snippet_type_buttons() {
+		$buttons      = $this->get_snippet_types_for_filters();
+		$buttons_html = '';
+
+		foreach ( $buttons as $button ) {
+			$buttons_html .= sprintf(
+				'<li><a class="%1$s" href="#" data-type="%2$s">%3$s</a></li>',
+				esc_attr( $button['class'] ),
+				esc_attr( $button['type'] ),
+				esc_attr( $button['label'] )
+			);
+		}
+
+		return $buttons_html;
+	}
+
+	/**
 	 * Content of the bottom row of the header.
 	 *
 	 * @return void
@@ -231,11 +330,17 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 		$add_new_url = $this->admin_url( 'admin.php?page=wpcode-snippet-manager' );
 		?>
 		<div class="wpcode-column wpcode-title-button">
-			<h1><?php esc_html_e( 'All Snippets', 'insert-headers-and-footers' ); ?></h1>
+			<ul id="wpcode-snippet-type-buttons" class="wpcode-admin-tabs">
+				<?php echo $this->get_snippet_type_buttons(); ?>
+			</ul>
+			<button class="wpcode-mobile-dropdown-toggle wpcode-button wpcode-button-just-icon" data-target="#wpcode-snippet-type-buttons">
+				<?php wpcode_icon( 'menu', '24', '24', '0 -960 960 960' ); ?>
+			</button>
 			<a class="wpcode-button" href="<?php echo esc_url( $add_new_url ); ?>">
 				<?php esc_html_e( 'Add New', 'insert-headers-and-footers' ); ?>
 			</a>
 		</div>
+
 		<?php
 	}
 
@@ -383,6 +488,26 @@ class WPCode_Admin_Page_Code_Snippets extends WPCode_Admin_Page {
 		$hidden[] = 'code_type';
 
 		return $hidden;
+	}
+
+	/**
+	 * Prepare the data for the admin JS localization.
+	 *
+	 * @param array $data The data to be localized.
+	 *
+	 * @return array
+	 */
+	public function prepare_admin_js_localization_data( $data ) {
+
+		$data['blocks_title']               = __( 'Blocks snippets is a Pro Feature', 'insert-headers-and-footers' );
+		$data['blocks_description']         = __( 'Upgrade to PRO today and unlock building snippets using the Gutenberg Block Editor. Create templates using blocks and use the full power of WPCode to insert them in your site.', 'insert-headers-and-footers' );
+		$data['blocks_snippet_upgrade_url'] = wpcode_utm_url( 'https://wpcode.com/lite/', 'code_type', 'blocks', 'modal' );
+		$data['button_text']                = __( 'Upgrade to PRO', 'insert-headers-and-footers' );
+		$data['scss_title']                 = __( 'SCSS snippets is a Pro Feature', 'insert-headers-and-footers' );
+		$data['scss_description']           = __( 'Upgrade to PRO today and unlock editing snippets using SCSS code with optimized compiling directly in the WordPress admin.', 'insert-headers-and-footers' );
+		$data['scss_snippet_upgrade_url']   = wpcode_utm_url( 'https://wpcode.com/lite/', 'code_type', 'scss', 'modal' );
+
+		return $data;
 	}
 
 	/**

@@ -424,6 +424,19 @@
     "mobileAlign": {
       "type": "string"
     },
+    "enableTextShadow": {
+      "type": "boolean",
+      "default": false
+    },
+    "textOrientation": {
+      "type": "string"
+    },
+    "tabletTextOrientation": {
+      "type": "string"
+    },
+    "mobileTextOrientation": {
+      "type": "string"
+    },
     "textShadow": {
       "type": "array",
       "default": [
@@ -433,6 +446,30 @@
           "blur": 1,
           "hOffset": 1,
           "vOffset": 1
+        }
+      ]
+    },
+    "textShadowTablet": {
+      "type": "array",
+      "default": [
+        {
+          "enable": false,
+          "color": "",
+          "blur": "",
+          "hOffset": "",
+          "vOffset": ""
+        }
+      ]
+    },
+    "textShadowMobile": {
+      "type": "array",
+      "default": [
+        {
+          "enable": false,
+          "color": "",
+          "blur": "",
+          "hOffset": "",
+          "vOffset": ""
         }
       ]
     },

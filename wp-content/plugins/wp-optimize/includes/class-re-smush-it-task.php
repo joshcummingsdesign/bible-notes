@@ -31,7 +31,7 @@ class Re_Smush_It_Task extends Updraft_Smush_Task {
 		$body .= "\r\n";
 		$body .= "Content-Disposition: form-data; name=\"files\"; filename=\"$file_name\"\r\n";
 		$body .= "\r\n";
-		$body .= file_get_contents($test_image);
+		$body .= WPO_File_System_Helper::get_file_contents($test_image);
 		$body .= "\r\n";
 		$body .= "--$boundary";
 
@@ -105,7 +105,7 @@ class Re_Smush_It_Task extends Updraft_Smush_Task {
 		$payload .= "\r\n";
 		$payload .= "Content-Disposition: form-data; name=\"files\"; filename=\"$file_name\"\r\n";
 		$payload .= "\r\n";
-		$payload .= file_get_contents($local_file);
+		$payload .= WPO_File_System_Helper::get_file_contents($local_file);
 		$payload .= "\r\n";
 		$payload .= "--$boundary";
 
@@ -140,7 +140,7 @@ class Re_Smush_It_Task extends Updraft_Smush_Task {
 
 		if (!property_exists($data, 'dest')) {
 			$this->fail("invalid_response", "The response does not contain the compressed file URL");
-			$this->log("data: ".json_encode($data));
+			$this->log("data: ".wp_json_encode($data));
 			return false;
 		}
 
@@ -156,7 +156,7 @@ class Re_Smush_It_Task extends Updraft_Smush_Task {
 			}
 		} else {
 			$this->fail("invalid_response", "The compression apparently succeeded, but WP-Optimize could not retrieve the compressed image from the remote server.");
-			$this->log("data: ".json_encode($data));
+			$this->log("data: ".wp_json_encode($data));
 			if (!empty($http_response_header) && is_array($http_response_header)) {
 				$this->log("headers: ".implode("\n", $http_response_header));
 			}

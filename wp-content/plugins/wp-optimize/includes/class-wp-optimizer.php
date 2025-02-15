@@ -485,13 +485,25 @@ class WP_Optimizer {
 		
 		switch ($type) {
 			case "trackbacks":
-			$thissql = "UPDATE `".$wpdb->posts."` SET ping_status='".$new_status."' WHERE post_status = 'publish' AND post_type = 'post';";
-			$wpdb->query($thissql);
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE `{$wpdb->posts}` SET ping_status = %s WHERE post_status = %s AND post_type = %s",
+					$new_status,
+					'publish',
+					'post'
+				)
+			);
 				break;
 
 			case "comments":
-			$thissql = "UPDATE `".$wpdb->posts."` SET comment_status='".$new_status."' WHERE post_status = 'publish' AND post_type = 'post';";
-			$wpdb->query($thissql);
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE `{$wpdb->posts}` SET comment_status = %s WHERE post_status = %s AND post_type = %s",
+					$new_status,
+					'publish',
+					'post'
+				)
+			);
 				break;
 
 			default:
@@ -504,7 +516,7 @@ class WP_Optimizer {
 	/**
 	 * This function will return total database size and a possible gain of db in KB.
 	 *
-	 * @param boolean $update - Wether to update the values or not
+	 * @param boolean $update - Whether to update the values or not
 	 * @return string total db size gained.
 	 */
 	public function get_current_db_size($update = false) {
@@ -572,10 +584,12 @@ class WP_Optimizer {
 			if (!$options['comments']) {
 				$this->enable_linkbacks('comments', false);
 				$output[] = __('Comments have now been disabled on all current and previously published posts.', 'wp-optimize');
+				// translators: %s is a date and time
 				$messages[] =  sprintf(__('All comments on existing posts were disabled at %s.', 'wp-optimize'), WP_Optimize()->format_date_time(time()));
 			} else {
 				$this->enable_linkbacks('comments');
 				$output[] = __('Comments have now been enabled on all current and previously published posts.', 'wp-optimize');
+				// translators: %s is a date and time
 				$messages[] =  sprintf(__('All comments on existing posts were enabled at %s.', 'wp-optimize'), WP_Optimize()->format_date_time(time()));
 			}
 		}
@@ -584,10 +598,12 @@ class WP_Optimizer {
 			if (!$options['trackbacks']) {
 				$this->enable_linkbacks('trackbacks', false);
 				$output[] = __('Trackbacks have now been disabled on all current and previously published posts.', 'wp-optimize');
+				// translators: %s is a date and time
 				$messages[] =  sprintf(__('All trackbacks on existing posts were disabled at %s.', 'wp-optimize'), WP_Optimize()->format_date_time(time()));
 			} else {
 				$this->enable_linkbacks('trackbacks');
 				$output[] = __('Trackbacks have now been enabled on all current and previously published posts.', 'wp-optimize');
+				// translators: %s is a date and time
 				$messages[] =  sprintf(__('All trackbacks on existing posts were enabled at %s.', 'wp-optimize'), WP_Optimize()->format_date_time(time()));
 			}
 		}
@@ -596,7 +612,7 @@ class WP_Optimizer {
 	}
 
 	/**
-	 * Wether InnoDB tables require confirmation to be optimized
+	 * Whether InnoDB tables require confirmation to be optimized
 	 *
 	 * @return boolean
 	 */

@@ -257,7 +257,7 @@ abstract class Updraft_Smush_Task extends Updraft_Task_1_2 {
 		if ($backup_original)
 			$this->backup_original_image($file_path);
 
-		if (false !== file_put_contents($file_path, $optimised_image)) {
+		if (false !== WPO_File_System_Helper::write_to_file($file_path, $optimised_image)) {
 			$this->success = true;
 		} else {
 			$this->success = false;
@@ -287,10 +287,12 @@ abstract class Updraft_Smush_Task extends Updraft_Task_1_2 {
 		clearstatcache(true, $file_path);
 		if (0 == $original_size) {
 			$saved = '';
+			// translators: %s is a file size
 			$info = sprintf(__("The file was compressed to %s using WP-Optimize", 'wp-optimize'), WP_Optimize()->format_size(filesize($file_path)));
 		} else {
 			$saved = round((($original_size - filesize($file_path)) / $original_size * 100), 2);
-			$info = sprintf(__("The file was compressed from %s to %s, saving %s percent, using WP-Optimize", 'wp-optimize'), WP_Optimize()->format_size($original_size), WP_Optimize()->format_size(filesize($file_path)), $saved);
+			// translators: %1$s is a file size, %2$s is a file size, %3$s is a percentage
+			$info = sprintf(__('The file was compressed from %1$s to %2$s, saving %3$s percent, using WP-Optimize', 'wp-optimize'), WP_Optimize()->format_size($original_size), WP_Optimize()->format_size(filesize($file_path)), $saved);
 		}
 
 		$stats = array(
@@ -329,7 +331,8 @@ abstract class Updraft_Smush_Task extends Updraft_Task_1_2 {
 
 		$attachment_id = $this->get_option('attachment_id');
 
-		$info = sprintf(__("Failed with error code %s - %s", 'wp-optimize'), $error_code, $error_message);
+		// translators: %1$s is the error code, %2$s is the error message
+		$info = sprintf(__('Failed with error code %1$s - %2$s', 'wp-optimize'), $error_code, $error_message);
 
 		if (is_multisite()) {
 			switch_to_blog($this->get_option('blog_id', 1));
