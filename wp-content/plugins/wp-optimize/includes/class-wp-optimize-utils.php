@@ -18,7 +18,7 @@ class WP_Optimize_Utils {
 		}
 		// Ensure index.php in log folder to stop directory listing
 		if (!file_exists($upload_base . 'wpo/logs/index.php')) {
-			WPO_File_System_Helper::write_to_file($upload_base . 'wpo/logs/index.php', "<?php");
+			file_put_contents($upload_base . 'wpo/logs/index.php', "<?php");
 		}
 		return $upload_base . 'wpo/logs/';
 	}

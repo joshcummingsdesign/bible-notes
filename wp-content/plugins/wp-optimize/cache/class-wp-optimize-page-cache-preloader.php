@@ -337,14 +337,14 @@ class WP_Optimize_Page_Cache_Preloader extends WP_Optimize_Preloader {
 		// if we get error then
 		// sometimes returns error due to timeout
 		if (is_wp_error($response)) {
-			$response = WPO_File_System_Helper::get_file_contents($sitemap_url);
+			$response = file_get_contents($sitemap_url);
 
 			// if response is empty then try load from file.
 			if (empty($response) && '' == $sitemap_url) {
 				$sitemap_file = $this->get_local_sitemap_file();
 
 				if (is_file($sitemap_file)) {
-					$response = WPO_File_System_Helper::get_file_contents($sitemap_file);
+					$response = file_get_contents($sitemap_file);
 				}
 			}
 

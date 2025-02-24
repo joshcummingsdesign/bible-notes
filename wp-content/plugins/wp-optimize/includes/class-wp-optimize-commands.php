@@ -343,7 +343,7 @@ class WP_Optimize_Commands {
 		}
 
 		if (is_file($logfile)) {
-			return WPO_File_System_Helper::get_file_contents($logfile);
+			return file_get_contents($logfile);
 		} else {
 			return $this->request_error('log_file_not_exist');
 		}

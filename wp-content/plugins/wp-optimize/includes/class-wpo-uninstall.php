@@ -74,7 +74,7 @@ class WPO_Uninstall {
 			$files = @scandir($wpo_folder); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- suppress warning if it arises due to race condition
 			if (false === $files) return;
 			if (2 === count($files)) {
-				WPO_File_System_Helper::delete($wpo_folder);
+				@rmdir($wpo_folder); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- suppress error due to file permission issues
 			}
 		}
 	}

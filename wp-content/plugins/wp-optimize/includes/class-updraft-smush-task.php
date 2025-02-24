@@ -257,7 +257,7 @@ abstract class Updraft_Smush_Task extends Updraft_Task_1_2 {
 		if ($backup_original)
 			$this->backup_original_image($file_path);
 
-		if (false !== WPO_File_System_Helper::write_to_file($file_path, $optimised_image)) {
+		if (false !== file_put_contents($file_path, $optimised_image)) {
 			$this->success = true;
 		} else {
 			$this->success = false;

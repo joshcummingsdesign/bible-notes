@@ -92,7 +92,7 @@ class WP_Optimize_Server_Information {
 				foreach ($patterns as $pattern) {
 					$file = basename($file_full_path);
 					if (preg_match('|' . $pattern . '|', $file) && is_file($file_full_path)) {
-						$log_data[$file] = (true === $paths_only) ? filesize($file_full_path) : WPO_File_System_Helper::get_file_contents($file_full_path);
+						$log_data[$file] = (true === $paths_only) ? filesize($file_full_path) : file_get_contents($file_full_path);
 					}
 				}
 			}
@@ -119,7 +119,7 @@ class WP_Optimize_Server_Information {
 		$file = trailingslashit(ABSPATH) . '.htaccess';
 		if (!is_readable($file)) return '';
 
-		return trim(WPO_File_System_Helper::get_file_contents($file));
+		return trim(file_get_contents($file));
 	}
 
 	/**
@@ -133,7 +133,7 @@ class WP_Optimize_Server_Information {
 
 		if (!is_readable($file)) return '';
 		
-		return trim(WPO_File_System_Helper::get_file_contents($file));
+		return trim(file_get_contents($file));
 	}
 
 	/**

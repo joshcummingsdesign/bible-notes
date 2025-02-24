@@ -181,7 +181,7 @@ class WPO_Cache_Config {
 			$config_content = wp_json_encode($this->config);
 		}
 
-		if ((!$only_if_present || file_exists($config_file)) && (!wp_is_writable(WPO_CACHE_CONFIG_DIR) || !WPO_File_System_Helper::write_to_file($config_file, $config_content))) {
+		if ((!$only_if_present || file_exists($config_file)) && (!wp_is_writable(WPO_CACHE_CONFIG_DIR) || !file_put_contents($config_file, $config_content))) {
 			// translators: %s is the path to the cache config file
 			return new WP_Error('write_cache_config', sprintf(__('The cache configuration file could not be saved to the disk; please check the file/folder permissions of %s .', 'wp-optimize'), $config_file));
 		}

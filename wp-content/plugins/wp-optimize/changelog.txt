@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 4.0.1 - 17/Feb/2025 =
+
+* FIX: File system usage issue
+
 = 4.0.0 - 05/Feb/2025 =
 
 * FEATURE: Delay Javascript Execution 

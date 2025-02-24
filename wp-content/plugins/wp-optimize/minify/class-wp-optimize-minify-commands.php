@@ -299,7 +299,7 @@ class WP_Optimize_Minify_Commands {
 							}
 							$maybe_file_path = $cache_min_folder . '/' . $maybe_file;
 							if (is_file($maybe_file_path) && 'meta.json' === basename($maybe_file_path)) {
-								$combined_metas['meta_logs'][$d] = json_decode(WPO_File_System_Helper::get_file_contents($maybe_file_path));
+								$combined_metas['meta_logs'][$d] = json_decode(file_get_contents($maybe_file_path));
 							}
 						}
 						closedir($cache_min_folder_handle);
@@ -336,7 +336,7 @@ class WP_Optimize_Minify_Commands {
 		$file = $cache_dir.'/'.$filename;
 
 		if (file_exists($file.'.json')) {
-			$log = json_decode(WPO_File_System_Helper::get_file_contents($file.'.json'));
+			$log = json_decode(file_get_contents($file.'.json'));
 			$data['filename'] = $filename;
 			$data['log'] = $log;
 		}

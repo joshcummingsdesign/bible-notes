@@ -134,7 +134,7 @@ class Updraft_File_Logger extends Updraft_Abstract_Logger {
 		
 		$message = sprintf("[%s : %s] - %s \n", gmdate("Y-m-d H:i:s"), Updraft_Log_Levels::to_text($level), $this->interpolate($message, $context));
 		
-		if (false == WPO_File_System_Helper::write_to_file($this->logfile, $message, FILE_APPEND)) {
+		if (false == file_put_contents($this->logfile, $message, FILE_APPEND)) {
 			error_log($message);
 		}
 	}

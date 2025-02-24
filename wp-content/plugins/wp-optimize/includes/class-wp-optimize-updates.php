@@ -276,8 +276,8 @@ class WP_Optimize_Updates {
 
 		// Check if only old file exists, if new file exists no need to overwrite its content
 		if (is_file($old_file) && !is_file($new_file)) {
-			$old_file_content = WPO_File_System_Helper::get_file_contents($old_file);
-			WPO_File_System_Helper::write_to_file($new_file, $old_file_content);
+			$old_file_content = file_get_contents($old_file);
+			file_put_contents($new_file, $old_file_content);
 		}
 
 		// Delete all smush log files in the old path (uploads/smush-*)

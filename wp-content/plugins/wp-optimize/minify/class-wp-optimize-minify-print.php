@@ -49,9 +49,9 @@ class WP_Optimize_Minify_Print {
 	public static function async_style($href, $media = 'all') {
 		echo '<link rel="preload" href="'.esc_url($href).'" as="style" media="'.esc_attr($media).'" onload="this.onload=null;this.rel=\'stylesheet\'">' . "\n";
 		// fix for firefox not supporting preload
-		echo '<link rel="stylesheet" href="'.esc_url($href).'" media="'.esc_attr($media).'">' . "\n";
-		echo '<noscript><link rel="stylesheet" href="'.esc_url($href).'" media="'.esc_attr($media).'"></noscript>' . "\n";
-		echo '<!--[if IE]><link rel="stylesheet" href="'.esc_url($href).'" media="'.esc_attr($media).'"><![endif]-->' . "\n";
+		echo '<link rel="stylesheet" href="'.esc_url($href).'" media="'.esc_attr($media).'">' . "\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- N/A
+		echo '<noscript><link rel="stylesheet" href="'.esc_url($href).'" media="'.esc_attr($media).'"></noscript>' . "\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- N/A
+		echo '<!--[if IE]><link rel="stylesheet" href="'.esc_url($href).'" media="'.esc_attr($media).'"><![endif]-->' . "\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- N/A
 	}
 
 	/**
@@ -127,7 +127,7 @@ class WP_Optimize_Minify_Print {
 	 * @return void
 	 */
 	public static function style($href) {
-		echo '<link rel="stylesheet" href="'.esc_url($href).'" media="all">' . "\n";
+		echo '<link rel="stylesheet" href="'.esc_url($href).'" media="all">' . "\n"; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- N/A
 	}
 
 	/**
@@ -138,7 +138,7 @@ class WP_Optimize_Minify_Print {
 	 * @return void
 	 */
 	public static function write_header($file, $headers) {
-		WPO_File_System_Helper::write_to_file($file, $headers);
+		file_put_contents($file, $headers);
 		WP_Optimize_Minify_Cache_Functions::fix_permission_bits($file);
 	}
 
@@ -151,20 +151,20 @@ class WP_Optimize_Minify_Print {
 	 * @return void
 	 */
 	public static function write_combined_asset($file, $code, $log) {
-		WPO_File_System_Helper::write_to_file($file.'.json', wp_json_encode($log));
-		WPO_File_System_Helper::write_to_file($file, $code);
+		file_put_contents($file.'.json', wp_json_encode($log));
+		file_put_contents($file, $code);
 		// permissions
 		WP_Optimize_Minify_Cache_Functions::fix_permission_bits($file.'.json');
 		WP_Optimize_Minify_Cache_Functions::fix_permission_bits($file);
 
 		if (function_exists('gzencode')) {
-			WPO_File_System_Helper::write_to_file($file.'.gz', gzencode(WPO_File_System_Helper::get_file_contents($file), 9));
+			file_put_contents($file.'.gz', gzencode(file_get_contents($file), 9));
 			WP_Optimize_Minify_Cache_Functions::fix_permission_bits($file.'.gz');
 		}
 		
 		// brotli static support
 		if (function_exists('brotli_compress')) {
-			WPO_File_System_Helper::write_to_file($file.'.br', brotli_compress(WPO_File_System_Helper::get_file_contents($file), 11));
+			file_put_contents($file.'.br', brotli_compress(file_get_contents($file), 11));
 			WP_Optimize_Minify_Cache_Functions::fix_permission_bits($file.'.br');
 		}
 	}
@@ -175,7 +175,7 @@ class WP_Optimize_Minify_Print {
 	 */
 	public static function add_load_async() {
 		$min_or_not_internal = WP_Optimize()->get_min_or_not_internal_string();
-		$contents = WPO_File_System_Helper::get_file_contents(trailingslashit(WPO_PLUGIN_MAIN_PATH) . "js/loadAsync$min_or_not_internal.js");
+		$contents = file_get_contents(trailingslashit(WPO_PLUGIN_MAIN_PATH) . "js/loadAsync$min_or_not_internal.js");
 		echo "<script>$contents</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped
 	}
 
@@ -187,7 +187,7 @@ class WP_Optimize_Minify_Print {
 	 */
 	public static function add_load_css() {
 		$min_or_not_internal = WP_Optimize()->get_min_or_not_internal_string();
-		$contents = WPO_File_System_Helper::get_file_contents(trailingslashit(WPO_PLUGIN_MAIN_PATH) . "js/loadCSS$min_or_not_internal.js");
+		$contents = file_get_contents(trailingslashit(WPO_PLUGIN_MAIN_PATH) . "js/loadCSS$min_or_not_internal.js");
 		echo "<script>$contents</script>" . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped
 	}
 }

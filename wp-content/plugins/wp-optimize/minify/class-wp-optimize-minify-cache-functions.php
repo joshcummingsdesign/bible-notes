@@ -20,7 +20,7 @@ class WP_Optimize_Minify_Cache_Functions {
 		if (function_exists('stat')) {
 			if ($stat = stat(dirname($file))) {
 				$perms = $stat['mode'] & 0007777;
-				WPO_File_System_Helper::chmod($file, $perms);
+				chmod($file, $perms); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- N/A
 				clearstatcache();
 				return true;
 			}
@@ -38,7 +38,7 @@ class WP_Optimize_Minify_Cache_Functions {
 			if (($perms & ~umask() != $perms)) {
 				$folder_parts = explode('/', substr($file, strlen(dirname($file)) + 1));
 				for ($i = 1, $c = count($folder_parts); $i <= $c; $i++) {
-					WPO_File_System_Helper::chmod(dirname($file) . '/' . implode('/', array_slice($folder_parts, 0, $i)), $perms);
+					chmod(dirname($file) . '/' . implode('/', array_slice($folder_parts, 0, $i)), $perms); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- N/A
 				}
 			}
 		}
@@ -361,7 +361,7 @@ class WP_Optimize_Minify_Cache_Functions {
 								$log[] = "recursive files and folders deletion unsuccessful - $dir";
 							}
 							if (file_exists($dir)) {
-								if (WPO_File_System_Helper::delete($dir)) {
+								if (rmdir($dir)) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- N/A
 									$log[] = "folder deleted successfully - $dir";
 								} else {
 									$log[] = "folder deletion unsuccessful - $dir";
@@ -393,7 +393,7 @@ class WP_Optimize_Minify_Cache_Functions {
 		$f = $tmp_dir.'/'.$key.'.transient';
 		clearstatcache();
 		if (file_exists($f)) {
-			return WPO_File_System_Helper::get_file_contents($f);
+			return file_get_contents($f);
 		} else {
 			return false;
 		}
@@ -414,7 +414,7 @@ class WP_Optimize_Minify_Cache_Functions {
 		$cache_path = self::cache_path();
 		$tmp_dir = $cache_path['tmpdir'];
 		$f = $tmp_dir.'/'.$key.'.transient';
-		WPO_File_System_Helper::write_to_file($f, $code);
+		file_put_contents($f, $code);
 		self::fix_permission_bits($f);
 		return true;
 	}
@@ -452,7 +452,7 @@ class WP_Optimize_Minify_Cache_Functions {
 	 */
 	public static function godaddy_request($method, $url = null) {
 		$url  = empty($url) ? home_url() : $url;
-		$host = parse_url($url, PHP_URL_HOST);
+		$host = wp_parse_url($url, PHP_URL_HOST);
 		$url  = set_url_scheme(str_replace($host, WPaas\Plugin::vip(), $url), 'http');
 		wp_cache_flush();
 		update_option('gd_system_last_cache_flush', time()); // purge apc
@@ -537,7 +537,7 @@ class WP_Optimize_Minify_Cache_Functions {
 			return $error_log;
 		}
 
-		$log = json_decode(WPO_File_System_Helper::get_file_contents($file));
+		$log = json_decode(file_get_contents($file));
 
 		$is_valid_json = json_last_error() === JSON_ERROR_NONE ? true : false;
 

@@ -31,7 +31,7 @@ class Re_Smush_It_Task extends Updraft_Smush_Task {
 		$body .= "\r\n";
 		$body .= "Content-Disposition: form-data; name=\"files\"; filename=\"$file_name\"\r\n";
 		$body .= "\r\n";
-		$body .= WPO_File_System_Helper::get_file_contents($test_image);
+		$body .= file_get_contents($test_image);
 		$body .= "\r\n";
 		$body .= "--$boundary";
 
@@ -105,7 +105,7 @@ class Re_Smush_It_Task extends Updraft_Smush_Task {
 		$payload .= "\r\n";
 		$payload .= "Content-Disposition: form-data; name=\"files\"; filename=\"$file_name\"\r\n";
 		$payload .= "\r\n";
-		$payload .= WPO_File_System_Helper::get_file_contents($local_file);
+		$payload .= file_get_contents($local_file);
 		$payload .= "\r\n";
 		$payload .= "--$boundary";
 

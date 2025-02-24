@@ -216,7 +216,7 @@ class WP_Optimize_Minify_Front_End {
 
 		// Check if working with google font url
 
-		if ('fonts.googleapis.com' == parse_url($href, PHP_URL_HOST)) {
+		if ('fonts.googleapis.com' == wp_parse_url($href, PHP_URL_HOST)) {
 			// if option disabled google fonts processing
 			if ($this->options['disable_google_fonts_processing']) return $html;
 			// check if google fonts should be removed
@@ -866,14 +866,14 @@ class WP_Optimize_Minify_Front_End {
 					if (!empty($code)) {
 						// Only generate meta.json file if cache is reset
 						if (!empty($meta_log['invalidation_reason'])) {
-							WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
+							file_put_contents($meta_json_file, wp_json_encode($meta_log));
 						}
 						WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 					}
 				} else {
 					$log_file = $file.'.json';
 					if (file_exists($log_file)) {
-						$saved_log = json_decode(WPO_File_System_Helper::get_file_contents($log_file));
+						$saved_log = json_decode(file_get_contents($log_file));
 						if (is_object($saved_log) && property_exists($saved_log, 'files')) {
 							$files = (array) $saved_log->files;
 							foreach ($header[$i]['handles'] as $handle) {
@@ -1171,14 +1171,14 @@ class WP_Optimize_Minify_Front_End {
 					if (!empty($code)) {
 						// Only generate meta.json file if cache is reset
 						if (!empty($meta_log['invalidation_reason'])) {
-							WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
+							file_put_contents($meta_json_file, wp_json_encode($meta_log));
 						}
 						WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 					}
 				} else {
 					$log_file = $file.'.json';
 					if (file_exists($log_file)) {
-						$saved_log = json_decode(WPO_File_System_Helper::get_file_contents($log_file));
+						$saved_log = json_decode(file_get_contents($log_file));
 						if (is_object($saved_log) && property_exists($saved_log, 'files')) {
 							$files = (array) $saved_log->files;
 							foreach ($footer[$i]['handles'] as $handle) {
@@ -1528,14 +1528,14 @@ class WP_Optimize_Minify_Front_End {
 					if (!empty($code)) {
 						// Only generate meta.json file if cache is reset
 						if (!empty($meta_log['invalidation_reason'])) {
-							WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
+							file_put_contents($meta_json_file, wp_json_encode($meta_log));
 						}
 						WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 					}
 				} else {
 					$log_file = $file.'.json';
 					if (file_exists($log_file)) {
-						$saved_log = json_decode(WPO_File_System_Helper::get_file_contents($log_file));
+						$saved_log = json_decode(file_get_contents($log_file));
 						if (is_object($saved_log) && property_exists($saved_log, 'files')) {
 							$files = (array) $saved_log->files;
 							foreach ($header[$i]['handles'] as $handle) {
@@ -1965,14 +1965,14 @@ class WP_Optimize_Minify_Front_End {
 					if (!empty($code)) {
 						// Only generate meta.json file if cache is reset
 						if (!empty($meta_log['invalidation_reason'])) {
-							WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
+							file_put_contents($meta_json_file, wp_json_encode($meta_log));
 						}
 						WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 					}
 				} else {
 					$log_file = $file.'.json';
 					if (file_exists($log_file)) {
-						$saved_log = json_decode(WPO_File_System_Helper::get_file_contents($log_file));
+						$saved_log = json_decode(file_get_contents($log_file));
 						if (is_object($saved_log) && property_exists($saved_log, 'files')) {
 							$files = (array) $saved_log->files;
 							foreach ($footer[$i]['handles'] as $handle) {
@@ -2000,7 +2000,7 @@ class WP_Optimize_Minify_Front_End {
 
 						// inline if the file is smaller than 20KB or option has been enabled
 						if (filesize($file) < 20000 && $this->options['inline_css']) {
-							$this->inline_css(WPO_File_System_Helper::get_file_contents($file), $handle, $file_url, $footer[$i]['media']);
+							$this->inline_css(file_get_contents($file), $handle, $file_url, $footer[$i]['media']);
 						} else {
 							// enqueue it
 							wp_enqueue_style("wpo_min-footer-$i", $file_url, array(), null, $footer[$i]['media']);
@@ -2116,7 +2116,7 @@ class WP_Optimize_Minify_Front_End {
 
 			// Only generate meta.json file if cache is reset
 			if (!empty($meta_log['invalidation_reason'])) {
-				WPO_File_System_Helper::write_to_file($meta_json_file, wp_json_encode($meta_log));
+				file_put_contents($meta_json_file, wp_json_encode($meta_log));
 			}
 			WP_Optimize_Minify_Print::write_combined_asset($file, $code, $log);
 
@@ -2233,8 +2233,8 @@ class WP_Optimize_Minify_Front_End {
 		if (empty($host)) {
 			$host = isset($_SERVER['HTTP_HOST']) ? htmlentities($_SERVER['HTTP_HOST']) : '';
 		}
-		$request_query = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
-		$request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		$request_query = wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
+		$request_uri = wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		
 		// initialize headers
 		$headers = array();
@@ -2361,8 +2361,8 @@ class WP_Optimize_Minify_Front_End {
 		if (empty($host)) {
 			$host = isset($_SERVER['HTTP_HOST']) ? htmlentities($_SERVER['HTTP_HOST']) : '';
 		}
-		$request_query = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
-		$request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		$request_query = wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
+		$request_uri = wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		
 		// get cache path
 		$cache_path = WP_Optimize_Minify_Cache_Functions::cache_path();
@@ -2378,10 +2378,10 @@ class WP_Optimize_Minify_Front_End {
 		
 		// return header files or fallback
 		if ($b == $a && file_exists($a)) {
-			return WPO_File_System_Helper::get_file_contents($a);
+			return file_get_contents($a);
 		}
 		if ($b != $a && file_exists($b)) {
-			return WPO_File_System_Helper::get_file_contents($b);
+			return file_get_contents($b);
 		}
 		
 		return false;

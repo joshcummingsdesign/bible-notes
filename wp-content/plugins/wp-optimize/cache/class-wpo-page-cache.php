@@ -470,8 +470,8 @@ class WPO_Page_Cache {
 		$disabled_advanced_cache = true;
 		// First try to remove (so that it doesn't look to any other plugin like the file is already 'claimed')
 		// We only touch advanched-cache.php and wp-config.php if it appears that we were in control of advanced-cache.php
-		if (!file_exists($advanced_cache_file) || false !== strpos(WPO_File_System_Helper::get_file_contents($advanced_cache_file), 'WP-Optimize advanced-cache.php')) {
-			if (file_exists($advanced_cache_file) && (!wp_delete_file($advanced_cache_file) && false === WPO_File_System_Helper::write_to_file($advanced_cache_file, "<?php\n// WP-Optimize: page cache disabled"))) {
+		if (!file_exists($advanced_cache_file) || false !== strpos(file_get_contents($advanced_cache_file), 'WP-Optimize advanced-cache.php')) {
+			if (file_exists($advanced_cache_file) && (!wp_delete_file($advanced_cache_file) && false === file_put_contents($advanced_cache_file, "<?php\n// WP-Optimize: page cache disabled"))) {
 				$disabled_advanced_cache = false;
 				$this->log("The request to the filesystem to remove or empty advanced-cache.php failed");
 				$this->add_warning('error_disabling', __('The request to the filesystem to remove or empty advanced-cache.php failed', 'wp-optimize'));
@@ -568,7 +568,7 @@ class WPO_Page_Cache {
 					if ($modified_time <= $expires) {
 						$log[] = "deleting cache in $dir";
 						wpo_delete_files($dir, true);
-						if (file_exists($dir)) WPO_File_System_Helper::delete($dir, true);
+						if (file_exists($dir)) rmdir($dir); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- N/A
 					}
 				}
 				closedir($handle);
@@ -766,7 +766,7 @@ EOF;
 		$advanced_cache_filename = $this->get_advanced_cache_filename();
 
 		// If the file content is already up to date, success
-		if (is_file($advanced_cache_filename) && WPO_File_System_Helper::get_file_contents($advanced_cache_filename) === $this->advanced_cache_file_content) {
+		if (is_file($advanced_cache_filename) && file_get_contents($advanced_cache_filename) === $this->advanced_cache_file_content) {
 			$this->advanced_cache_file_writing_error = false;
 			return true;
 		}
@@ -789,7 +789,7 @@ EOF;
 			}
 		}
 
-		if (!WPO_File_System_Helper::write_to_file($this->get_advanced_cache_filename(), $this->advanced_cache_file_content)) {
+		if (!file_put_contents($this->get_advanced_cache_filename(), $this->advanced_cache_file_content)) {
 			$this->advanced_cache_file_writing_error = true;
 			return false;
 		}
@@ -839,7 +839,7 @@ EOF;
 	private function is_the_site_url_or_folder_changed() {
 		if (!is_file($this->get_advanced_cache_filename())) return false;
 
-		$content = WPO_File_System_Helper::get_file_contents($this->get_advanced_cache_filename());
+		$content = file_get_contents($this->get_advanced_cache_filename());
 		
 		if (false === $content) return false;
 
@@ -871,7 +871,7 @@ EOF;
 		if (!is_file($this->get_advanced_cache_filename())) return false;
 
 		$version = false;
-		$content = WPO_File_System_Helper::get_file_contents($this->get_advanced_cache_filename());
+		$content = file_get_contents($this->get_advanced_cache_filename());
 
 		if (preg_match('/WP\-Optimize advanced\-cache\.php \(written by version\: (.+)\)/Ui', $content, $match)) {
 			$version = $match[1];
@@ -901,7 +901,7 @@ EOF;
 			return false;
 		}
 
-		$config_file_string = WPO_File_System_Helper::get_file_contents($config_path);
+		$config_file_string = file_get_contents($config_path);
 
 		// Config file is empty. Maybe couldn't read it?
 		if (empty($config_file_string)) {
@@ -936,7 +936,7 @@ EOF;
 				unset($config_file[$key]);
 			}
 		}
-		if (!WPO_File_System_Helper::write_to_file($config_path, implode(PHP_EOL, $config_file))) {
+		if (!file_put_contents($config_path, implode(PHP_EOL, $config_file))) {
 			return false;
 		}
 		$changed = true;
@@ -963,7 +963,7 @@ EOF;
 		$advanced_cache_file = untrailingslashit(WP_CONTENT_DIR).'/advanced-cache.php';
 		
 		// Now check wp-content. We need to be able to create files of the same user as this file.
-		if ((!file_exists($advanced_cache_file) || false === strpos(WPO_File_System_Helper::get_file_contents($advanced_cache_file), 'WP-Optimize advanced-cache.php')) && !wp_is_writable($advanced_cache_file) && !wp_is_writable(untrailingslashit(WP_CONTENT_DIR))) {
+		if ((!file_exists($advanced_cache_file) || false === strpos(file_get_contents($advanced_cache_file), 'WP-Optimize advanced-cache.php')) && !wp_is_writable($advanced_cache_file) && !wp_is_writable(untrailingslashit(WP_CONTENT_DIR))) {
 			$this->log("Unable to write the file advanced-cache.php inside the wp-content folder; please check file/folder permissions");
 			$this->add_error('verify_cache', __("Unable to write the file advanced-cache.php inside the wp-content folder; please check file/folder permissions", 'wp-optimize'));
 			$errors++;

@@ -182,7 +182,7 @@ class WP_Optimize_Delay_JS {
 		$min_or_not_internal = WP_Optimize()->get_min_or_not_internal_string();
 		echo '<script data-no-delay-js>';
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- we don't need to escape inline scripts
-		echo WPO_File_System_Helper::get_file_contents(WPO_PLUGIN_MAIN_PATH . 'js/delay-js' . $min_or_not_internal . '.js');
+		echo file_get_contents(WPO_PLUGIN_MAIN_PATH . 'js/delay-js' . $min_or_not_internal . '.js');
 		echo '</script>';
 	}
 

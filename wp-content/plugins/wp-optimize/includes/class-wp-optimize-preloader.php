@@ -396,13 +396,13 @@ abstract class WP_Optimize_Preloader extends Updraft_Task_Manager_1_4 {
 
 		// if we get error then
 		if (is_wp_error($response)) {
-			$response = WPO_File_System_Helper::get_file_contents($sitemap_url);
+			$response = file_get_contents($sitemap_url);
 
 			// if response is empty then try load from file.
 			if (empty($response) && '' == $sitemap_url) {
 				$sitemap_file = $this->get_local_sitemap_file();
 
-				$response = WPO_File_System_Helper::get_file_contents($sitemap_file);
+				$response = file_get_contents($sitemap_file);
 			}
 
 			if (empty($response)) return $urls;

@@ -511,14 +511,14 @@ class WP_Optimize_Database_Information {
 
 		if (is_file($plugin_tables_json_file) && is_readable($plugin_tables_json_file)) {
 			// get data from plugin.json file.
-			$plugin_tables = json_decode(WPO_File_System_Helper::get_file_contents($plugin_tables_json_file), true);
+			$plugin_tables = json_decode(file_get_contents($plugin_tables_json_file), true);
 		}
 
 		// Fallback to the bundled version if the list is empty
 		if (empty($plugin_tables)) {
 			if (is_file($fallback_plugin_tables_json_file) && is_readable($fallback_plugin_tables_json_file)) {
 				// get data from the bundled plugin.json file.
-				$plugin_tables = json_decode(WPO_File_System_Helper::get_file_contents($fallback_plugin_tables_json_file), true);
+				$plugin_tables = json_decode(file_get_contents($fallback_plugin_tables_json_file), true);
 			}
 		}
 
@@ -645,7 +645,7 @@ class WP_Optimize_Database_Information {
 		if (200 !== wp_remote_retrieve_response_code($update_request)) return;
 		$json_content = wp_remote_retrieve_body($update_request);
 		if (json_decode($json_content)) {
-			WPO_File_System_Helper::write_to_file($this->get_plugin_json_file_path(), $json_content);
+			file_put_contents($this->get_plugin_json_file_path(), $json_content);
 		}
 	}
 

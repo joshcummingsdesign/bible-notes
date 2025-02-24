@@ -85,7 +85,7 @@ class WP_Optimize_Htaccess {
 	public function read_file() {
 		if (false == $this->is_exists() || false == $this->is_readable()) return;
 
-		$content = WPO_File_System_Helper::get_file_contents($this->_htaccess_file);
+		$content = file_get_contents($this->_htaccess_file);
 
 		$content = explode("\n", $content);
 
@@ -133,7 +133,7 @@ class WP_Optimize_Htaccess {
 	public function write_file() {
 		$content = implode(PHP_EOL, $this->get_flat_array($this->_file_tree));
 		if ($this->is_writable()) {
-			WPO_File_System_Helper::write_to_file($this->_htaccess_file, $content);
+			@file_put_contents($this->_htaccess_file, $content); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- Hosts like WP Engine restricts use of `.htaccess` file
 		}
 	}
 
