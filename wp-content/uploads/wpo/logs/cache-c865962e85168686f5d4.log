@@ -1,0 +1,7 @@
+[2025-02-24 08:05:23 : INFO] - Full Cache Purge triggered by: plugin activation/deactivation 
+[2025-02-24 08:05:46 : INFO] - Cache for multiple term taxonomy have been purged due to post terms update, triggered by action: set_object_terms 
+[2025-02-24 08:05:46 : INFO] - Cache for URL: https://bible-notes.lndo.site/?p=14736 has been purged, triggered by action: save_post 
+[2025-02-24 08:05:46 : INFO] - Cache for previous post (with URL: https://bible-notes.lndo.site/meditations/a-concise-history-of-the-reformation-from-rome-to-the-united-states/) adjacent to post with id: 14736 has been purged, triggered by action: save_post 
+[2025-02-24 08:05:46 : INFO] - Cache for all archives page associated with post_type: post and Title: "A Concise History of the Reformation: From Rome to the United States" have been purged, triggered by action: save_post 
+[2025-02-24 08:05:46 : INFO] - Cache for multiple term taxonomy have been purged due to post terms update, triggered by action: set_object_terms 
+[2025-02-24 08:05:46 : INFO] - Cache for multiple term taxonomy have been purged due to post terms update, triggered by action: set_object_terms 
