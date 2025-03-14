@@ -1,3 +1,15 @@
+== 1.2.18 | 7th March 2025 ==
+* Fix: broken top level links on menus
+
+== 1.2.17 | 6th March 2025 ==
+* Update: Ability to activate mega menu (or dropdown menu) on click.
+* Update: Set different color for each post category
+* Fix: Google fonts in some areas not served locally.
+* Fix: The 'alignwide' style on the frontend.
+
+== 1.2.16 | 3rd February 2025 ==
+* Fix: Issue with some customizer components not loading.
+
 == 1.2.15 | 30th January 2025 ==
 * Add: Disable default sitemap option.
 * Fix: Threads Icon missing brand colors

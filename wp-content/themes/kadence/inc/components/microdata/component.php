@@ -42,7 +42,9 @@ class Component implements Component_Interface, Templating_Component_Interface {
      */
     public function disable_sitemap_filter() {
         $disable_sitemap = kadence()->option( 'disable_sitemap' ) ? true : false;
-        add_filter( 'wp_sitemaps_enabled', $disable_sitemap ? '__return_false' : '__return_true' );
+		if( $disable_sitemap ) {
+        	add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		}
     }
 
 	/**

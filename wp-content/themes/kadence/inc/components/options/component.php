@@ -975,6 +975,7 @@ class Component implements Component_Interface, Templating_Component_Interface {
 						'unit' => 'em',
 					),
 					'primary_navigation_stretch' => false,
+					'primary_navigation_open_type' => 'hover',
 					'primary_navigation_fill_stretch' => false,
 					'primary_navigation_style'   => 'standard',
 					'primary_navigation_color'   => array(
