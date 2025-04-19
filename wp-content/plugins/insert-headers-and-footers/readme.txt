@@ -4,7 +4,7 @@ Tags: code, css, php, header, code snippets
 Requires at least: 4.6
 Tested up to: 6.7
 Requires PHP: 5.5
-Stable tag: 2.2.6
+Stable tag: 2.2.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -232,6 +232,9 @@ WPCode comes with a ready-made code snippets library that allows you to replace 
 
 == Changelog ==
 
+= 2.2.7 =
+* New: Added support for automatically importing snippets from 2 new plugins.
+
 = 2.2.6 =
 * New: Easily find where your snippet is used as a shortcode with our new shortcode finder tool. 1-click search through your site.
 * New: Improved editor for snippet notes. You can now add links and format text with a WYSIWYG editor.
@@ -353,64 +356,3 @@ WPCode comes with a ready-made code snippets library that allows you to replace 
 = 2.1.0 =
 * New: See exactly which scripts and snippets are loaded on the current page with the WPCode admin bar info menu.
 * Tweak: Minor update to connect process.
-
-= 2.0.13.1 =
-* Fix: Improve compatibility with older WordPress versions before version 4.7.
-* Fix: Add escaping to tag filter links in the list of snippets.
-
-= 2.0.13 =
-* New: We have added user customization options for the list of snippets in the admin. Now, you can choose snippet list columns, determine the number of snippets to display, and set the default order of the snippets.
-* New: When you save a snippet, the WPCode editor will retain the cursor position, making it easier for you to continue editing larger snippets.
-
-= 2.0.12 =
-* New: You can now add shortcode attributes and use them in snippets. Any attribute you define becomes available as a variable in PHP & Universal code snippets.
-* Tweak: We improved the way the editor is loaded when users enable the “Disable syntax highlighting when editing code” in their profile.
-* Tweak: We adjusted the way the editor gets refreshed when changing a snippet code type.
-* Fix: The Auto-Insert location was getting reset with every code type change.
-
-= 2.0.11 =
-* New: Automatically disabled snippets due to errors will now be highlighted in the list for easier debugging.
-* New: We added a filter to allow users to easily customize the Codemirror settings for the WPCode editor.
-* Tweak: We extended our plugin-specific snippet loading to allow plugin version checks.
-
-= 2.0.10 =
-* New: We added a way to load more snippets in the WPCode Library relevant to other plugins you are using.
-* Fix: We added an extra filter removal to prevent WordPress core from automatically adding the rel tag to snippets where it may break the syntax.
-* Fix: We improved backwards compatibility with older WordPress versions.
-
-= 2.0.9 =
-* New: We redesigned the auto-insert location picker to make it easier to find the right place to insert your snippets.
-* Fix: We fixed an edge-case where a snippet getting automatically deactivated due to throwing an error would have its code changed.
-* Fix: Inserting a snippet as a shortcode was ignoring the conditional logic rules enable toggle and always applying rules.
-* Fix: We updated the way we check the taxonomy term id when applying conditional logic rules.
-* Fix: Security hardening for deleting logs.
-
-= 2.0.8.1 =
-* Fix: Improve compatibility with PHP 8.1 for our error handling class.
-
-= 2.0.8 =
-* New: We added the option to log PHP errors thrown by snippets added with WPCode to make it easier to track down issues.
-* New: We added a new auto-insert location to improve the available conditional logic rules you can use with PHP snippets.
-* Tweak: We added more info regarding the error thrown when trying to activate a PHP snippet with a syntax error.
-* Tweak: Conditional logic rules are now also applied to shortcodes for better control of output.
-* Tweak: We updated the code editor for PHP snippets to give you a better experience when editing snippets.
-* Fix: We adjusted the permission checks of some ajax endpoints to avoid any potential unwanted usage.
-* Fix: The Safe Mode notice was no longer being displayed on the WPCode pages, so we added that back when needed.
-
-= 2.0.7 =
-* New: We added the ability to resume editing snippets that were created using the WPCode snippet generator.
-* Fix: We adjusted the code output in the editor to improve support for using HTML entities.
-* Fix: We made sure conditional logic rules are loaded correctly in the admin when used globally.
-* Fix: We added an extra permissions check to the library endpoints to limit access.
-
-= 2.0.6 =
-* New: WPCode Library public snippets can now be installed with 1-click on sites connected to the WPCode Library - no more copy/paste needed!
-* New: We added a new setting for the editor height, so you can set the editor to a custom height or make it automatically grow with the code.
-* Tweak: We adjusted the "Connect To Library" functionality to improve support for site names with special characters or empty names.
-* Fix: We added extra checks to prevent errors when certain conditional logic rules were being called too early with PHP snippets.
-
-= 2.0.5 =
-* New: 2 new bulk actions are available in the admin to allow enabling or disabling multiple snippets at once.
-* New: We added a new search field for snippets in the admin list which allows you to search using all snippet fields.
-* New: When adding a JavaScript snippet, WPCode will attempt to remove HTML script tags, if present.
-

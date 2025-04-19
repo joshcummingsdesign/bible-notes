@@ -36,6 +36,8 @@
 	},
 	"scripts": {
 		"start-gulp": "gulp watch",
-		"build-gulp": "gulp build"
+		"build-gulp": "gulp build",
+		"start-wp": "wp-scripts start",
+		"build-wp": "wp-scripts build"
 	}
 }

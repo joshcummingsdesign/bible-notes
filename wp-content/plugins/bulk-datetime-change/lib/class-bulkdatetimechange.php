@@ -19,6 +19,10 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $bulkdatetimechange = new BulkDatetimeChange();
 
 /** ==================================================
@@ -266,11 +270,11 @@ class BulkDatetimeChange {
 		}
 		if ( ! $selected_monthly ) {
 			?>
-			<option value="" selected><?php esc_html_e( 'All dates' ); ?></option>
+			<option value="" selected><?php esc_html_e( 'All dates', 'bulk-datetime-change' ); ?></option>
 			<?php
 		} else {
 			?>
-			<option value=""><?php esc_html_e( 'All dates' ); ?></option>
+			<option value=""><?php esc_html_e( 'All dates', 'bulk-datetime-change' ); ?></option>
 			<?php
 		}
 		?>
@@ -303,13 +307,13 @@ class BulkDatetimeChange {
 			$type_mime[ $type ] = $ext_mimes_csv;
 			switch ( $type ) {
 				case 'image':
-					$type_text[ $type ] = __( 'Image' );
+					$type_text[ $type ] = __( 'Image', 'bulk-datetime-change' );
 					break;
 				case 'audio':
-					$type_text[ $type ] = __( 'Audio' );
+					$type_text[ $type ] = __( 'Audio', 'bulk-datetime-change' );
 					break;
 				case 'video':
-					$type_text[ $type ] = __( 'Video' );
+					$type_text[ $type ] = __( 'Video', 'bulk-datetime-change' );
 					break;
 				case 'document':
 					$type_text[ $type ] = __( 'Document', 'bulk-datetime-change' );
@@ -321,13 +325,13 @@ class BulkDatetimeChange {
 					$type_text[ $type ] = __( 'Interactive', 'bulk-datetime-change' );
 					break;
 				case 'text':
-					$type_text[ $type ] = __( 'Text' );
+					$type_text[ $type ] = __( 'Text', 'bulk-datetime-change' );
 					break;
 				case 'archive':
 					$type_text[ $type ] = __( 'Archive', 'bulk-datetime-change' );
 					break;
 				case 'code':
-					$type_text[ $type ] = __( 'Code' );
+					$type_text[ $type ] = __( 'Code', 'bulk-datetime-change' );
 					break;
 				case 'other':
 					$type_text[ $type ] = __( 'Other', 'bulk-datetime-change' );
@@ -357,11 +361,11 @@ class BulkDatetimeChange {
 		}
 		if ( ! $selected_mime_type ) {
 			?>
-			<option value="" selected><?php esc_html_e( 'All media items' ); ?></option>
+			<option value="" selected><?php esc_html_e( 'All media items', 'bulk-datetime-change' ); ?></option>
 			<?php
 		} else {
 			?>
-			<option value=""><?php esc_html_e( 'All media items' ); ?></option>
+			<option value=""><?php esc_html_e( 'All media items', 'bulk-datetime-change' ); ?></option>
 			<?php
 		}
 		?>
@@ -373,7 +377,7 @@ class BulkDatetimeChange {
 		$search_text = get_user_option( 'bulkdatetimechange_search_text', $uid );
 		if ( ! $search_text ) {
 			?>
-			<input style="vertical-align: middle;" name="search_text" type="text" value="" placeholder="<?php echo esc_attr__( 'Search' ); ?>">
+			<input style="vertical-align: middle;" name="search_text" type="text" value="" placeholder="<?php echo esc_attr__( 'Search', 'bulk-datetime-change' ); ?>">
 			<?php
 		} else {
 			?>
@@ -385,7 +389,7 @@ class BulkDatetimeChange {
 		</div>
 		<?php
 
-		submit_button( __( 'Filter' ), 'large', 'bulk-datetime-change-filter', false );
+		submit_button( __( 'Filter', 'bulk-datetime-change' ), 'large', 'bulk-datetime-change-filter', false );
 		?>
 		</form>
 		<?php
@@ -409,7 +413,7 @@ class BulkDatetimeChange {
 			<?php esc_html_e( 'Bulk Change', 'bulk-datetime-change' ); ?> : 
 			<span class="cp_tooltip_change_text"><?php esc_html_e( 'Changes made by pressing this "Change" button are temporary. To confirm the change, check the checkbox for the date and time you wish to change and press the "Update" button.', 'bulk-datetime-change' ); ?></span>
 			<input type="text" id="datetimepicker-bdtc" name="all_change_datetime" value="<?php echo esc_html( $now_date_time ); ?>" />
-			<?php submit_button( __( 'Change' ), 'large', 'all_change', false ); ?>
+			<?php submit_button( __( 'Change', 'bulk-datetime-change' ), 'large', 'all_change', false ); ?>
 			</div>
 		</div>
 		<?php
@@ -425,8 +429,8 @@ class BulkDatetimeChange {
 
 		?>
 		<div style="margin: 0px; text-align: right;">
-			<?php esc_html_e( 'Number of items per page:' ); ?><input type="number" step="1" min="1" max="9999" style="width: 80px;" name="per_page" value="<?php echo esc_attr( get_user_option( 'bdtc_per_page', $uid ) ); ?>" form="bulkdatetimechange_forms" />
-			<?php submit_button( __( 'Change' ), 'large', 'per_page_change', false, array( 'form' => 'bulkdatetimechange_forms' ) ); ?>
+			<?php esc_html_e( 'Number of items per page:', 'bulk-datetime-change' ); ?><input type="number" step="1" min="1" max="9999" style="width: 80px;" name="per_page" value="<?php echo esc_attr( get_user_option( 'bdtc_per_page', $uid ) ); ?>" form="bulkdatetimechange_forms" />
+			<?php submit_button( __( 'Change', 'bulk-datetime-change' ), 'large', 'per_page_change', false, array( 'form' => 'bulkdatetimechange_forms' ) ); ?>
 		</div>
 		<?php
 	}

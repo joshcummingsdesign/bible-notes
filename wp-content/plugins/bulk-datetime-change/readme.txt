@@ -4,8 +4,8 @@ Donate link: https://shop.riverforest-wp.info/donate/
 Tags: date, time, media, posts, pages
 Requires at least: 4.6
 Requires PHP: 8.0
-Tested up to: 6.5
-Stable tag: 1.17
+Tested up to: 6.8
+Stable tag: 1.18
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,9 @@ none
 2. Settings
 
 == Changelog ==
+
+= [1.18] 2025/04/15 =
+* Fix - Loading the management screen.
 
 = [1.17] 2024/02/09 =
 * Fix - Added nonce when sorting.

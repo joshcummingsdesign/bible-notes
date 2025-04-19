@@ -8,10 +8,11 @@
  parents and grandparents (up to top level page), and any immediate children of
  the current page. Can also be called via function inside template files or by
  shortcode.
- Version: 1.6.1
+ Version: 1.7.0
  Author: Cornershop Creative
  Author URI: https://cornershopcreative.com/
- Text Domain: better-section-nav
+ Text Domain: better-section-navigation
+ License: GPLv3 or later
 
 	Plugin: Copyright 2017 Cornershop Creative (email : plugins@cornershopcreative.com)
 

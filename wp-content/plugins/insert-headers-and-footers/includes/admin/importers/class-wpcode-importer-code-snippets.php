@@ -56,11 +56,13 @@ class WPCode_Importer_Code_Snippets extends WPCode_Importer_Type {
 			 *
 			 * @var \Code_Snippets\Snippet $code_snippet
 			 */
+			if ( '' === $code_snippet->name ) {
+				$code_snippet->name = '(no title)';
+			}
 			$snippets[ $code_snippet->id ] = $code_snippet->name;
 		}
 
 		return $snippets;
-
 	}
 
 	/**
@@ -104,9 +106,10 @@ class WPCode_Importer_Code_Snippets extends WPCode_Importer_Type {
 		$new_snippet->save();
 
 		if ( ! empty( $new_snippet->get_id() ) ) {
+			$title = $new_snippet->get_title();
 			wp_send_json_success(
 				array(
-					'name' => $new_snippet->get_title(),
+					'name' => '' !== $title ? $title : '(no title)',
 					'edit' => esc_url_raw(
 						add_query_arg(
 							array(
@@ -147,11 +150,14 @@ class WPCode_Importer_Code_Snippets extends WPCode_Importer_Type {
 			$auto_insert = 0;
 		}
 
+		$tags   = is_array( $snippet->tags ) ? $snippet->tags : explode( ',', $snippet->tags );
+		$tags[] = $this->add_imported_tag();
+
 		return array(
 			'code'        => wp_slash( $snippet->code ),
 			'note'        => $snippet->desc,
 			'title'       => $snippet->name,
-			'tags'        => $snippet->tags,
+			'tags'        => implode( ',', $tags ), // Combine all tags into a single string.
 			'code_type'   => $code_type,
 			'priority'    => $snippet->priority,
 			'location'    => $location,

@@ -621,6 +621,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		<?php $this->get_input_auto_insert_options(); ?>
 		<div class="wpcode-metabox-form">
 			<?php $this->get_input_row_as_file(); ?>
+			<?php $this->get_input_row_compress_output(); ?>
 			<?php $this->get_input_row_schedule(); ?>
 		</div>
 		<?php
@@ -1535,7 +1536,7 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 				$type_options = $options[ $row['type'] ];
 				$value_option = $type_options['options'][ $row['option'] ];
 
-				// Construct the meta array
+				// Construct the meta array.
 				$meta = array(
 					'post' => isset( $row['meta_key'] ) ? $row['meta_key'] : '',
 					'user' => isset( $row['user_meta_key'] ) ? $row['user_meta_key'] : '',
@@ -1672,19 +1673,19 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		$markup .= '</select>';
 		$markup .= '</span>'; // wpcode-cl-rule-type-container.
 
-		// Display the appropriate input based on the type
-		if ( $type === 'user_meta' || $type === 'post_meta' ) {
+		// Display the appropriate input based on the type.
+		if ( 'user_meta' === $type || 'post_meta' === $type ) {
 			$meta_key = '';
-			if ( $type === 'post_meta' && isset( $meta['post'] ) ) {
-				$meta_key = $meta['post'];
-                $identifier = 'wpcode-cl-rule-meta-key';
-			} elseif ( $type === 'user_meta' && isset( $meta['user'] ) ) {
-				$meta_key = $meta['user'];
-                $identifier = 'wpcode-cl-rule-user-meta-key';
+			if ( 'post_meta' === $type && isset( $meta['post'] ) ) {
+				$meta_key   = $meta['post'];
+				$identifier = 'wpcode-cl-rule-meta-key';
+			} elseif ( 'user_meta' === $type && isset( $meta['user'] ) ) {
+				$meta_key   = $meta['user'];
+				$identifier = 'wpcode-cl-rule-user-meta-key';
 			}
 
-			$markup .= '<div class="'.$identifier.'-container">';
-			$markup .= '<input type="text" class="' .$identifier. ' wpcode-input-text" name="' .$identifier. '" placeholder="Enter Meta Key" value="' . esc_attr( $meta_key ) . '">';
+			$markup .= '<div class="' . $identifier . '-container">';
+			$markup .= '<input type="text" class="' . $identifier . ' wpcode-input-text" name="' . $identifier . '" placeholder="Enter Meta Key" value="' . esc_attr( $meta_key ) . '">';
 			$markup .= '</div>';
 		}
 
@@ -1769,6 +1770,9 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		$data['laf_title']              = __( 'Load as file is a Pro Feature', 'insert-headers-and-footers' );
 		$data['laf_text']               = __( 'Upgrade to PRO today and unlock loading your CSS and JS snippets as files for better performance and improved compatibility with caching plugins.', 'insert-headers-and-footers' );
 		$data['laf_url']                = wpcode_utm_url( 'https://wpcode.com/lite/', 'snippet-editor', 'laf', 'modal' );
+		$data['co_title']               = __( 'Compress Output is a Pro Feature', 'insert-headers-and-footers' );
+		$data['co_text']                = __( 'Upgrade to PRO today and unlock the ability to compress your code by removing comments and unnecessary spaces, ensuring enhanced performance.', 'insert-headers-and-footers' );
+		$data['co_url']                 = wpcode_utm_url( 'https://wpcode.com/lite/', 'snippet-editor', 'compress-output', 'modal' );
 		$data['php_cl_location_notice'] = sprintf(
 		// Translators: %1$s Opening anchor tag. %2$s Closing anchor tag.
 			__( 'For better results using conditional logic with PHP snippets we automatically switched the auto-insert location to "Frontend Conditional Logic" that runs later. If you want to run the snippet earlier please switch back to "Run Everywhere" but note not all conditional logic options will be available. %1$sRead more%2$s', 'insert-headers-and-footers' ),
@@ -2013,6 +2017,15 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 	}
 
 	/**
+	 * Get the description of the compress output option.
+	 *
+	 * @return string
+	 */
+	public function get_input_row_compress_output_description() {
+		return esc_html__( 'Compress code output by removing spaces and comments.', 'insert-headers-and-footers' );
+	}
+
+	/**
 	 * Get the markup for displaying an option to load the snippet as a file if the code type is CSS or JS.
 	 *
 	 * @return void
@@ -2030,6 +2043,28 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			$this->get_input_row_as_file_description(),
 			true,
 			'wpcode_snippet_as_file_option'
+		);
+	}
+
+	/**
+	 * Get the markup for displaying an option to compress the output if the code type is CSS, HTML, or JS.
+	 *
+	 * @return void
+	 */
+	public function get_input_row_compress_output() {
+
+		$this->metabox_row(
+			esc_html__( 'Compress Output', 'insert-headers-and-footers' ),
+			$this->get_checkbox_toggle(
+				false,
+				'wpcode_compress_output'
+			),
+			'wpcode_compress_output',
+			'#wpcode_snippet_type',
+			'js,css,html',
+			$this->get_input_row_compress_output_description(),
+			true,
+			'wpcode_compress_output_option'
 		);
 	}
 

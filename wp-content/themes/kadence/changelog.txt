@@ -1,3 +1,19 @@
+= 1.2.22 | 17th April 2025 =
+* Update: Adding datePublished meta information for seo.
+* Fix: Link to starter templates page in Kadence -> Starter tempaltes.
+* Fix: Updated logic for custom category colors in loop.
+
+= 1.2.21 | 4th April 2025 =
+* Fix: Issue with loading google fonts in footer.
+
+= 1.2.20 | 3rd April 2025 =
+* Fix: Scroll to top button not losing hover state on mobile after pressed.
+* FIx: Improvments to LifterLMS integration.
+* Fix: Issue with double loading google fonts in some situations.
+
+== 1.2.19 | 18th March 2025 ==
+* Update: Improve basic GiveWP support.
+
 == 1.2.18 | 7th March 2025 ==
 * Fix: broken top level links on menus
 

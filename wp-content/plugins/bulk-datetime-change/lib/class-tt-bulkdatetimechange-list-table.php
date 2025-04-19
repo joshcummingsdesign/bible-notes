@@ -22,6 +22,10 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
 	require_once ABSPATH . 'wp-admin/includes/screen.php';
@@ -258,16 +262,16 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 				$status_html = null;
 				break;
 			case 'pending':
-				$status_html = '<b> - ' . __( 'Pending' ) . '</b>';
+				$status_html = '<b> - ' . __( 'Pending', 'bulk-datetime-change' ) . '</b>';
 				break;
 			case 'draft':
-				$status_html = '<b> - ' . __( 'Draft' ) . '</b>';
+				$status_html = '<b> - ' . __( 'Draft', 'bulk-datetime-change' ) . '</b>';
 				break;
 			case 'future':
-				$status_html = '<b> - ' . __( 'Scheduled' ) . '</b>';
+				$status_html = '<b> - ' . __( 'Scheduled', 'bulk-datetime-change' ) . '</b>';
 				break;
 			case 'private':
-				$status_html = '<b> - ' . __( 'Private' ) . '</b>';
+				$status_html = '<b> - ' . __( 'Private', 'bulk-datetime-change' ) . '</b>';
 				break;
 			default:
 				$status_html = null;
@@ -303,18 +307,18 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 
 		$bulkdatetimechange_settings = get_user_option( 'bulkdatetimechange', get_current_user_id() );
 		if ( 'modified' === $bulkdatetimechange_settings['method'] ) {
-			$method = __( 'Last updated' );
+			$method = __( 'Last updated', 'bulk-datetime-change' );
 		} else {
 			$method = __( 'Posted', 'bulk-datetime-change' );
 		}
 
 		$columns = array(
 			'cb'         => '<input type="checkbox" />', /* Render a checkbox instead of text */
-			'title'      => __( 'Title' ),
-			'datetime'   => __( 'Date/time' ) . ' ' . $method,
+			'title'      => __( 'Title', 'bulk-datetime-change' ),
+			'datetime'   => __( 'Date/time', 'bulk-datetime-change' ) . ' ' . $method,
 			'posttype'   => __( 'Post type', 'bulk-datetime-change' ),
-			'author'     => __( 'Author' ),
-			'categories' => __( 'Categories' ),
+			'author'     => __( 'Author', 'bulk-datetime-change' ),
+			'categories' => __( 'Categories', 'bulk-datetime-change' ),
 		);
 
 		return $columns;
@@ -388,7 +392,7 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 			<label for="cb-select-all-' . $cb_counter . '">' .
 				'<span class="screen-reader-text">' .
 					/* translators: Hidden accessibility text. */
-					__( 'Select All' ) .
+					__( 'Select All', 'bulk-datetime-change' ) .
 				'</span>' .
 				'</label>';
 			++$cb_counter;
@@ -460,9 +464,9 @@ class TT_BulkDatetimeChange_List_Table extends WP_List_Table {
 					$class[] = 'desc' === $order ? 'asc' : 'desc';
 
 					/* translators: Hidden accessibility text. */
-					$asc_text = __( 'Sort ascending.' );
+					$asc_text = __( 'Sort ascending.', 'bulk-datetime-change' );
 					/* translators: Hidden accessibility text. */
-					$desc_text  = __( 'Sort descending.' );
+					$desc_text  = __( 'Sort descending.', 'bulk-datetime-change' );
 					$order_text = 'asc' === $order ? $asc_text : $desc_text;
 				}
 

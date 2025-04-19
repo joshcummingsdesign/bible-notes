@@ -89,6 +89,15 @@ abstract class WPCode_Importer_Type {
 		update_option( 'wpcode_imported', $imported, false );
 	}
 
+    /**
+     * Get the imported tag for this plugin.
+     *
+     * @return string
+     */
+    public function add_imported_tag(){
+        return 'imported-' . $this->slug;
+    }
+
 	/**
 	 * Import a single snippet using AJAX.
 	 *

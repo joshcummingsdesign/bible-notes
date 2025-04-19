@@ -4,7 +4,7 @@ Tags: translation-ready, two-columns, right-sidebar, left-sidebar, footer-widget
 Requires at least: 6.3
 Tested up to: 6.7.2
 Requires PHP: 7.4
-Stable tag: 1.2.18
+Stable tag: 1.2.22
 License: GNU General Public License v3.0 (or later)
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -25,6 +25,22 @@ Please report security bugs found in the source code of the Kadence Theme throug
 Please report security bugs found in the Kadence theme's source code through the Patchstack Vulnerability Disclosure Program https://patchstack.com/database/vdp/kadence. The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this theme.
 
 = Changelog =
+
+= 1.2.22 | 17th April 2025 =
+* Update: Adding datePublished meta information for seo.
+* Fix: Link to starter templates page in Kadence -> Starter tempaltes.
+* Fix: Updated logic for custom category colors in loop.
+
+= 1.2.21 | 4th April 2025 =
+* Fix: Issue with loading google fonts in footer.
+
+= 1.2.20 | 3rd April 2025 =
+* Fix: Scroll to top button not losing hover state on mobile after pressed.
+* Fix: Improvments to LifterLMS integration.
+* Fix: Issue with double loading google fonts in some situations.
+
+== 1.2.19 | 18th March 2025 ==
+* Update: Improve basic GiveWP support.
 
 == 1.2.18 | 7th March 2025 ==
 * Fix: broken top level links on menus.

@@ -1,9 +1,9 @@
-=== Better Section Navigation Widget ===
+=== Better Section Navigation ===
 Contributors: kenjigarland, jakemgold, thinkoomph
 Tags: navigation, section, cms, pages, hierarchy
 Requires at least: 2.8
-Tested up to: 6.6.1
-Stable tag: 1.6.1
+Tested up to: 6.7
+Stable tag: 1.7.0
 Requires PHP: 5.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -92,6 +92,11 @@ Here’s the complete list:
 
 == Changelog ==
 
+= 1.7.0 =
+* **Security update:** fix a cross-site scripting vulnerability that allowed contributor users (and higher) to inject unsanitized HTML into content.
+* Correct translation textdomain issues. The plugin's user-facing text is now fully localizable.
+* Miscellaneous other code cleanup.
+
 = 1.6.1 =
 * Restore Simple Section Navigation's handling of the display of child pages *not* descended from the current page. Simple Section Navigation did not display other pages' children unless the "show all pages in section" checkbox was checked, but formerly, Better Section Navigation would show all children of _siblings_ of the current page.
 
@@ -130,10 +135,3 @@ Here’s the complete list:
 * Cleaned up deprecated function calls.
 * Added a shortcode to allow users to display the section nav widget without
 	editing any template files.
-
-
-== Upgrade Notice ==
-
-= 1.0 =
-If you were previously using the Simple Section Navigation Widget plugin, you'll want to create new Better Section Navigation widgets and copy over your old widget settings, and/or edit your template files to use the function
-`better_section_nav()` where you previously used `simple_section_nav()`, before deactivating Simple Section Navigation Widget.

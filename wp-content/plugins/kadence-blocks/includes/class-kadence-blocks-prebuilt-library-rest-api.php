@@ -299,6 +299,13 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 	];
 
 	/**
+	 * The environment.
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	public $env = '';
+	/**
 	 * @var Block_Library_Cache
 	 */
 	protected $block_library_cache;
@@ -758,6 +765,9 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 		if ( ! empty( $data['product'] ) ) {
 			$this->product_slug = $data['product'];
 		}
+		if ( ! empty( $data['env'] ) ) {
+			$this->env = $data['env'];
+		}
 	}
 
 	/**
@@ -1001,6 +1011,9 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 				}
 				if ( 'iThemes' === $this->api_email ) {
 					$args['site_url'] = $args['site'];
+				}
+				if ( ! empty( $this->env ) ) {
+					$args['env'] = $this->env;
 				}
 			}
 			// Get the response.
@@ -1289,7 +1302,6 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 		$context           = $request->get_param( self::PROP_CONTEXT );
 		$reload            = $request->get_param( self::PROP_FORCE_RELOAD );
 		$available_prompts = get_option( 'kb_design_library_prompts', [] );
-
 		// Check if we have captured prompt.
 		if ( ! empty( $available_prompts[ $context ] ) && ! $reload ) {
 
@@ -1312,7 +1324,6 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 			// Check if we have a remote file.
 			$response = $this->get_remote_contents( $available_prompts[ $context ] );
 			$body     = wp_remote_retrieve_body( $response );
-
 			if ( is_wp_error( $response ) ) {
 				$current_prompts = get_option( 'kb_design_library_prompts', [] );
 				if ( isset( $current_prompts[ $context ] ) ) {
@@ -1351,7 +1362,12 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 				// Note: This event is logged on an external server.
 				return rest_ensure_response( 'error' );
 			}
-
+			if ( empty( $body ) ) {
+				return rest_ensure_response( 'error' );
+			}
+			if ( 'error' === $body ) {
+				return rest_ensure_response( 'error' );
+			}
 			// Cache the AI content.
 			$this->ai_cache->cache( $available_prompts[ $context ], $body );
 
@@ -1371,7 +1387,6 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 			// Create a job.
 			$response = $this->get_new_remote_contents( $context );
 			$data     = json_decode( $response, true );
-
 			if ( $response === 'error' || $response === 'credits' ) {
 				return rest_ensure_response( $response );
 			} elseif ( isset( $data['data']['job_id'] ) ) {
@@ -1846,7 +1861,9 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 			$args['api_email']  = $this->api_email;
 			$args['api_key']    = $this->api_key;
 			$args['product_id'] = $this->product_id;
-
+			if ( ! empty( $this->env ) ) {
+				$args['env'] = $this->env;
+			}
 			if ( 'iThemes' === $this->api_email ) {
 				$args['site_url'] = $site_url;
 			}
@@ -1897,7 +1914,9 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 			$args['api_email']  = $this->api_email;
 			$args['api_key']    = $this->api_key;
 			$args['product_id'] = $this->product_id;
-
+			if ( ! empty( $this->env ) ) {
+				$args['env'] = $this->env;
+			}
 			if ( 'iThemes' === $this->api_email ) {
 				$args['site_url'] = $site_url;
 			}
@@ -2057,6 +2076,9 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 		if ( ! empty( $this->api_email ) ) {
 			// Send in case we need to verify with old api.
 			$args['email'] = $this->api_email;
+		}
+		if ( ! empty( $this->env ) ) {
+			$args['env'] = $this->env;
 		}
 		$api_url  = add_query_arg( $args, $this->remote_credits_url . 'get-remaining' );
 		$response = wp_safe_remote_get(
@@ -2551,6 +2573,9 @@ class Kadence_Blocks_Prebuilt_Library_REST_Controller extends WP_REST_Controller
 			'product_slug'    => apply_filters( 'kadence-blocks-auth-slug', $product_slug ),
 			'product_version' => KADENCE_BLOCKS_VERSION,
 		];
+		if ( ! empty( $license_data['env'] ) ) {
+			$defaults['env'] = $license_data['env'];
+		}
 
 		$parsed_args = wp_parse_args( $args, $defaults );
 

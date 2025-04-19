@@ -2,8 +2,8 @@
 Contributors: britner
 Tags: templates, gutenberg
 Requires at least: 6.2
-Tested up to: 6.7
-Stable tag: 2.1.9
+Tested up to: 6.8
+Stable tag: 2.2.7
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -124,6 +124,44 @@ assist you with verification, CVE assignment, and notify the
 developers of this plugin.
 
 == Changelog ==
+
+= 2.2.7 =
+Release Date: 17th April 2025
+* Update: New AI layouts release.
+* Update: Add option to have AI generate the about.
+* Fix: Issue installing plugin.
+* Fix: Text replace in some instances.
+
+= 2.2.6 =
+Release Date: 16th April 2025
+* Fix: Issue importing goal related content.
+* Fix: Issue handling product images.
+* Fix: Issue with some images showing broken.
+
+= 2.2.5 =
+Release Date: 14th April 2025
+* Update: Flush cache after import.
+
+= 2.2.4 =
+* Update: Add performance in todos.
+* Update: Improve AI image replace.
+* Update: Improve how long site names are handled.
+
+= 2.2.3 =
+* Update: Improve importing images.
+
+= 2.2.2 =
+* Update: Improve image replace with AI templates.
+* Update: Improve form import.
+* Fix: Issue with importing video file.
+
+= 2.2.1 =
+* Update: Improve GiveWP support in prep for 4.0
+
+= 2.2.0 =
+* Add: New Site Assist.
+* Update: Improve GiveWP support.
+* Update: Improve AI content input.
 
 = 2.1.9 =
 * Fix: Issue where AI wasn't connecting correctly.

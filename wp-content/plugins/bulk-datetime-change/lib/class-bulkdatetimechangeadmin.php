@@ -19,6 +19,10 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $bulkdatetimechangeadmin = new BulkDatetimeChangeAdmin();
 
 /** ==================================================
@@ -59,7 +63,7 @@ class BulkDatetimeChangeAdmin {
 		}
 		if ( $file == $this_plugin ) {
 			$links[] = '<a href="' . admin_url( 'admin.php?page=bulkdatetimechange' ) . '">Bulk Datetime Change</a>';
-			$links[] = '<a href="' . admin_url( 'admin.php?page=bulkdatetimechange-settings' ) . '">' . __( 'Settings' ) . '</a>';
+			$links[] = '<a href="' . admin_url( 'admin.php?page=bulkdatetimechange-settings' ) . '">' . __( 'Settings', 'bulk-datetime-change' ) . '</a>';
 		}
 		return $links;
 	}
@@ -80,8 +84,8 @@ class BulkDatetimeChangeAdmin {
 		);
 		add_submenu_page(
 			'bulkdatetimechange',
-			__( 'Settings' ),
-			__( 'Settings' ),
+			__( 'Settings', 'bulk-datetime-change' ),
+			__( 'Settings', 'bulk-datetime-change' ),
 			'publish_posts',
 			'bulkdatetimechange-settings',
 			array( $this, 'settings_page' )
@@ -131,7 +135,7 @@ class BulkDatetimeChangeAdmin {
 	public function manage_page() {
 
 		if ( ! current_user_can( 'publish_posts' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.' ) );
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bulk-datetime-change' ) );
 		}
 
 		$bulkdatetimechange_settings = get_user_option( 'bulkdatetimechange', get_current_user_id() );
@@ -214,7 +218,7 @@ class BulkDatetimeChangeAdmin {
 		<div class="wrap">
 
 		<h2>Bulk Datetime Change
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=bulkdatetimechange-settings' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Settings' ); ?></a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=bulkdatetimechange-settings' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Settings', 'bulk-datetime-change' ); ?></a>
 		</h2>
 		<div style="clear: both;"></div>
 
@@ -233,7 +237,7 @@ class BulkDatetimeChangeAdmin {
 				?>
 				<div class="cp_tooltip_update">
 				<?php
-				submit_button( __( 'Update' ), 'primary', 'bulk-datetime-change-update1', false, array( 'form' => 'bulkdatetimechange_forms' ) );
+				submit_button( __( 'Update', 'bulk-datetime-change' ), 'primary', 'bulk-datetime-change-update1', false, array( 'form' => 'bulkdatetimechange_forms' ) );
 				?>
 				<span class="cp_tooltip_update_text"><?php esc_html_e( 'This "Update" button changes the date and time of the items checked in the checkbox.', 'bulk-datetime-change' ); ?></span>
 				</div>
@@ -243,7 +247,7 @@ class BulkDatetimeChangeAdmin {
 				?>
 				<div class="cp_tooltip_update">
 				<?php
-				submit_button( __( 'Update' ), 'primary', 'bulk-datetime-change-update2', false, array( 'form' => 'bulkdatetimechange_forms' ) );
+				submit_button( __( 'Update', 'bulk-datetime-change' ), 'primary', 'bulk-datetime-change-update2', false, array( 'form' => 'bulkdatetimechange_forms' ) );
 				?>
 				<span class="cp_tooltip_update_text"><?php esc_html_e( 'This "Update" button changes the date and time of the items checked in the checkbox.', 'bulk-datetime-change' ); ?></span>
 				</div>
@@ -261,7 +265,7 @@ class BulkDatetimeChangeAdmin {
 	public function settings_page() {
 
 		if ( ! current_user_can( 'publish_posts' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.' ) );
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bulk-datetime-change' ) );
 		}
 
 		$bulkdatetimechange = new BulkDatetimeChange();
@@ -275,7 +279,7 @@ class BulkDatetimeChangeAdmin {
 		?>
 		<div class="wrap">
 
-		<h2><a href="<?php echo esc_url( admin_url( 'admin.php?page=bulkdatetimechange' ) ); ?>" style="text-decoration: none;">Bulk Datetime Change</a>&nbsp;&nbsp;<?php esc_html_e( 'Settings' ); ?>
+		<h2><a href="<?php echo esc_url( admin_url( 'admin.php?page=bulkdatetimechange' ) ); ?>" style="text-decoration: none;">Bulk Datetime Change</a>&nbsp;&nbsp;<?php esc_html_e( 'Settings', 'bulk-datetime-change' ); ?>
 		</h2>
 		<div style="clear: both;"></div>
 
@@ -316,7 +320,7 @@ class BulkDatetimeChangeAdmin {
 				?>
 				</details>
 				<details style="margin-bottom: 5px;" open>
-				<summary style="cursor: pointer; padding: 10px; border: 1px solid #ddd; background: #f4f4f4; color: #000;"><?php esc_html_e( 'View' ); ?></summary>
+				<summary style="cursor: pointer; padding: 10px; border: 1px solid #ddd; background: #f4f4f4; color: #000;"><?php esc_html_e( 'View', 'bulk-datetime-change' ); ?></summary>
 				<form method="post" action="<?php echo esc_url( $scriptname ); ?>">
 					<?php wp_nonce_field( 'bdtc_settings', 'bulk_datetime_change_settings' ); ?>
 					<div style="display: block;padding:5px 5px">
@@ -336,7 +340,7 @@ class BulkDatetimeChangeAdmin {
 						if ( 'modified' === $bulkdatetimechange_settings['method'] ) {
 							echo 'checked';}
 						?>
-						><?php esc_html_e( 'Last updated' ); ?>
+						><?php esc_html_e( 'Last updated', 'bulk-datetime-change' ); ?>
 					</div>
 					<?php
 					if ( $bulkdatetimechange->is_add_on_activate ) {
@@ -352,7 +356,7 @@ class BulkDatetimeChangeAdmin {
 					?>
 				</details>
 				<details style="margin-bottom: 5px;" open>
-				<summary style="cursor: pointer; padding: 10px; border: 1px solid #ddd; background: #f4f4f4; color: #000;"><?php esc_html_e( 'Change' ); ?></summary>
+				<summary style="cursor: pointer; padding: 10px; border: 1px solid #ddd; background: #f4f4f4; color: #000;"><?php esc_html_e( 'Change', 'bulk-datetime-change' ); ?></summary>
 					<div style="display: block;padding:5px 5px">
 						<input type="radio" name="write" value="date_modified" 
 						<?php
@@ -422,7 +426,7 @@ class BulkDatetimeChangeAdmin {
 					}
 					?>
 				</details>
-				<?php submit_button( __( 'Save Changes' ), 'primary', 'bulk-datetime-change-settings-options-apply', true ); ?>
+				<?php submit_button( __( 'Save Changes', 'bulk-datetime-change' ), 'primary', 'bulk-datetime-change-settings-options-apply', true ); ?>
 				</form>
 
 			</div>
@@ -467,7 +471,7 @@ class BulkDatetimeChangeAdmin {
 				}
 			}
 		}
-		$plugin_version = __( 'Version:' ) . ' ' . $plugin_ver_num;
+		$plugin_version = __( 'Version:', 'bulk-datetime-change' ) . ' ' . $plugin_ver_num;
 		/* translators: FAQ Link & Slug */
 		$faq       = sprintf( __( 'https://wordpress.org/plugins/%s/faq', 'bulk-datetime-change' ), $slug );
 		$support   = 'https://wordpress.org/support/plugin/' . $slug;
@@ -488,7 +492,7 @@ class BulkDatetimeChangeAdmin {
 		<a style="text-decoration: none;" href="<?php echo esc_url( $translate ); ?>" target="_blank" rel="noopener noreferrer">
 		<?php
 		/* translators: Plugin translation link */
-		echo esc_html( sprintf( __( 'Translations for %s' ), $plugin_name ) );
+		echo esc_html( sprintf( __( 'Translations for %s', 'bulk-datetime-change' ), $plugin_name ) );
 		?>
 		</a> | <a style="text-decoration: none;" href="<?php echo esc_url( $facebook ); ?>" target="_blank" rel="noopener noreferrer"><span class="dashicons dashicons-facebook"></span></a> | <a style="text-decoration: none;" href="<?php echo esc_url( $twitter ); ?>" target="_blank" rel="noopener noreferrer"><span class="dashicons dashicons-twitter"></span></a> | <a style="text-decoration: none;" href="<?php echo esc_url( $youtube ); ?>" target="_blank" rel="noopener noreferrer"><span class="dashicons dashicons-video-alt3"></span></a>
 		</div>
@@ -497,7 +501,7 @@ class BulkDatetimeChangeAdmin {
 		<div style="width: 250px; height: 180px; margin: 5px; padding: 5px; border: #CCC 2px solid;">
 		<h3><?php esc_html_e( 'Please make a donation if you like my work or would like to further the development of this plugin.', 'bulk-datetime-change' ); ?></h3>
 		<div style="text-align: right; margin: 5px; padding: 5px;"><span style="padding: 3px; color: #ffffff; background-color: #008000">Plugin Author</span> <span style="font-weight: bold;">Katsushi Kawamori</span></div>
-		<button type="button" style="margin: 5px; padding: 5px;" onclick="window.open('<?php echo esc_url( $donate ); ?>')"><?php esc_html_e( 'Donate to this plugin &#187;' ); ?></button>
+		<button type="button" style="margin: 5px; padding: 5px;" onclick="window.open('<?php echo esc_url( $donate ); ?>')"><?php esc_html_e( 'Donate to this plugin &#187;', 'bulk-datetime-change' ); ?></button>
 		</div>
 
 		<?php
@@ -528,7 +532,7 @@ class BulkDatetimeChangeAdmin {
 				do_action( 'bdtc_custompost_options_updated', get_current_user_id() );
 				do_action( 'bdtc_exif_options_updated', get_current_user_id() );
 				do_action( 'bdtc_randomupdate_options_updated', get_current_user_id() );
-				echo '<div class="notice notice-success is-dismissible"><ul><li>' . esc_html( __( 'Settings' ) . ' --> ' . __( 'Changes saved.' ) ) . '</li></ul></div>';
+				echo '<div class="notice notice-success is-dismissible"><ul><li>' . esc_html( __( 'Settings', 'bulk-datetime-change' ) . ' --> ' . __( 'Changes saved.', 'bulk-datetime-change' ) ) . '</li></ul></div>';
 			}
 		}
 	}
@@ -573,9 +577,9 @@ class BulkDatetimeChangeAdmin {
 			$post_custom_types = get_user_option( 'bulkdatetimechange_addon_custompost', get_current_user_id() );
 		}
 		$post_types = array(
-			'post' => __( 'Post' ),
-			'page' => __( 'Page' ),
-			'attachment' => __( 'Media' ),
+			'post' => __( 'Post', 'bulk-datetime-change' ),
+			'page' => __( 'Page', 'bulk-datetime-change' ),
+			'attachment' => __( 'Media', 'bulk-datetime-change' ),
 		);
 		if ( ! empty( $post_custom_types ) ) {
 			$custom_types = array();

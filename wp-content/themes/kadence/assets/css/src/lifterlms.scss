@@ -557,3 +557,11 @@ body:not( .elementor-page ) .llms-loop-item-content {
 	margin-top: 5px;
 	margin-bottom: 0;
 }
+
+// v8.0.2 fix
+#review_box label {
+	display: block;
+}
+.llms-favorite-wrapper button {
+	color: var(--global-palette4);
+}

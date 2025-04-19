@@ -177,6 +177,13 @@ class WPCode_Snippet {
 	 * @var array
 	 */
 	private $generator_data;
+
+	/**
+	 * Compress code output.
+	 *
+	 * @var bool
+	 */
+	public $compress_output;
 	/**
 	 * The type of device to load this snippet on.
 	 *
@@ -589,6 +596,12 @@ class WPCode_Snippet {
 		if ( isset( $this->load_as_file ) && in_array( $this->get_code_type(), array( 'css', 'js', 'scss' ), true ) ) {
 			update_post_meta( $this->id, '_wpcode_load_as_file', $this->load_as_file );
 		}
+		if ( isset( $this->compress_output ) ) {
+			update_post_meta( $this->id, '_wpcode_compress_output', true );
+		} else {
+			delete_post_meta( $this->id, '_wpcode_compress_output' );
+		}
+
 		if ( isset( $this->compiled_code ) ) {
 			update_post_meta( $this->id, '_wpcode_compiled_code', $this->compiled_code );
 		}
@@ -1096,6 +1109,19 @@ class WPCode_Snippet {
 			$this->compiled_code = get_post_meta( $this->get_id(), '_wpcode_compiled_code', true );
 		}
 		return $this->compiled_code;
+	}
+
+	/**
+	 * Maybe the output be compressed?
+	 *
+	 * @return bool
+	 */
+	public function maybe_compress_output() {
+		if ( ! isset( $this->compress_output ) ) {
+			$this->compress_output = boolval( get_post_meta( $this->get_id(), '_wpcode_compress_output', true ) );
+		}
+
+		return $this->compress_output;
 	}
 
 	/**

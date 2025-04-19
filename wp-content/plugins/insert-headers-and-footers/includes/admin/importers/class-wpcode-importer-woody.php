@@ -53,11 +53,13 @@ class WPCode_Importer_Woody extends WPCode_Importer_Type {
 		);
 
 		foreach ( $snippets_posts as $post ) {
+			if ( '' === $post->post_title ) {
+				$post->post_title = '(no title)';
+			}
 			$snippets[ $post->ID ] = $post->post_title;
 		}
 
 		return $snippets;
-
 	}
 
 	/**
@@ -100,9 +102,10 @@ class WPCode_Importer_Woody extends WPCode_Importer_Type {
 		$new_snippet->save();
 
 		if ( ! empty( $new_snippet->get_id() ) ) {
+			$title = $new_snippet->get_title();
 			wp_send_json_success(
 				array(
-					'name' => $new_snippet->get_title(),
+					'name' => '' !== $title ? $title : '(no title)',
 					'edit' => esc_url_raw(
 						add_query_arg(
 							array(
@@ -149,11 +152,16 @@ class WPCode_Importer_Woody extends WPCode_Importer_Type {
 				$location = $snippet_location;
 		}
 
+		$existing_tags   = wp_get_post_terms( $snippet->ID, WINP_SNIPPETS_TAXONOMY, array( 'fields' => 'slugs' ) );
+		$existing_tags[] = $this->add_imported_tag(); // Add the import tag.
+
+		$tags = ( is_array( $existing_tags ) ) ? implode( ',', $existing_tags ) : $existing_tags;
+
 		return array(
 			'code'        => wp_slash( WINP_Helper::get_snippet_code( $snippet ) ),
 			'note'        => WINP_Helper::getMetaOption( $snippet->ID, 'snippet_description', '' ),
 			'title'       => $snippet->post_title,
-			'tags'        => wp_get_post_terms( $snippet->ID, WINP_SNIPPETS_TAXONOMY, array( 'fields' => 'slugs' ) ),
+			'tags'        => $tags,
 			'code_type'   => WINP_Helper::get_snippet_type( $snippet->ID ),
 			'priority'    => intval( WINP_Helper::getMetaOption( $snippet->ID, 'snippet_priority', '' ) ),
 			'location'    => $location,

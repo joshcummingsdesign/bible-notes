@@ -13,11 +13,11 @@ class Better_Section_Nav extends WP_Widget {
 	 */
 	function __construct( $id_base = 'better-section-nav', $name = '' ) {
 		if ( empty( $name ) ) {
-			$name = __( 'Better Section Navigation', 'better-section-nav' );
+			$name = __( 'Better Section Navigation', 'better-section-navigation' );
 		}
 		$widget_ops = array(
 			'classname' => 'better-section-nav simple-section-nav',
-			'description' => __( 'Shows page ancestory (parents, grandparents, etc), siblings of ancestory and current page, and immediate children of the current page beneath the current top level page.', 'better-section-nav' ),
+			'description' => __( 'Shows page ancestory (parents, grandparents, etc), siblings of ancestory and current page, and immediate children of the current page beneath the current top level page.', 'better-section-navigation' ),
 		);
 		parent::__construct( $id_base, $name, $widget_ops );
 	}
@@ -53,7 +53,7 @@ class Better_Section_Nav extends WP_Widget {
 		}
 
 		if ( is_front_page() || isset( $sub_front_page ) ) {
-			echo $args['before_widget'] . $args['before_title'] . get_bloginfo( 'name', 'display' ) . $args['after_title']; // phpcs:ignore
+			echo wp_kses_post( $args['before_widget'] . $args['before_title'] . get_bloginfo( 'name', 'display' ) . $args['after_title'] );
 			echo '<ul class="' . esc_attr( apply_filters( 'bsn_list_class', 'bsn-list' ) ) . '">';
 			$children = wp_list_pages( array(
 				'title_li' => '',
@@ -62,8 +62,8 @@ class Better_Section_Nav extends WP_Widget {
 				'exclude' => $instance['exclude'],
 				'echo' => false,
 			) );
-			echo apply_filters( 'better_section_page_list', $children );	// phpcs:ignore
-			echo '</ul>' . $args['after_widget'];	// phpcs:ignore
+			echo wp_kses_post( apply_filters( 'better_section_page_list', $children ) );
+			echo '</ul>' . wp_kses_post( $args['after_widget'] );
 			return true;
 		}
 
@@ -135,10 +135,10 @@ class Better_Section_Nav extends WP_Widget {
 			$sect_title = '<a href="' . get_page_link( $top_page ) . '" id="toppage-' . $top_page . '" class="' . $headclass . '">' . $sect_title . '</a>';
 		}
 
-		echo $args['before_widget'] . $args['before_title'] . $sect_title . $args['after_title'];	// phpcs:ignore
+		echo wp_kses_post( $args['before_widget'] . $args['before_title'] . $sect_title . $args['after_title'] );
 		echo '<ul class="' . esc_attr( apply_filters( 'bsn_list_class', 'bsn-list' ) ) . '">';
-		echo apply_filters( 'better_section_page_list', $children ); // phpcs:ignore
-		echo '</ul>' . $args['after_widget']; // phpcs:ignore
+		echo wp_kses_post( apply_filters( 'better_section_page_list', $children ) );
+		echo '</ul>' . wp_kses_post( $args['after_widget'] );
 	}
 
 	/**
@@ -175,34 +175,34 @@ class Better_Section_Nav extends WP_Widget {
 		) );
 		?>
 		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Override Title:' ); ?></label>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Override Title:', 'better-section-navigation' ); ?></label>
 			<input type="text" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php echo esc_attr( $instance['title'] ); ?>" size="7" class="widefat" /><br />
 				<small>Leave blank to use top level page title.</small>
 		</p>
 		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'sort_by' ) ); ?>"><?php esc_html_e( 'Sort pages by:' ); ?></label>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'sort_by' ) ); ?>"><?php esc_html_e( 'Sort pages by:', 'better-section-navigation' ); ?></label>
 			<select name="<?php echo esc_attr( $this->get_field_name( 'sort_by' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'sort_by' ) ); ?>" class="widefat">
-				<option value="post_title"<?php selected( $instance['sort_by'], 'post_title' ); ?>><?php esc_html_e( 'Page title' ); ?></option>
-				<option value="menu_order"<?php selected( $instance['sort_by'], 'menu_order' ); ?>><?php esc_html_e( 'Page order' ); ?></option>
-				<option value="ID"<?php selected( $instance['sort_by'], 'ID' ); ?>><?php esc_html_e( 'Page ID' ); ?></option>
+				<option value="post_title"<?php selected( $instance['sort_by'], 'post_title' ); ?>><?php esc_html_e( 'Page title', 'better-section-navigation' ); ?></option>
+				<option value="menu_order"<?php selected( $instance['sort_by'], 'menu_order' ); ?>><?php esc_html_e( 'Page order', 'better-section-navigation' ); ?></option>
+				<option value="ID"<?php selected( $instance['sort_by'], 'ID' ); ?>><?php esc_html_e( 'Page ID', 'better-section-navigation' ); ?></option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'exclude' ) ); ?>"><?php esc_html_e( 'Exclude:' ); ?></label>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'exclude' ) ); ?>"><?php esc_html_e( 'Exclude:', 'better-section-navigation' ); ?></label>
 			<input type="text" id="<?php echo esc_attr( $this->get_field_id( 'exclude' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'exclude' ) ); ?>" value="<?php echo esc_attr( $instance['exclude'] ); ?>" size="7" class="widefat" /><br />
 			<small>Page IDs, separated by commas.</small>
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" <?php checked( $instance['show_on_home'] ); ?> id="<?php echo esc_attr( $this->get_field_id( 'show_on_home' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_on_home' ) ); ?>" />
-			<label for="<?php echo esc_attr( $this->get_field_id( 'show_on_home' ) ); ?>"><?php esc_html_e( 'Show on home page' ); ?></label><br />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'show_on_home' ) ); ?>"><?php esc_html_e( 'Show on home page', 'better-section-navigation' ); ?></label><br />
 			<input class="checkbox" type="checkbox" <?php checked( $instance['a_heading'] ); ?> id="<?php echo esc_attr( $this->get_field_id( 'a_heading' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'a_heading' ) ); ?>" />
-			<label for="<?php echo esc_attr( $this->get_field_id( 'a_heading' ) ); ?>"><?php esc_html_e( 'Link heading (top level page)' ); ?></label><br />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'a_heading' ) ); ?>"><?php esc_html_e( 'Link heading (top level page)', 'better-section-navigation' ); ?></label><br />
 			<input class="checkbox" type="checkbox" <?php checked( $instance['show_all'] ); ?> id="<?php echo esc_attr( $this->get_field_id( 'show_all' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_all' ) ); ?>" />
-			<label for="<?php echo esc_attr( $this->get_field_id( 'show_all' ) ); ?>"><?php esc_html_e( 'Show all pages in section' ); ?></label><br />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'show_all' ) ); ?>"><?php esc_html_e( 'Show all pages in section', 'better-section-navigation' ); ?></label><br />
 			<input class="checkbox" type="checkbox" <?php checked( $instance['show_empty'] ); ?> id="<?php echo esc_attr( $this->get_field_id( 'show_empty' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_empty' ) ); ?>" />
-			<label for="<?php echo esc_attr( $this->get_field_id( 'show_empty' ) ); ?>"><?php esc_html_e( 'Output even if empty section' ); ?></label><br />
+			<label for="<?php echo esc_attr( $this->get_field_id( 'show_empty' ) ); ?>"><?php esc_html_e( 'Output even if empty section', 'better-section-navigation' ); ?></label><br />
 			<input class="checkbox" type="checkbox" <?php checked( $instance['hide_on_excluded'] ); ?> id="<?php echo esc_attr( $this->get_field_id( 'hide_on_excluded' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'hide_on_excluded' ) ); ?>" />
-			<label for="<?php echo esc_attr( $this->get_field_id( 'hide_on_excluded' ) ); ?>"><?php esc_html_e( 'No nav on excluded pages' ); ?></label>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'hide_on_excluded' ) ); ?>"><?php esc_html_e( 'No nav on excluded pages', 'better-section-navigation' ); ?></label>
 		</p>
 		<!-- p><small><a href="https://cornershopcreative.com/plugins/better-section-navigation/" target="_blank">Help &amp; Support</a></small></p -->
 		<?php

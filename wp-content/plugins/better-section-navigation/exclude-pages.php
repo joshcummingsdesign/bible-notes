@@ -83,7 +83,7 @@ function bsn_ep_admin_init() {
 	// Add panels into the editing sidebar(s)
 	add_meta_box(
 		'bsn_ep_admin_meta_box',
-		__( 'Sectional Navigation', 'better-section-nav' ),
+		__( 'Sectional Navigation', 'better-section-navigation' ),
 		'bsn_ep_admin_meta_box',
 		'page',
 		'side',
@@ -115,7 +115,7 @@ function bsn_update_exclusions( $post_id ) {
 
 	// If nonce fail, then default to including the page in the nav
 	// (i.e. bomb out here rather than doing anything whatsoever)
-	if ( ! isset( $_REQUEST['bsn_ep_nonce'] ) || ! wp_verify_nonce( $_REQUEST['bsn_ep_nonce'], 'bsn_ep_include' ) ) {
+	if ( ! isset( $_REQUEST['bsn_ep_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_REQUEST['bsn_ep_nonce'] ), 'bsn_ep_include' ) ) {
 		return;
 	}
 
@@ -172,7 +172,7 @@ function bsn_ep_admin_meta_box() {
 		<p>
 			<label for="bsn_page_included" class="selectit">
 				<input type="checkbox" name="bsn_ancestor_included" id="bsn_ancestor_included" disabled="disabled" />
-				<?php esc_html_e( 'Include this page in lists of pages', 'better-section-nav' ); ?>
+				<?php esc_html_e( 'Include this page in lists of pages', 'better-section-navigation' ); ?>
 			</label>
 		</p>
 
@@ -180,7 +180,7 @@ function bsn_ep_admin_meta_box() {
 			<?php
 				printf(
 					/* translators: placeholder is admin url for editing ancestor */
-					wp_kses_post( __( 'Note: An ancestor of this page is excluded, so this page is too (<a href="%s" title="edit the excluded ancestor">edit ancestor</a>).', 'better-section-nav' ) ),
+					wp_kses_post( __( 'Note: An ancestor of this page is excluded, so this page is too (<a href="%s" title="edit the excluded ancestor">edit ancestor</a>).', 'better-section-navigation' ) ),
 					esc_attr( admin_url( "post.php?action=edit&amp;post=$nearest_excluded_ancestor" ) )
 				);
 			?>
@@ -192,7 +192,7 @@ function bsn_ep_admin_meta_box() {
 		<p>
 			<label for="bsn_page_included" class="selectit">
 				<input type="checkbox" name="bsn_page_included" id="bsn_page_included" <?php checked( true, bsn_current_page_included() ); ?> />
-				<?php esc_html_e( 'Include this page in lists of pages', 'better-section-nav' ); ?>
+				<?php esc_html_e( 'Include this page in lists of pages', 'better-section-navigation' ); ?>
 			</label>
 		</p>
 
@@ -205,11 +205,11 @@ function bsn_ep_admin_meta_box() {
 	if ( current_user_can( 'edit_theme_options' ) ) {
 		printf(
 			/* translators: placeholder is URL for edit menus screen */
-			wp_kses_post( __( 'Regardless of this setting, this page can appear in explicitly created <a href="%s">menus</a>.', 'better-section-nav' ) ),
+			wp_kses_post( __( 'Regardless of this setting, this page can appear in explicitly created <a href="%s">menus</a>.', 'better-section-navigation' ) ),
 			esc_attr( admin_url( 'nav-menus.php' ) )
 		);
 	} else {
-		esc_html_e( 'Note: This page can still appear in explicitly created menus.', 'better-section-nav' );
+		esc_html_e( 'Note: This page can still appear in explicitly created menus.', 'better-section-navigation' );
 	}
 	?>
 	</em></p>

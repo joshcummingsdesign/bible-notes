@@ -35,6 +35,8 @@ class WPCode_Importers {
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/importers/class-wpcode-importer-code-snippets.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/importers/class-wpcode-importer-code-snippets-premium.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/admin/importers/class-wpcode-importer-woody.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/admin/importers/class-wpcode-importer-simple-custom-css-and-js.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/admin/importers/class-wpcode-importer-header-footer-code-manager.php';
 	}
 
 	/**
@@ -45,9 +47,11 @@ class WPCode_Importers {
 	private function load_importers() {
 		if ( empty( $this->importers ) ) {
 			$this->importers = array(
-				'code-snippets'     => new WPCode_Importer_Code_Snippets(),
-				'code-snippets-pro' => new WPCode_Importer_Code_Snippets_Pro(),
-				'woody'             => new WPCode_Importer_Woody(),
+				'code-snippets'              => new WPCode_Importer_Code_Snippets(),
+				'code-snippets-pro'          => new WPCode_Importer_Code_Snippets_Pro(),
+				'woody'                      => new WPCode_Importer_Woody(),
+				'simple-custom-css-js'       => new WPCode_Importer_Simple_Custom_CSS_and_JS(),
+				'header-footer-code-manager' => new WPCode_Importer_Header_Footer_Code_Manager(),
 			);
 		}
 	}

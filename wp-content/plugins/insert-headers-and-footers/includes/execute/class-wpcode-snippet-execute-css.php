@@ -6,7 +6,7 @@
  */
 
 /**
- * WPCode_Snippet_Execute_Text class.
+ * WPCode_Snippet_Execute_CSS class.
  */
 class WPCode_Snippet_Execute_CSS extends WPCode_Snippet_Execute_Type {
 

@@ -24,7 +24,6 @@ class WPCode_Snippet_Execute_HTML extends WPCode_Snippet_Execute_Type {
 	 * @return string
 	 */
 	protected function prepare_snippet_output() {
-		// There's nothing to prepare here at this point.
 		return $this->get_snippet_code();
 	}
 }
