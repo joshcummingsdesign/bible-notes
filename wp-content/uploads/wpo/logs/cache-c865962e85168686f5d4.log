@@ -15,3 +15,6 @@
 [2025-03-14 20:54:53 : INFO] - Cache for multiple term taxonomy have been purged due to post terms update, triggered by action: set_object_terms 
 [2025-03-14 20:54:54 : INFO] - Cache for multiple term taxonomy have been purged due to post terms update, triggered by action: set_object_terms 
 [2025-03-14 20:54:55 : INFO] - Cache for multiple term taxonomy have been purged due to post terms update, triggered by action: set_object_terms 
+[2025-05-13 17:04:56 : INFO] - Cache for URL: https://bible-notes.lndo.site/?p=19522 has been purged, triggered by action: save_post 
+[2025-05-13 17:04:56 : INFO] - Cache for previous post (with URL: https://bible-notes.lndo.site/meditations/the-theology-of-exercise/) adjacent to post with id: 19522 has been purged, triggered by action: save_post 
+[2025-05-13 17:04:56 : INFO] - Cache for all archives page associated with post_type: post and Title: "Auto Draft" have been purged, triggered by action: save_post 
