@@ -59,7 +59,7 @@ class Factory
      *
      * @throws NotFoundException If a builder cannot find its implementation target.
      */
-    public function getBuilder($id, $implementation = null, array $afterBuildMethods = null, ...$buildArgs)
+    public function getBuilder($id, $implementation = null, ?array $afterBuildMethods = null, ...$buildArgs)
     {
         if ($implementation === null) {
             $implementation = $id;

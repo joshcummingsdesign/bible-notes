@@ -12,42 +12,24 @@ namespace KadenceWP\KadenceBlocks\StellarWP\ProphecyMonorepo\ImageDownloader\Mod
  */
 final class DownloadedImage
 {
-	/**
-	 * @var int
-	 */
-	public $id;
-	/**
-	 * @var int
-	 */
-	public $width;
-	/**
-	 * @var int
-	 */
-	public $height;
-	/**
-	 * @var string
-	 */
-	public $file;
-	/**
-	 * @var string
-	 */
-	public $size;
-	/**
-	 * @var string
-	 */
-	public $alt;
-	/**
-	 * @var string
-	 */
-	public $url;
-	/**
-	 * @var string
-	 */
-	public $photographer;
-	/**
-	 * @var string
-	 */
-	public $photographer_url;
+
+	public int $id;
+
+	public int $width;
+
+	public int $height;
+
+	public string $file;
+
+	public string $size;
+
+	public string $alt;
+
+	public string $url;
+
+	public string $photographer;
+
+	public string $photographer_url;
 	/**
 	 * @param int    $id               The unique Pexels ID.
 	 * @param int    $width            The image's original max width.

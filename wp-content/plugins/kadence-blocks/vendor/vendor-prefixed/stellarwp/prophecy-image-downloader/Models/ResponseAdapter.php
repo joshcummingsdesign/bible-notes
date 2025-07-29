@@ -11,50 +11,27 @@ use KadenceWP\KadenceBlocks\Symfony\Contracts\HttpClient\ResponseInterface;
 
 final class ResponseAdapter
 {
-	/**
-	 * @var int
-	 */
-	public $id;
-	/**
-	 * @var int
-	 */
-	public $width;
-	/**
-	 * @var int
-	 */
-	public $height;
-	/**
-	 * @var string
-	 */
-	public $filename;
-	/**
-	 * @var string
-	 */
-	public $size;
-	/**
-	 * @var int
-	 */
-	public $key;
-	/**
-	 * @var string
-	 */
-	public $alt;
-	/**
-	 * @var string
-	 */
-	public $url;
-	/**
-	 * @var string
-	 */
-	public $photographer;
-	/**
-	 * @var string
-	 */
-	public $photographer_url;
-	/**
-	 * @var \KadenceWP\KadenceBlocks\Symfony\Contracts\HttpClient\ResponseInterface
-	 */
-	public $response;
+
+	public int $id;
+
+	public int $width;
+
+	public int $height;
+
+	public string $filename;
+
+	public string $size;
+
+	public int $key;
+
+	public string $alt;
+
+	public string $url;
+
+	public string $photographer;
+
+	public string $photographer_url;
+	public ResponseInterface $response;
 	/**
 	 * @param int    $id               The unique Pexels ID.
 	 * @param int    $width            The image's original max width.

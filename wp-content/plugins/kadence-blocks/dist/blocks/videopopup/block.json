@@ -37,6 +37,23 @@
         }
       ]
     },
+    "mediaPoster": {
+      "type": "array",
+      "default": [
+        {
+          "url": "",
+          "id": "",
+          "width": "",
+          "height": "",
+          "alt": "",
+          "subtype": ""
+        }
+      ]
+    },
+    "posterType": {
+      "type": "string",
+      "default": ""
+    },
     "autoPlay": {
       "type": "boolean",
       "default": true
@@ -377,6 +394,32 @@
     "isVimeoPrivate": {
       "type": "boolean",
       "default": false
+    },
+    "mediaRatio": {
+      "type": "string"
+    },
+    "mediaUseMobile": {
+      "type": "boolean",
+      "default": false
+    },
+    "urlMobile": {
+      "type": "string"
+    },
+    "mediaMobile": {
+      "type": "array",
+      "default": [
+        {
+          "url": "",
+          "id": "",
+          "width": "",
+          "height": "",
+          "alt": "",
+          "subtype": ""
+        }
+      ]
+    },
+    "mediaRatioMobile": {
+      "type": "string"
     }
   },
   "supports": {

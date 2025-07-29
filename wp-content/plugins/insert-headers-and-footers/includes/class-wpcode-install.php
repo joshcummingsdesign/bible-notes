@@ -70,11 +70,6 @@ class WPCode_Install {
 			// The option was empty so let's add the demo data.
 			$this->add_demo_data();
 
-			if ( ! empty( $activated['lite'] ) ) {
-				// If IHAF 1.6 has been running on the site, redirect to upgrade screen.
-				set_transient( 'wpcode_upgrade_redirect', true, 30 );
-			}
-
 			do_action( 'wpcode_install' );
 		}
 

@@ -11,6 +11,7 @@
 class WPCode_Admin_Page_Headers_Footers extends WPCode_Admin_Page {
 
 	use WPCode_Revisions_Display_Lite;
+	use WPCode_WPConsent_Notice;
 
 	/**
 	 * The page slug to be used when adding the submenu.
@@ -148,6 +149,8 @@ class WPCode_Admin_Page_Headers_Footers extends WPCode_Admin_Page {
 	 * @return void
 	 */
 	public function output_content() {
+
+		$this->notice_wpconsent();
 
 		$header_desc = sprintf(
 		/* translators: %s: The `<head>` tag */

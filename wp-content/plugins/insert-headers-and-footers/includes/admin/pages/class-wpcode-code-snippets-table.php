@@ -577,14 +577,15 @@ class WPCode_Code_Snippets_Table extends WP_List_Table {
 		$is_filtered = false;
 
 		$args = array(
-			'orderby'        => $order_by,
-			'order'          => $order,
-			'nopaging'       => false,
-			'posts_per_page' => $per_page,
-			'paged'          => $page,
-			'no_found_rows'  => false,
-			'post_status'    => array( 'publish', 'draft' ),
-			'post_type'      => $this->get_post_type(),
+			'orderby'          => $order_by,
+			'order'            => $order,
+			'nopaging'         => false,
+			'posts_per_page'   => $per_page,
+			'paged'            => $page,
+			'no_found_rows'    => false,
+			'post_status'      => array( 'publish', 'draft' ),
+			'post_type'        => $this->get_post_type(),
+			'suppress_filters' => true,
 		);
 
 		if ( 'priority' === $order_by ) {

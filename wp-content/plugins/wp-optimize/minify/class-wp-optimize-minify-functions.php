@@ -1225,8 +1225,10 @@ class WP_Optimize_Minify_Functions {
 		$abs_file_path = WP_Optimize_Utils::get_file_path($hurl);
 		if (empty($abs_file_path)) return '';
 
-		$modification_time = @filemtime($abs_file_path); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- Suppress E-Warning on failure
-		return strval($modification_time);
+		$modification_time = strval(@filemtime($abs_file_path)); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged -- Suppress E-Warning on failure
+		$filtered_modification_time = apply_filters('wpo_minify_file_modification_time', $modification_time, $abs_file_path);
+		
+		return is_string($filtered_modification_time) ? $filtered_modification_time : $modification_time;
 	}
 
 	/**

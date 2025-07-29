@@ -2,9 +2,9 @@
 Contributors: britner, oakesjosh, woodardmc, ghernkadence
 Tags: gutenberg, blocks, page builder, editor, gutenberg blocks
 Donate link: https://www.kadencewp.com/about-us/
-Requires at least: 6.4
-Tested up to: 6.8.1
-Stable tag: 3.5.7
+Requires at least: 6.6
+Tested up to: 6.8.2
+Stable tag: 3.5.16
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -173,6 +173,79 @@ Please report security bugs found in the source code of the Kadence Blocks plugi
 Please report security bugs found in the Kadence Blocks plugin's source code through the Patchstack Vulnerability Disclosure Program https://patchstack.com/database/vdp/kadence-blocks. The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Changelog ==
+
+= 3.5.16 =
+Release Date: 28th July 2025
+* Fix: Classic form blocks created after 3.5.13 not handling submissions
+
+= 3.5.15 =
+Release Date: 23rd July 2025
+* Fix: Mosaic gallery custom link in editor. 
+* Fix: Block defaults not applying to new blocks.
+* Fix: Add link support to advanced text block in some templates.
+
+= 3.5.14 =
+Release Date: 15th July 2025
+* Fix: Issue editing kadence blocks in widget areas
+
+= 3.5.13 =
+Release Date: 15th July 2025
+* Add: Ability to style carousel dots and arrows in the Slider block
+* Add: Warning text about browser compatibility for vertical text setting in Advanced Text block.
+* Fix: Performance improvements for blocks in the editor.
+* Fix: Issue when adding the Advanced Form Submit button in the editor.
+* Fix: Issue with submenu clipping while using backdrop filter on the Header block.
+* Fix: Bad dom content output in Gallery Block in some cases.
+* Fix: Frontend divider style for Countdown block.
+* Fix: Anchor attribute support for Navigation and Navigation Link blocks.
+* Fix: Border radius reset values for the Advanced Header block.
+
+= 3.5.12 =
+Release Date: 2nd July 2025
+* Update: Header block off canvas trigger focus styles. 
+* Fix: Icon List default bottom margin.
+* Fix: Count Up block responsive font, number size, line height preview in editor.
+* Fix: Content for Testimonial block when copy/paste styles.
+* Fix: Warning that content doesn't match template while editing Navigation posts.
+* Fix: Inability to insert new row when table block was inside a section.
+
+= 3.5.11 =
+Release Date: 19th June 2025
+* Add: Screen reader text styles for Advanced Text block.
+* Add: Additional social network icons.
+* Fix: Form select option color for Windows.
+* Fix: Section responsive vertical alignment.
+* Fix: Responsive controls not working in widget editor.
+* Fix: Escape redirect URL in countdown block.
+
+= 3.5.10 =
+Release Date: 5th June 2025
+* Add: Ability to customize breakpoint for mobile advanced header to appear.
+* Fix: Broken link while uploading custom icons.
+* Fix: Advanced form submit button width when inherit styles is enabled.
+* Fix: Links not crawlable when disabled in Navigation block.
+
+= 3.5.9 =
+Release Date: 29th May 2025
+* Fix: Icon size preview for the Infobox block.
+* Update: Default aria-label for Search block input field.
+* Fix: Image file size for the image block default settings.
+* Fix: Mosaic (pro) gallery items accessibility issue.
+* Fix: Mosaic (pro) gallery default row height and reset.
+* Fix: Gallery fluid carousel overflow issue when gutter set.
+
+= 3.5.8 =
+Release Date: 15th May 2025
+* Add: Image border radius to post grid/carousel block.
+* Add: Option to overflow gallery block.
+* Fix: Better resizing of images when shrinking row in advanced header.
+* Fix: Sticky sections when backdrop filter is enabled.
+* Fix: Asterisk color for required fields in advanced form when using color palette.
+* Fix: HTML anchor for advanced header not applying on frontend.
+* Fix: Advanced header max width limited to 600px.
+* Fix: Vector block alignment when inside a section.
+* Fix: Circular progress bar alignment and max-width fixes.
+* Fix: Overflow issue in some mega menus.
 
 = 3.5.7 =
 Release Date: May 5th 2025

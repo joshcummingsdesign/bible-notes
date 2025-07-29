@@ -15,11 +15,9 @@ use KadenceWP\KadenceBlocks\StellarWP\ProphecyMonorepo\ImageDownloader\Sanitizat
 final class FileNameSanitizer
 {
 	/**
-	 * @var Sanitizer
-	 *
 	 * @readonly
 	 */
-	private $sanitizer;
+	private Sanitizer $sanitizer;
 	/**
 	 * @param Sanitizer $sanitizer The filename sanitizer Closure strategy.
 	 */

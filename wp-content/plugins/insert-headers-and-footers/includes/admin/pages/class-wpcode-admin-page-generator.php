@@ -88,6 +88,9 @@ class WPCode_Admin_Page_Generator extends WPCode_Admin_Page {
 			$generator = sanitize_text_field( wp_unslash( $_GET['generator'] ) );
 			if ( array_key_exists( $generator, $this->generators ) ) {
 				$this->generator = $generator;
+				if ( isset( $this->generators[ $generator ]->code_type ) ) {
+					$this->code_type = $this->generators[ $generator ]->code_type;
+				}
 			}
 		}
 
@@ -275,5 +278,6 @@ class WPCode_Admin_Page_Generator extends WPCode_Admin_Page {
 		$editor->init_editor();
 
 		wp_enqueue_script( 'jquery-ui-autocomplete' );
+		wp_enqueue_media();
 	}
 }

@@ -37,6 +37,16 @@ class WPCode_Suggested_Plugins {
 	 */
 	public static function all_plugins() {
 		$plugins = array(
+			'wpconsent'              => array(
+				'name'        => 'WPConsent',
+				'description' => esc_html__( 'Custom cookie banner with automatic script blocking, advanced scanner and more.', 'insert-headers-and-footers' ),
+				'url'         => 'https://downloads.wordpress.org/plugin/wpconsent-cookies-banner-privacy-suite.zip',
+				'slug'        => 'wpconsent-cookies-banner-privacy-suite/wpconsent.php',
+				'pro_slug'    => 'wpconsent-premium/wpconsent-premium.php',
+				'icon'        => 'icon-wpconsent.png',
+				'suggested'   => true,
+				'library'     => false,
+			),
 			'duplicator'             => array(
 				'name'        => 'Duplicator',
 				'description' => esc_html__( 'Easy, Fast and Secure WordPress and Website Migration.', 'insert-headers-and-footers' ),

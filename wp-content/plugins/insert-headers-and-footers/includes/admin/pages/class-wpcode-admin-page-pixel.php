@@ -10,6 +10,8 @@
  */
 class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 
+	use WPCode_WPConsent_Notice;
+
 	/**
 	 * The page slug to be used when adding the submenu.
 	 *
@@ -45,6 +47,7 @@ class WPCode_Admin_Page_Pixel extends WPCode_Admin_Page {
 	 * @return void
 	 */
 	public function output_content() {
+		$this->notice_wpconsent();
 		if ( method_exists( $this, 'output_view_' . $this->view ) ) {
 			echo '<div class="wpcode-blur-area">';
 			call_user_func( array( $this, 'output_view_' . $this->view ) );

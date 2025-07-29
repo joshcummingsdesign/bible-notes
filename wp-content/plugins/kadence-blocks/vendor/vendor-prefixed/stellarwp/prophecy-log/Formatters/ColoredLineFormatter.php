@@ -21,7 +21,7 @@ class ColoredLineFormatter extends LineFormatter
 	 *
 	 * @var array<string, string>
 	 */
-	private $colorScheme = [
+	private array $colorScheme = [
 		LogLevel::DEBUG     => "\033[0;37m",
 		LogLevel::INFO      => "\033[1;32m",
 		LogLevel::NOTICE    => "\033[1;34m",

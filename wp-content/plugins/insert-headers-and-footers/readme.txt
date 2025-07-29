@@ -2,9 +2,9 @@
 Contributors: WPbeginner, smub, gripgrip, wpcodeteam
 Tags: code, css, php, header, code snippets
 Requires at least: 4.6
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 5.5
-Stable tag: 2.2.7
+Stable tag: 2.2.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -231,6 +231,16 @@ WPCode comes with a ready-made code snippets library that allows you to replace 
 ... and basically any plugin that adds a functionality which can be added via custom code snippets.
 
 == Changelog ==
+
+= 2.2.9 =
+* New: Added a new importer for the Post Snippets plugin to make it easier to migrate your code snippets.
+* Tweak: We adjusted the way the safe mode works to limit its effects on frontend urls.
+
+= 2.2.8 =
+* New: Schema Generators - we added 20 new code generators to make it easier to manage schema code on your website.
+* Tweak: We moved the button to update generated snippets to the top so that you can update snippets easier.
+* Tweak: We added "suppress_filters" to WP_Query used by WPCode to avoid conflicts with other plugins.
+* Fix: We fixed an issue where the generated snippets were not automatically inserted when activated.
 
 = 2.2.7 =
 * New: Added support for automatically importing snippets from 2 new plugins.

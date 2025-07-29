@@ -53,12 +53,10 @@ final class LogProvider extends Provider
 
 		$this->container->singleton(
 			StreamHandler::class,
-			function ($c) use ($channel) {
-				return new StreamHandler(
-					$this->config->get("log.channels.$channel.with.stream", 'php://stdout'),
-					$c->get(self::LOG_LEVEL)
-				);
-			}
+			fn ($c) => new StreamHandler(
+				$this->config->get("log.channels.$channel.with.stream", 'php://stdout'),
+				$c->get(self::LOG_LEVEL)
+			)
 		);
 
 		$this->container->bind(

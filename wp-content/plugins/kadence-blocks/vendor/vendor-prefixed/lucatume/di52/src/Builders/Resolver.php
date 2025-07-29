@@ -114,7 +114,7 @@ class Resolver
      */
     public function unbind($id)
     {
-        unset($this->bindings[$id]);
+        unset($this->bindings[$id], $this->whenNeedsGive[$id], $this->singletons[$id]);
     }
 
     /**
@@ -173,7 +173,7 @@ class Resolver
      *                                                                build arguments.
      * @throws NotFoundException If the id is a string that does not resolve to an existing, concrete, class.
      */
-    public function resolveWithArgs($id, array $afterBuildMethods = null, ...$buildArgs)
+    public function resolveWithArgs($id, ?array $afterBuildMethods = null, ...$buildArgs)
     {
         if (! is_string($id)) {
             return $id;
@@ -200,7 +200,7 @@ class Resolver
      *
      * @throws NotFoundException If the id is a string that is not bound and is not an existing, concrete, class.
      */
-    public function resolve($id, array $buildLine = null)
+    public function resolve($id, ?array $buildLine = null)
     {
         if ($buildLine !== null) {
             $this->buildLine = $buildLine;
@@ -274,7 +274,7 @@ class Resolver
      * @throws NotFoundException If trying to clone the builder for a non existing id or an id that does not map to a
      *                           concrete class name.
      */
-    private function cloneBuilder($id, array $afterBuildMethods = null, ...$buildArgs)
+    private function cloneBuilder($id, ?array $afterBuildMethods = null, ...$buildArgs)
     {
         if (isset($this->bindings[$id]) && $this->bindings[$id] instanceof BuilderInterface) {
             $builder = clone $this->bindings[$id];

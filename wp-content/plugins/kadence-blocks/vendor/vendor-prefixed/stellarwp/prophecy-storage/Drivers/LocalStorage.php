@@ -17,14 +17,9 @@ class LocalStorage implements Storage
 {
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\Symfony\Component\Filesystem\Filesystem
 	 */
-	private $filesystem;
-	/**
-	 * @var string
-	 */
-	private $storagePath;
+	private Filesystem $filesystem;
+	private string $storagePath;
 	public function __construct(
 		Filesystem $filesystem,
 		string $storagePath

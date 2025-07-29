@@ -56,7 +56,7 @@ class CallableBuilder implements BuilderInterface, ReinitializableBuilderInterfa
     public function __construct(
         Container $container,
         callable $callable,
-        array $afterBuildMethods = null,
+        ?array $afterBuildMethods = null,
         ...$buildArgs
     ) {
         $this->container = $container;
@@ -89,7 +89,7 @@ class CallableBuilder implements BuilderInterface, ReinitializableBuilderInterfa
      *
      * @return void This method does not return any value.
      */
-    public function reinit(array $afterBuildMethods = null, ...$buildArgs)
+    public function reinit(?array $afterBuildMethods = null, ...$buildArgs)
     {
         $this->afterBuildMethods = $afterBuildMethods ?: [];
         $this->buildArgs = $buildArgs;

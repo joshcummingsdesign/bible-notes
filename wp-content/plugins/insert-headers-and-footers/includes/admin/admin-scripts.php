@@ -43,18 +43,20 @@ function wpcode_admin_scripts() {
 		apply_filters(
 			'wpcode_admin_js_data',
 			array(
-				'nonce'             => wp_create_nonce( 'wpcode_admin' ),
-				'code_type_options' => wpcode()->execute->get_code_type_options(),
-				'please_wait'       => __( 'Please wait.', 'insert-headers-and-footers' ),
-				'ok'                => __( 'OK', 'insert-headers-and-footers' ),
-				'purchased'         => __( 'Already Purchased?', 'insert-headers-and-footers' ),
-				'upgrade_link'      => wpcode_utm_url( 'https://wpcode.com/docs/how-to-upgrade-your-wpcode-license/', 'upsell-alert', $current_screen->id ),
-				'bonus'             => __( 'Bonus', 'insert-headers-and-footers' ),
-				'price'             => __( '$50 off', 'insert-headers-and-footers' ),
-				'regular_price'     => __( 'regular price, automatically applied at checkout.', 'insert-headers-and-footers' ),
-				'wpcode_lite_users' => __( 'WPCode Lite users get', 'insert-headers-and-footers' ),
-				'upgrade_button'    => __( 'Upgrade to PRO', 'insert-headers-and-footers' ),
-				'testing_mode'      => array(
+				'nonce'                    => wp_create_nonce( 'wpcode_admin' ),
+				'code_type_options'        => wpcode()->execute->get_code_type_options(),
+				'please_wait'              => __( 'Please wait.', 'insert-headers-and-footers' ),
+				'ok'                       => __( 'OK', 'insert-headers-and-footers' ),
+				'purchased'                => __( 'Already Purchased?', 'insert-headers-and-footers' ),
+				'upgrade_link'             => wpcode_utm_url( 'https://wpcode.com/docs/how-to-upgrade-your-wpcode-license/', 'upsell-alert', $current_screen->id ),
+				'bonus'                    => __( 'Bonus', 'insert-headers-and-footers' ),
+				'price'                    => __( '$50 off', 'insert-headers-and-footers' ),
+				'regular_price'            => __( 'regular price, automatically applied at checkout.', 'insert-headers-and-footers' ),
+				'wpcode_lite_users'        => __( 'WPCode Lite users get', 'insert-headers-and-footers' ),
+				'upgrade_button'           => __( 'Upgrade to PRO', 'insert-headers-and-footers' ),
+				'smart_tags_upgrade_title' => __( 'Smart Tags are a Premium feature', 'insert-headers-and-footers' ),
+				'smart_tags_upgrade_text'  => __( 'Upgrade to PRO today and simplify the way you write advanced snippets using smart tags without having to write any PHP code.', 'insert-headers-and-footers' ),
+				'testing_mode'             => array(
 					'title'           => __( 'Testing Mode is a Premium Feature', 'insert-headers-and-footers' ),
 					'text'            => __( 'Upgrade to PRO today and make changes to your snippets, Header & Footer scripts or Page Scripts without affecting your live site. You choose when and what to publish to your visitors.', 'insert-headers-and-footers' ),
 					'button_text'     => __( 'Upgrade to PRO', 'insert-headers-and-footers' ),
@@ -62,8 +64,8 @@ function wpcode_admin_scripts() {
 					'learn_more_text' => __( 'Learn more about Testing Mode', 'insert-headers-and-footers' ),
 					'learn_more_link' => wpcode_utm_url( 'https://wpcode.com/docs/testing-mode/', 'testing-mode-learn-more', $current_screen->id ),
 				),
-				'multisite'         => false,
-				'connect_url'       => wpcode()->library_auth->auth_url(),
+				'multisite'                => false,
+				'connect_url'              => wpcode()->library_auth->auth_url(),
 			)
 		)
 	);

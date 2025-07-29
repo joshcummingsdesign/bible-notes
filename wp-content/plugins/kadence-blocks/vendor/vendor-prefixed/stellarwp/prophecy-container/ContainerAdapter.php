@@ -22,10 +22,8 @@ final class ContainerAdapter implements Container
 {
 	/**
 	 * @readonly
-	 *
-	 * @var DI52Container
 	 */
-	private $container;
+	private DI52Container $container;
 	public function __construct(DI52Container $container) {
 		$this->container = $container;
 	}
@@ -36,7 +34,7 @@ final class ContainerAdapter implements Container
 	 *
 	 * @throws \KadenceWP\KadenceBlocks\lucatume\DI52\ContainerException
 	 */
-	public function bind(string $id, $implementation = null, array $afterBuildMethods = null): void {
+	public function bind(string $id, $implementation = null, ?array $afterBuildMethods = null): void {
 		$this->container->bind($id, $implementation, $afterBuildMethods);
 	}
 
@@ -71,7 +69,7 @@ final class ContainerAdapter implements Container
 	 *
 	 * @throws \KadenceWP\KadenceBlocks\lucatume\DI52\ContainerException
 	 */
-	public function singleton(string $id, $implementation = null, array $afterBuildMethods = null): void {
+	public function singleton(string $id, $implementation = null, ?array $afterBuildMethods = null): void {
 		$this->container->singleton($id, $implementation, $afterBuildMethods);
 	}
 

@@ -151,7 +151,7 @@ class Container implements ArrayAccess, ContainerInterface
      * @return void This method does not return any value.
      * @throws ContainerException If there's any issue reflecting on the class, interface or the implementation.
      */
-    public function singleton($id, $implementation = null, array $afterBuildMethods = null)
+    public function singleton($id, $implementation = null, ?array $afterBuildMethods = null)
     {
         if ($implementation === null) {
             $implementation = $id;
@@ -462,6 +462,7 @@ class Container implements ArrayAccess, ContainerInterface
             $provider->register();
         } else {
             $provided = $provider->provides();
+            // @phpstan-ignore-next-line
             if (!is_array($provided) || count($provided) === 0) {
                 throw new ContainerException(
                     "Service provider '{$serviceProviderClass}' is marked as deferred" .
@@ -529,7 +530,7 @@ class Container implements ArrayAccess, ContainerInterface
      *
      * @throws ContainerException      If there's an issue while trying to bind the implementation.
      */
-    public function bind($id, $implementation = null, array $afterBuildMethods = null)
+    public function bind($id, $implementation = null, ?array $afterBuildMethods = null)
     {
         if ($implementation === null) {
             $implementation = $id;
@@ -577,7 +578,7 @@ class Container implements ArrayAccess, ContainerInterface
      * @return void This method does not return any value.
      * @throws ContainerException
      */
-    public function singletonDecorators($id, $decorators, array $afterBuildMethods = null, $afterBuildAll = false)
+    public function singletonDecorators($id, $decorators, ?array $afterBuildMethods = null, $afterBuildAll = false)
     {
         $this->resolver->singleton(
             $id,
@@ -603,7 +604,7 @@ class Container implements ArrayAccess, ContainerInterface
     private function getDecoratorBuilder(
         array $decorators,
         $id,
-        array $afterBuildMethods = null,
+        ?array $afterBuildMethods = null,
         $afterBuildAll = false
     ) {
         $decorator = array_pop($decorators);
@@ -642,7 +643,7 @@ class Container implements ArrayAccess, ContainerInterface
      * @return void This method does not return any value.
      * @throws ContainerException If there's any issue binding the decorators.
      */
-    public function bindDecorators($id, array $decorators, array $afterBuildMethods = null, $afterBuildAll = false)
+    public function bindDecorators($id, array $decorators, ?array $afterBuildMethods = null, $afterBuildAll = false)
     {
         $this->resolver->bind($id, $this->getDecoratorBuilder($decorators, $id, $afterBuildMethods, $afterBuildAll));
     }
@@ -732,7 +733,8 @@ class Container implements ArrayAccess, ContainerInterface
         $id = "{$this->whenClass}::{$this->needsClass}";
         $builder = $this->builders->getBuilder($id, $implementation);
         $this->resolver->setWhenNeedsGive($this->whenClass, $this->needsClass, $builder);
-        unset($this->whenClass, $this->needsClass);
+        // @phpstan-ignore unset.possiblyHookedProperty
+        unset($this->whenClass, $this->needsClass); // @phpstan-ignore unset.possiblyHookedProperty
     }
 
     /**
@@ -751,6 +753,7 @@ class Container implements ArrayAccess, ContainerInterface
     {
         $callbackIdPrefix = is_object($id) ? spl_object_hash($id) : $id;
 
+        // @phpstan-ignore-next-line
         if (!is_string($callbackIdPrefix)) {
             $typeOfId = gettype($id);
             throw new ContainerException(
@@ -758,6 +761,7 @@ class Container implements ArrayAccess, ContainerInterface
             );
         }
 
+        // @phpstan-ignore-next-line
         if (!is_string($method)) {
             throw new ContainerException("Callbacks second argument must be a string method name.");
         }
@@ -821,7 +825,7 @@ class Container implements ArrayAccess, ContainerInterface
      * @return callable|Closure  A callable function that will return an instance of the specified class when
      *                   called.
      */
-    public function instance($id, array $buildArgs = [], array $afterBuildMethods = null)
+    public function instance($id, array $buildArgs = [], ?array $afterBuildMethods = null)
     {
         return function () use ($id, $afterBuildMethods, $buildArgs) {
             if (is_string($id)) {
@@ -881,6 +885,7 @@ class Container implements ArrayAccess, ContainerInterface
      */
     public function isBound($id)
     {
+        // @phpstan-ignore-next-line
         return is_string($id) && $this->resolver->isBound($id);
     }
 

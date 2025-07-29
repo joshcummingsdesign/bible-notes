@@ -677,6 +677,16 @@
           }
           offsetTop = window.kadence.getOffset(wrapper).top + proOffset;
         }
+        // Account for WooCommerce store notice
+        if (
+          document.body.classList.contains("woocommerce-demo-store") &&
+          document.body.classList.contains("kadence-store-notice-placement-above")
+        ) {
+          var storeNotice = document.querySelector(".woocommerce-store-notice");
+          if (storeNotice && storeNotice.offsetHeight > 0) {
+            offsetTop = offsetTop - storeNotice.offsetHeight;
+          }
+        }
         if (kadenceConfig.breakPoints.desktop <= window.innerWidth) {
           activeHeader = desktopSticky;
         } else {
@@ -1008,6 +1018,8 @@
           return;
         }
       }
+      
+      // Check for tab elements - expanded to include WooCommerce tabs
       if (
         targetLink.parentNode &&
         targetLink.parentNode.hasAttribute("role") &&
@@ -1015,6 +1027,12 @@
       ) {
         return;
       }
+      
+      // Check for tab navigation links - exclude only actual tab navigation elements
+      if (targetLink.closest(".woocommerce-tabs ul.tabs")) {
+        return;
+      }
+      
       var targetID;
       if (respond) {
         targetID = respond
@@ -1122,7 +1140,7 @@
         }
       }
       var foundLinks = document.querySelectorAll(
-        "a[href*=\\#]:not([href=\\#]):not(.scroll-ignore):not([data-tab]):not([data-toggle])"
+        "a[href*=\\#]:not([href=\\#]):not(.scroll-ignore):not([data-tab]):not([data-toggle]):not(.woocommerce-tabs a):not(.tabs a)"
       );
       if (!foundLinks.length) {
         return;

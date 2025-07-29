@@ -1065,10 +1065,6 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 		$this->metabox_row( __( 'Priority', 'insert-headers-and-footers' ), $this->get_input_number( 'wpcode_priority', $priority ), 'wpcode_priority' );
 		$this->metabox_row( __( 'Note', 'insert-headers-and-footers' ), $this->get_input_textarea( 'wpcode_note', $note ), 'wpcode_note' );
 
-		if ( isset( $this->snippet ) && $this->snippet->is_generated() ) {
-			$this->metabox_row( __( 'Generator', 'insert-headers-and-footers' ), $this->get_input_generator() );
-		}
-
 		$this->metabox(
 			__( 'Basic info', 'insert-headers-and-footers' ),
 			ob_get_clean(),
@@ -1231,6 +1227,9 @@ class WPCode_Admin_Page_Snippet_Manager extends WPCode_Admin_Page {
 			<?php esc_html_e( 'Execute Snippet Now', 'insert-headers-and-footers' ); ?>
 		</button>
 		<?php
+		if ( isset( $this->snippet ) && $this->snippet->is_generated() ) {
+			echo $this->get_input_generator();
+		}
 		$this->update_button();
 	}
 

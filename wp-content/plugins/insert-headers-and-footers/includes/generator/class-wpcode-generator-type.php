@@ -72,9 +72,9 @@ abstract class WPCode_Generator_Type {
 	/**
 	 * Should the generated snippet be auto-inserted?
 	 *
-	 * @var bool
+	 * @var int
 	 */
-	public $auto_insert = true;
+	public $auto_insert = 1;
 
 	/**
 	 * Constructor.
@@ -185,7 +185,7 @@ abstract class WPCode_Generator_Type {
 						if ( isset( $field['repeater'] ) ) {
 							$repeater_groups_fields[ $field['repeater'] ][ $field['id'] ] = $field;
 							$repeater_groups_values[ $field['repeater'] ][ $field['id'] ] = $snippet_data[ $field['id'] ];
-							$field['value']                                               = $snippet_data[ $field['id'] ][0];
+							$field['value'] = $snippet_data[ $field['id'] ][0];
 						} else {
 							$field['value'] = $snippet_data[ $field['id'] ];
 						}
@@ -204,7 +204,8 @@ abstract class WPCode_Generator_Type {
 								}
 								?>
 								<div class="wpcode-repeater-group" data-id="<?php echo absint( $i ); ?>">
-									<?php foreach ( $repeater_groups_fields[ $repeater_id ] as $repeater_field_id => $repeater_groups_field ) {
+									<?php
+									foreach ( $repeater_groups_fields[ $repeater_id ] as $repeater_field_id => $repeater_groups_field ) {
 										$repeater_groups_field['value'] = $repeater_values[ $repeater_field_id ][ $key ];
 										$this->render_field( $repeater_groups_field );
 									}
@@ -212,7 +213,7 @@ abstract class WPCode_Generator_Type {
 									<button type="button" class="wpcode-button wpcode-button-secondary wpcode-remove-row" data-target="<?php echo absint( $i ); ?>"><?php esc_html_e( 'Remove Row', 'insert-headers-and-footers' ); ?></button>
 								</div>
 								<?php
-								$i ++;
+								++$i;
 							}
 							continue 2;
 						}
@@ -269,6 +270,9 @@ abstract class WPCode_Generator_Type {
 		);
 		if ( ! empty( $field['autocomplete'] ) ) {
 			$classes[] = 'wpcode-generator-field-autocomplete';
+		}
+		if ( ! empty( $field['is_image_url'] ) ) {
+			$classes[] = 'wpcode-generator-field-image-url';
 		}
 
 		echo '<div class="' . esc_attr( implode( ' ', $classes ) ) . '" ' . $repeater . '>';// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -360,9 +364,22 @@ abstract class WPCode_Generator_Type {
 		$placeholder = ! empty( $field['placeholder'] ) ? $field['placeholder'] : '';
 		$name        = empty( $field['name'] ) ? $id : $field['name'];
 		$value       = isset( $field['value'] ) ? $field['value'] : $this->get_default_value( $field['id'] );
-		?>
-		<input type="text" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php echo esc_attr( $value ); ?>" class="wpcode-input-text"/>
-		<?php
+
+		// Check if this is an image URL field.
+		if ( ! empty( $field['is_image_url'] ) ) {
+			?>
+			<div class="wpcode-image-url-field">
+				<input type="text" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php echo esc_attr( $value ); ?>" class="wpcode-input-text wpcode-image-url-input"/>
+				<button type="button" class="wpcode-button wpcode-button-secondary wpcode-media-library-button" data-target="<?php echo esc_attr( $id ); ?>">
+					<?php esc_html_e( 'Choose Image', 'insert-headers-and-footers' ); ?>
+				</button>
+			</div>
+			<?php
+		} else {
+			?>
+			<input type="text" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php echo esc_attr( $value ); ?>" class="wpcode-input-text"/>
+			<?php
+		}
 		if ( ! empty( $field['description'] ) ) {
 			$this->input_field_description( $field['description'] );
 		}
@@ -581,6 +598,10 @@ abstract class WPCode_Generator_Type {
 				break;
 			case 'html':
 				$sanitized = wp_kses_post( wp_unslash( $value ) );
+				break;
+			case 'date':
+			case 'date_and_time':
+				$sanitized = sanitize_text_field( wp_unslash( $value ) );
 				break;
 			case 'text':
 			default:
@@ -824,5 +845,57 @@ abstract class WPCode_Generator_Type {
 	 */
 	public function sanitize_function_name( $value ) {
 		return str_replace( '-', '_', sanitize_title_with_dashes( $value ) );
+	}
+
+	/**
+	 * Render a date input field (date only).
+	 *
+	 * @param array $field The field array.
+	 *
+	 * @return void
+	 */
+	public function render_field_date( $field ) {
+		if ( empty( $field['id'] ) ) {
+			return;
+		}
+		if ( ! empty( $field['label'] ) ) {
+			$this->input_field_label( $field['label'], $field['id'] );
+		}
+		$id          = $field['id'];
+		$placeholder = ! empty( $field['placeholder'] ) ? $field['placeholder'] : '';
+		$name        = empty( $field['name'] ) ? $id : $field['name'];
+		$value       = isset( $field['value'] ) ? $field['value'] : $this->get_default_value( $field['id'] );
+		?>
+		<input type="date" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php echo esc_attr( $value ); ?>" class="wpcode-input-date"/>
+		<?php
+		if ( ! empty( $field['description'] ) ) {
+			$this->input_field_description( $field['description'] );
+		}
+	}
+
+	/**
+	 * Render a date and time input field.
+	 *
+	 * @param array $field The field array.
+	 *
+	 * @return void
+	 */
+	public function render_field_date_and_time( $field ) {
+		if ( empty( $field['id'] ) ) {
+			return;
+		}
+		if ( ! empty( $field['label'] ) ) {
+			$this->input_field_label( $field['label'], $field['id'] );
+		}
+		$id          = $field['id'];
+		$placeholder = ! empty( $field['placeholder'] ) ? $field['placeholder'] : '';
+		$name        = empty( $field['name'] ) ? $id : $field['name'];
+		$value       = isset( $field['value'] ) ? $field['value'] : $this->get_default_value( $field['id'] );
+		?>
+		<input type="datetime-local" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>" value="<?php echo esc_attr( $value ); ?>" class="wpcode-input-date"/>
+		<?php
+		if ( ! empty( $field['description'] ) ) {
+			$this->input_field_description( $field['description'] );
+		}
 	}
 }

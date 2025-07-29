@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'matomo/device-detector' => array(
-            'pretty_version' => '6.4.5',
-            'version' => '6.4.5.0',
-            'reference' => '270bbc41f80994e80805ac377b67324eba53c412',
+            'pretty_version' => '6.4.6',
+            'version' => '6.4.6.0',
+            'reference' => '6f07f615199851548db47a900815d2ea2cdcde08',
             'type' => 'library',
             'install_path' => __DIR__ . '/../matomo/device-detector',
             'aliases' => array(),
@@ -40,7 +40,7 @@
         'piwik/device-detector' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => '6.4.5',
+                0 => '6.4.6',
             ),
         ),
         'publishpress/instance-protection' => array(
@@ -89,9 +89,9 @@
             'dev_requirement' => false,
         ),
         'publishpress/wordpress-version-notices' => array(
-            'pretty_version' => '2.1.3',
-            'version' => '2.1.3.0',
-            'reference' => '8e54558d2427a0f93174ccbc1d02c1ba7e2abc8d',
+            'pretty_version' => '2.1.4',
+            'version' => '2.1.4.0',
+            'reference' => '7b32b0183e37b512a84231b730476834bd8755d0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../publishpress/wordpress-version-notices',
             'aliases' => array(),

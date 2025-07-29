@@ -10,6 +10,8 @@ namespace KadenceWP\KadenceStarterTemplates;
 
 use ITSEC_Modules;
 use ITSEC_Core;
+use LearnDash_Setup_Wizard;
+use LearnDash_Settings_Section;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_original_domain;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_license_key;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_authorization_token;
@@ -17,7 +19,6 @@ use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_disconnect_u
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_license_domain;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\is_authorized;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\build_auth_url;
-use function kadence_blocks_get_current_license_data;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -54,26 +55,6 @@ class Site_Assist_Dash {
 		}
 		add_action( 'init', [ $this, 'init_config' ] );
 		add_action( 'rest_api_init', [ $this, 'register_api_endpoints' ] );
-	}
-	/**
-	 * Get the current license key for the plugin.
-	 *
-	 * @return string 
-	 */
-	public function get_current_license_key() {
-
-		if ( function_exists( 'kadence_blocks_get_current_license_data' ) ) {
-			$data = kadence_blocks_get_current_license_data();
-			if ( ! empty( $data['key'] ) ) {
-				return $data['key'];
-			}
-		} else {
-			$key = get_license_key( 'kadence-starter-templates' );
-			if ( ! empty( $key ) ) {
-				return $key;
-			}
-		}
-		return '';
 	}
 	/**
 	 * Add the admin page
@@ -440,6 +421,71 @@ class Site_Assist_Dash {
 		return $return_data;
 	}
 	/**
+	 * Get LearnDash Data
+	 */
+	public function get_learndash_data() {
+		$data    = [
+			'plugin_setup'    => false,
+			'payment_connected'    => false,
+			'course_created'    => false,
+			'live_mode' => false,
+		];
+		$is_completed = get_option('learndash_setup_wizard_status') === LearnDash_Setup_Wizard::STATUS_COMPLETED;
+		if ( $is_completed ) {
+			$data['plugin_setup'] = true;
+		}
+		$stripe_connect_activated = LearnDash_Settings_Section::get_section_setting('LearnDash_Settings_Section_Stripe_Connect', 'enabled') === 'yes';
+		if ( $stripe_connect_activated ) {
+			$data['payment_connected'] = true;
+		}
+		$courses = get_posts( [ 'post_type' => 'sfwd-courses', 'post_status' => 'publish', 'posts_per_page' => 1 ] );
+		if ( ! empty( $courses ) ) {
+			$data['course_created'] = true;
+		}
+		$learndash_data = [
+			'title'       => __( 'LearnDash Setup', 'kadence-starter-templates' ),
+			'description' => __( 'Set up LearnDash to make sure you have a way to create and manage courses.', 'kadence-starter-templates' ),
+			'slug'        => 'learndash-setup',
+			'tasks'       => [
+				[
+					'title'       => __( 'Install LearnDash', 'kadence-starter-templates' ),
+					'description' => __( 'Install and Activate the LearnDash plugin.', 'kadence-starter-templates' ),
+					'button'      => __( 'Install', 'kadence-starter-templates' ),
+					'completed'   => true,
+					'action'       => 'install_plugin',
+					'plugin_state' => 'active',
+				],
+				[
+					'title'        => __( 'Configure LearnDash', 'kadence-starter-templates' ),
+					'description'  => __( 'Configure the LearnDash plugin.', 'kadence-starter-templates' ),
+					'button'       => __( 'Configure', 'kadence-starter-templates' ),
+					'link'         => admin_url( 'admin.php?page=learndash-setup-wizard' ),
+					'completed'    => $data['plugin_setup'] ? true : false,
+					'sameTab'     => true,
+				],
+				[
+					'title'        => __( 'Configure Payments', 'kadence-starter-templates' ),
+					'description'  => __( 'Configure the LearnDash payments.', 'kadence-starter-templates' ),
+					'button'       => __( 'Configure', 'kadence-starter-templates' ),
+					'link'         => admin_url( 'admin.php?page=learndash-setup' ),
+					'completed'    => $data['payment_connected'] ? true : false,
+					'requires'    => $data['plugin_setup'] ? false : true,
+					'sameTab'     => true,
+				],
+				[
+					'title'       => __( 'Create a Course', 'kadence-starter-templates' ),
+					'description' => __( 'Create a course to make sure you have a way to create and manage courses.', 'kadence-starter-templates' ),
+					'button'      => __( 'Create', 'kadence-starter-templates' ),
+					'link'        => admin_url( 'edit.php?post_type=sfwd-courses' ),
+					'completed'   => $data['course_created'] ? true : false,
+					'requires'    => $data['plugin_setup'] ? false : true,
+					'sameTab'     => true,
+				],
+			],
+		];
+		return $learndash_data;
+	}
+	/**
 	 * Get Security Data
 	 */
 	public function get_donation_data() {
@@ -736,7 +782,8 @@ class Site_Assist_Dash {
 			$token          = get_authorization_token( $slug );
 			$auth_url       = build_auth_url( apply_filters( 'kadence-blocks-auth-slug', $slug ), get_license_domain() );
 		}
-		$license_key    = $this->get_current_license_key();
+		$license_data = kadence_starter_templates_get_license_data();
+		$license_key = $license_data['api_key'];
 		$disconnect_url = '';
 		$is_authorized  = false;
 		if ( ! empty( $license_key ) ) {
@@ -778,6 +825,10 @@ class Site_Assist_Dash {
 
 		if ( in_array( 'donations', $goals ) ) {
 			$donation_data = $this->get_donation_data();
+		}
+		$learndash_data = [];
+		if ( class_exists( 'LearnDash_Settings_Section' ) ) {
+			$learndash_data = $this->get_learndash_data();
 		}
 		$security_data = $this->get_security_data();
 		$email_data = $this->get_email_data( $site_assist_data );
@@ -840,15 +891,20 @@ class Site_Assist_Dash {
 				}
 			}
 		}
+		// Get the current user display name.
+		$current_user = wp_get_current_user();
+		$display_name = $current_user->display_name;
+		// Username.
+		$username = $current_user->user_login;
 		$return_data = [
 			[
-				'title'       => __( 'AI Starter Site', 'kadence-starter-templates' ),
+				'title'       => __( 'AI Powered Site and Starter Template', 'kadence-starter-templates' ),
 				'description' => __( 'Get started with your new site by setting up key information and importing a starter site.', 'kadence-starter-templates' ),
 				'slug'        => 'ai-starter-site',
 				'tasks'       => [
 					[
 						'title'       => __( 'Activate Kadence AI', 'kadence-starter-templates' ),
-						'description' => __( 'Connect Kadence AI to your site by clicking the button below.', 'kadence-starter-templates' ),
+						'description' => __( 'Connect Kadence AI to your site by clicking the button below. This will allow you to import an AI Assisted Starter Template or use Kadence AI to generate custom content for your site.', 'kadence-starter-templates' ),
 						'button'      => ! $is_authorized ? __( 'Activate', 'kadence-starter-templates' ) : __( 'Connected', 'kadence-starter-templates' ),
 						'link'        => ! $is_authorized ? $auth_url : '',
 						'completed'   => $is_authorized ? true : false,
@@ -857,7 +913,7 @@ class Site_Assist_Dash {
 					],
 					[
 						'title'       => __( 'Set up Site AI Profile', 'kadence-starter-templates' ),
-						'description' => __( 'Set up your site AI profile to get started with your new site.', 'kadence-starter-templates' ),
+						'description' => __( 'Set up your site AI profile to get started with your new site. This will allow you to import an AI Assisted Starter Template or use Kadence AI to generate custom content for your site.', 'kadence-starter-templates' ),
 						'button'      => $has_ai_profile ? __( 'Edit', 'kadence-starter-templates' ) : __( 'Set Up', 'kadence-starter-templates' ),
 						'link'        => admin_url( 'admin.php?page=kadence-starter-templates&ai=wizard' ),
 						'completed'   => $has_ai_profile,
@@ -865,10 +921,10 @@ class Site_Assist_Dash {
 						'sameTab'     => true,
 					],
 					[
-						'title'       => __( 'Import AI Starter Site', 'kadence-starter-templates' ),
-						'description' => __( 'Import an AI Starter Site to get started with your new site.', 'kadence-starter-templates' ),
+						'title'       => __( 'Import an AI Powered Template or a Pre-Designed Template', 'kadence-starter-templates' ),
+						'description' => __( 'AI Powered Templates are less opinionated styles but already have content and images that match your brand making it easier to get started. Pre-Designed Templates are professionally designed templates that you can customize to your liking.', 'kadence-starter-templates' ),
 						'button'      => $has_previous ? __( 'Re-Import', 'kadence-starter-templates' ) : __( 'Import', 'kadence-starter-templates' ),
-						'link'        => admin_url( 'admin.php?page=kadence-starter-templates' ),
+						'link'        => admin_url( 'admin.php?page=kadence-starter-templates&choose=force' ),
 						'completed'   => $has_previous,
 						'sameTab'     => true,
 						'requires'    => $has_ai_profile ? false : true,
@@ -931,6 +987,17 @@ class Site_Assist_Dash {
 						'link'        => admin_url( 'options-general.php' ),
 						'manual'      => 'timezone',
 						'completed'   => ! empty( $site_assist_data['timezone'] ) || $timesone_set ? true : false,
+						'sameTab'     => true,
+					],
+					[
+						'title'       => __( 'Set your display name', 'kadence-starter-templates' ),
+						'subtitle'    => $display_name,
+						'image'       => KADENCE_STARTER_TEMPLATES_URL . 'assets/images/tasks/display-name.jpg',
+						'description' => __( 'Set your display name so that it appears correctly on your site for authored posts and comments.', 'kadence-starter-templates' ),
+						'button'      => __( 'Edit', 'kadence-starter-templates' ),
+						'link'        => admin_url( 'profile.php' ),
+						'manual'      => 'display_name',
+						'completed'   => $display_name !== $username ? true : false,
 						'sameTab'     => true,
 					],
 					[
@@ -1025,6 +1092,9 @@ class Site_Assist_Dash {
 		}
 		if ( !empty ( $donation_data ) ) {
 			$return_data[] = $donation_data;
+		}
+		if ( !empty ( $learndash_data ) ) {
+			$return_data[] = $learndash_data;
 		}
 		if ( class_exists( '\StellarWP\StellarSites\Plugin' ) ) {
 			$return_data[] = [

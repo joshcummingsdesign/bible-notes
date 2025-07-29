@@ -18,10 +18,8 @@ final class DefaultFileNameSanitizer implements Sanitizer
 {
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\Symfony\Component\String\Slugger\SluggerInterface
 	 */
-	private $slugger;
+	private SluggerInterface $slugger;
 	public function __construct(SluggerInterface $slugger) {
 		$this->slugger = $slugger;
 	}

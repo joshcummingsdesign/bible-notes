@@ -22,15 +22,18 @@ function wpcode_maybe_enable_safe_mode() {
 		return;
 	}
 
-	// If we're in safe mode, let's make sure all URLs keep the param until we are safe to get out.
-	add_filter( 'home_url', 'wpcode_keep_safe_mode' );
-	add_filter( 'admin_url', 'wpcode_keep_safe_mode' );
-	add_filter( 'site_url', 'wpcode_keep_safe_mode_login', 10, 3 );
-	// The admin menu doesn't offer a hook to change all the menu links so we do it with JS.
-	add_action( 'admin_footer', 'wpcode_keep_safe_mode_admin_menu' );
-	// Show a notice informing the user we're in safe mode and offer a way to get out.
-	add_action( 'admin_notices', 'wpcode_safe_mode_notice' );
-	add_action( 'wpcode_admin_notices', 'wpcode_safe_mode_notice' );
+	// Only modify URLs if the user is on the login page or has the capability to manage snippets.
+	if ( wpcode_is_wplogin() || current_user_can( 'wpcode_activate_snippets' ) ) {
+		// If we're in safe mode, let's make sure all URLs keep the param until we are safe to get out.
+		add_filter( 'home_url', 'wpcode_keep_safe_mode' );
+		add_filter( 'admin_url', 'wpcode_keep_safe_mode' );
+		add_filter( 'site_url', 'wpcode_keep_safe_mode_login', 10, 3 );
+		// The admin menu doesn't offer a hook to change all the menu links so we do it with JS.
+		add_action( 'admin_footer', 'wpcode_keep_safe_mode_admin_menu' );
+		// Show a notice informing the user we're in safe mode and offer a way to get out.
+		add_action( 'admin_notices', 'wpcode_safe_mode_notice' );
+		add_action( 'wpcode_admin_notices', 'wpcode_safe_mode_notice' );
+	}
 }
 
 /**

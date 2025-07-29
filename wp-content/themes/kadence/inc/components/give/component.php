@@ -202,7 +202,8 @@ class Component implements Component_Interface {
 			$args['display'] = 'swap';
 		}
 		$google_fonts_url = add_query_arg( apply_filters( 'kadence_theme_givewp_google_fonts_query_args', $args ), 'https://fonts.googleapis.com/css' );
-		if ( ! empty( $google_fonts_url ) ) {
+		// Check if give-sequoia-template-css is enqueued
+		if ( ! empty( $google_fonts_url ) && wp_style_is( 'give-sequoia-template-css', 'enqueued' ) ) {
 			if ( kadence()->option( 'load_fonts_local' ) ) {
 				if ( kadence()->option( 'preload_fonts_local' ) && apply_filters( 'kadence_local_fonts_preload', true ) ) {
 					print_webfont_preload( $google_fonts_url );

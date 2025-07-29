@@ -30,7 +30,8 @@ class WP_Optimize_Utils {
 	 * @return string The generated log file name.
 	 */
 	public static function get_log_file_name($prefix) {
-		return $prefix . '-' . substr(md5(wp_salt()), 0, 20) . '.log';
+		$secret = defined('AUTH_KEY') ? AUTH_KEY : 'WP_Optimize';
+		return $prefix . '-' . substr(md5($secret), 0, 20) . '.log';
 	}
 
 	/**

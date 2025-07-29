@@ -186,6 +186,9 @@ class Starter_Templates {
 			add_action( 'wp_ajax_kadence_import_subscribe', array( $this, 'subscribe_ajax_callback' ) );
 			add_action( 'wp_ajax_kadence_check_plugin_data', array( $this, 'check_plugin_data_ajax_callback' ) );
 			add_action( 'wp_ajax_kadence_starter_dismiss_notice', array( $this, 'ajax_dismiss_starter_notice' ) );
+			
+			// Admin notices.
+			add_action( 'admin_notices', array( $this, 'xmlreader_extension_notice' ) );
 		}
 
 		add_action( 'init', array( $this, 'setup_plugin_with_filter_data' ) );
@@ -318,6 +321,7 @@ class Starter_Templates {
 	 * @param array $selected_import the selected import.
 	 */
 	public function kadence_kadence_theme_after_import( $selected_import, $selected_palette, $selected_font ) {
+
 		if ( class_exists( 'woocommerce' ) && isset( $selected_import['ecommerce'] ) && $selected_import['ecommerce'] ) {
 			$this->import_demo_woocommerce();
 		}
@@ -663,8 +667,6 @@ class Starter_Templates {
 		delete_option( '_wc_needs_pages' );
 		delete_transient( '_wc_activation_redirect' );
 
-		// Flush rules after install.
-		flush_rewrite_rules();
 	}
 	/**
 	 * Throw error on object clone.
@@ -819,14 +821,18 @@ class Starter_Templates {
 	 *
 	 * @return array{key: string, email: string}
 	 */
-	public function get_current_license_data(): array {
-
-		$license_data = array(
-			'ktp_api_key'   => $this->get_current_license_key(),
-			'activation_email' => $this->get_current_license_email(),
+	public function get_current_scripts_license_data(): array {
+		$license_data = kadence_starter_templates_get_license_data();
+		$scripts_data = array(
+			'ktp_api_key'   => $license_data['api_key'],
+			'activation_email' => $license_data['api_email'],
 		);
+		if ( empty( $scripts_data['activation_email'] ) ) {
+			$current_user = wp_get_current_user();
+			$scripts_data['activation_email'] = $current_user->user_email;
+		}
 
-		return $license_data;
+		return $scripts_data;
 	}
 	/**
 	 * Get the current license key for the plugin.
@@ -835,34 +841,11 @@ class Starter_Templates {
 	 */
 	public function get_current_license_key() {
 
-		if ( function_exists( 'kadence_blocks_get_current_license_data' ) ) {
-			$data = kadence_blocks_get_current_license_data();
-			if ( ! empty( $data['key'] ) ) {
-				return $data['key'];
-			}
-		} else {
-			$key = get_license_key( 'kadence-starter-templates' );
-			if ( ! empty( $key ) ) {
-				return $key;
-			}
+		$license_data = kadence_starter_templates_get_license_data();
+		if ( ! empty( $license_data['api_key'] ) ) {
+			return $license_data['api_key'];
 		}
 		return '';
-	}
-	/**
-	 * Get the current license email for the plugin.
-	 *
-	 * @return string 
-	 */
-	public function get_current_license_email() {
-
-		if ( function_exists( 'kadence_blocks_get_current_license_data' ) ) {
-			$data = kadence_blocks_get_current_license_data();
-			if ( ! empty( $data['email'] ) ) {
-				return $data['email'];
-			}
-		}
-		$current_user = wp_get_current_user();
-		return $current_user->user_email;
 	}
 
 	/**
@@ -936,12 +919,6 @@ class Starter_Templates {
 				'title' => 'LearnDash',
 				'description' => __( 'LearnDash is a learning management system (LMS) plugin for WordPress.', 'kadence-starter-templates' ),
 				'state' => Plugin_Check::active_check( 'sfwd-lms/sfwd_lms.php' ),
-				'src'   => 'thirdparty',
-			),
-			'learndash-course-grid' => array(
-				'title' => 'LearnDash Course Grid Addon',
-				'description' => __( 'Add a course grid to any page or post.', 'kadence-starter-templates' ),
-				'state' => Plugin_Check::active_check( 'learndash-course-grid/learndash_course_grid.php' ),
 				'src'   => 'thirdparty',
 			),
 			'lifterlms' => array(
@@ -1227,7 +1204,7 @@ class Starter_Templates {
 			// Check for multiple images.
 			$has_content = ( 0 < wp_count_posts( 'attachment' )->inherit ? true : false );
 		}
-		$pro_data = $this->get_current_license_data();
+		$pro_data = $this->get_current_scripts_license_data();
 		$current_user     = wp_get_current_user();
 		$user_email       = $current_user->user_email;
 		$show_builder_choice = ( 'active' === $plugins['elementor']['state'] ? true : false );
@@ -1280,7 +1257,9 @@ class Starter_Templates {
 				'isNetworkAdmin'      => $is_network_admin,
 				'isNetworkEnabled'    => $using_network_enabled,
 				'blocksActive'        => class_exists( '\KadenceWP\KadenceBlocks\App' ) ? true : false,
+				'hasElementor'        => class_exists( '\Elementor\Plugin' ) ? true : false,
 				'bannerImage'         => KADENCE_STARTER_TEMPLATES_URL . 'assets/images/kadence-ai-starter-templates.jpg',
+				'imageURL'            => KADENCE_STARTER_TEMPLATES_URL . 'assets/images/',
 			)
 		);
 	}
@@ -1410,121 +1389,93 @@ class Starter_Templates {
 				),
 				'wpzoom-recipe-card' => array(
 					'title' => 'Recipe Card Blocks by WPZOOM',
-					'base'  => 'recipe-card-blocks-by-wpzoom',
-					'slug'  => 'wpzoom-recipe-card',
-					'path'  => 'recipe-card-blocks-by-wpzoom/wpzoom-recipe-card.php',
-					'src'   => 'repo',
-				),
-				'recipe-card-blocks-by-wpzoom' => array(
-					'title' => 'Recipe Card Blocks by WPZOOM',
-					'base'  => 'recipe-card-blocks-by-wpzoom',
-					'slug'  => 'wpzoom-recipe-card',
-					'path'  => 'recipe-card-blocks-by-wpzoom/wpzoom-recipe-card.php',
+					'state' => Plugin_Check::active_check( 'recipe-card-blocks-by-wpzoom/wpzoom-recipe-card.php' ),
 					'src'   => 'repo',
 				),
 				'learndash' => array(
 					'title' => 'LearnDash',
-					'base'  => 'sfwd-lms',
-					'slug'  => 'sfwd_lms',
-					'path'  => 'sfwd-lms/sfwd_lms.php',
-					'src'   => 'thirdparty',
-				),
-				'learndash-course-grid' => array(
-					'title' => 'LearnDash Course Grid Addon',
-					'base'  => 'learndash-course-grid',
-					'slug'  => 'learndash_course_grid',
-					'path'  => 'learndash-course-grid/learndash_course_grid.php',
-					'src'   => 'thirdparty',
-				),
-				'sfwd-lms' => array(
-					'title' => 'LearnDash',
-					'base'  => 'sfwd-lms',
-					'slug'  => 'sfwd_lms',
-					'path'  => 'sfwd-lms/sfwd_lms.php',
+					'description' => __( 'LearnDash is a learning management system (LMS) plugin for WordPress.', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'sfwd-lms/sfwd_lms.php' ),
 					'src'   => 'thirdparty',
 				),
 				'lifterlms' => array(
 					'title' => 'LifterLMS',
-					'base'  => 'lifterlms',
-					'slug'  => 'lifterlms',
-					'path'  => 'lifterlms/lifterlms.php',
+					'state' => Plugin_Check::active_check( 'lifterlms/lifterlms.php' ),
 					'src'   => 'repo',
 				),
 				'tutor' => array(
 					'title' => 'Tutor LMS',
-					'base'  => 'tutor',
-					'slug'  => 'tutor',
-					'path'  => 'tutor/tutor.php',
+					'state' => Plugin_Check::active_check( 'tutor/tutor.php' ),
 					'src'   => 'repo',
 				),
 				'give' => array(
 					'title' => 'GiveWP',
-					'base'  => 'give',
-					'slug'  => 'give',
-					'path'  => 'give/give.php',
+					'description' => __( 'GiveWP is the perfect online fundraising platform to increase your online donations.', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'give/give.php' ),
 					'src'   => 'repo',
 				),
 				'the-events-calendar' => array(
 					'title' => 'The Events Calendar',
-					'base'  => 'the-events-calendar',
-					'slug'  => 'the-events-calendar',
-					'path'  => 'the-events-calendar/the-events-calendar.php',
+					'description' => __( 'The Events Calendar is a carefully crafted, extensible plugin that lets you easily manage and share events.', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'the-events-calendar/the-events-calendar.php' ),
 					'src'   => 'repo',
 				),
 				'event-tickets' => array(
 					'title' => 'Event Tickets',
-					'base'  => 'event-tickets',
-					'slug'  => 'event-tickets',
-					'path'  => 'event-tickets/event-tickets.php',
+					'description' => __( 'Event Tickets provides a simple way for visitors to RSVP or purchase tickets to your events.', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'event-tickets/event-tickets.php' ),
 					'src'   => 'repo',
 				),
 				'orderable' => array(
 					'title' => 'Orderable',
-					'base'  => 'orderable',
-					'slug'  => 'orderable',
-					'path'  => 'orderable/orderable.php',
+					'description' => __( 'Take restaurant orders online with Orderable. The WooCommerce plugin designed to help you manage your restaurant, your way – with no added fees!', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'orderable/orderable.php' ),
 					'src'   => 'repo',
 				),
 				'restrict-content' => array(
 					'title' => 'Restrict Content',
-					'base'  => 'restrict-content',
-					'slug'  => 'restrictcontent',
-					'path'  => 'restrict-content/restrictcontent.php',
-					'src'   => 'repo',
-				),
-				'kadence-woo-extras' => array(
-					'title' => 'Kadence Shop Kit',
-					'base'  => 'kadence-woo-extras',
-					'slug'  => 'kadence-woo-extras',
-					'path'  => 'kadence-woo-extras/kadence-woo-extras.php',
-					'src'   => 'bundle',
-				),
-				'depicter' => array(
-					'title' => 'Depicter Slider',
-					'base'  => 'depicter',
-					'slug'  => 'depicter',
-					'path'  => 'depicter/depicter.php',
+					'state' => Plugin_Check::active_check( 'restrict-content/restrictcontent.php' ),
 					'src'   => 'repo',
 				),
 				'bookit' => array(
 					'title' => 'Bookit',
-					'base'  => 'bookit',
-					'slug'  => 'bookit',
-					'path'  => 'bookit/bookit.php',
+					'description' => __( 'Bookit is a booking system for WordPress.', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'bookit/bookit.php' ),
+					'src'   => 'repo',
+				),
+				'kadence-woo-extras' => array(
+					'title' => 'Kadence Shop Kit',
+					'description' => __( 'Kadence Shop Kit adds additional features to WooCommerce.', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'kadence-woo-extras/kadence-woo-extras.php' ),
+					'src'   => 'bundle',
+				),
+				'kadence-woocommerce-email-designer' => array(
+					'title' => 'Kadence WooCommerce Email Designer',
+					'description' => __( 'Kadence WooCommerce Email Designer lets you customize the default WooCommerce emails.', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'kadence-woocommerce-email-designer/kadence-woocommerce-email-designer.php' ),
+					'src'   => 'repo',
+				),
+				'depicter' => array(
+					'title' => 'Depicter Slider',
+					'state' => Plugin_Check::active_check( 'depicter/depicter.php' ),
 					'src'   => 'repo',
 				),
 				'seriously-simple-podcasting' => array(
 					'title' => 'Seriously Simple Podcasting',
-					'base'  => 'seriously-simple-podcasting',
-					'slug'  => 'seriously-simple-podcasting',
-					'path'  => 'seriously-simple-podcasting/seriously-simple-podcasting.php',
+					'state' => Plugin_Check::active_check( 'seriously-simple-podcasting/seriously-simple-podcasting.php' ),
+					'src'   => 'repo',
+				),
+				'better-wp-security' => array(
+					'title' => 'Solid Security',
+					'description' => __( 'Security, Two Factor Authentication, and Brute Force Protection', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'better-wp-security/better-wp-security.php' ),
 					'src'   => 'repo',
 				),
 				'solid-performance' => array(
 					'title' => 'Solid Performance',
-					'base'  => 'solid-performance',
-					'slug'  => 'solid-performance',
-					'path'  => 'solid-performance/solid-performance.php',
+					'description' => __( 'Solid Performance is a plugin that adds page caching, lazy loading, and more.', 'kadence-starter-templates' ),
+					'state' => Plugin_Check::active_check( 'solid-performance/solid-performance.php' ),
+					'src'   => 'repo',
 				),
 			);
 			$plugin_information = array();
@@ -1725,13 +1676,6 @@ class Starter_Templates {
 					'base'  => 'sfwd-lms',
 					'slug'  => 'sfwd_lms',
 					'path'  => 'sfwd-lms/sfwd_lms.php',
-					'src'   => 'thirdparty',
-				),
-				'learndash-course-grid' => array(
-					'title' => 'LearnDash Course Grid Addon',
-					'base'  => 'learndash-course-grid',
-					'slug'  => 'learndash_course_grid',
-					'path'  => 'learndash-course-grid/learndash_course_grid.php',
 					'src'   => 'thirdparty',
 				),
 				'lifterlms' => array(
@@ -2538,7 +2482,6 @@ class Starter_Templates {
 		Helpers::set_import_data_transient( $this->get_current_importer_data() );
 		if ( ! $this->before_import_executed ) {
 			$this->before_import_executed = true;
-
 			/**
 			 * Save Current Theme mods for a potential undo.
 			 */
@@ -2826,6 +2769,10 @@ class Starter_Templates {
 		// Delete importer data transient for current import.
 		delete_transient( 'kadence_importer_data' );
 
+		update_option( 'permalink_structure', '/%postname%/' );
+
+		flush_rewrite_rules();
+
 		// Display final messages (success or error messages).
 		if ( empty( $this->frontend_error_messages ) && ! empty( $extra ) ) {
 			$response['message'] = '';
@@ -3050,6 +2997,16 @@ class Starter_Templates {
 			}
 		}
 		return $forward;
+	}
+
+	/**
+	 * Display XMLReader extension notice.
+	 */
+	public function xmlreader_extension_notice() {
+		// Check if XMLReader class is available
+		if ( ! class_exists( 'XMLReader' ) ) {
+			echo '<div class="notice notice-warning"><p>' . esc_html__( 'The XMLReader extension is not enabled on your server. This extension is required for the Kadence Starter Templates plugin to function properly. Please contact your hosting provider to enable the XMLReader extension.', 'kadence-starter-templates' ) . '</p></div>';
+		}
 	}
 }
 Starter_Templates::get_instance();

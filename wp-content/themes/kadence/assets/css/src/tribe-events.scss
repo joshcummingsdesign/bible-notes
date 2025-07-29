@@ -6,6 +6,9 @@
 .tribe-common--breakpoint-medium.tribe-events .tribe-events-c-view-selector--labels .tribe-events-c-view-selector__content {
     word-break: normal;
 }
+.tribe-filter-bar button {
+	box-shadow: none;
+}
 #primary {
 	.tribe-common {
 		--tec-color-text-primary: var(--global-palette3);

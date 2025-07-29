@@ -13,10 +13,7 @@ use KadenceWP\KadenceBlocks\StellarWP\ProphecyMonorepo\ImageDownloader\Models\Re
 
 final class FileNameProcessor
 {
-	/**
-	 * @var mixed[]
-	 */
-	private $allowed_extensions;
+	private array $allowed_extensions;
 
 	public const SCALED_SIZE = 'scaled';
 

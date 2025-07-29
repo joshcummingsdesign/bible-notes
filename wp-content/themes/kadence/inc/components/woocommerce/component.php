@@ -178,6 +178,8 @@ class Component implements Component_Interface {
 
 		// Add Store Notice Body Class.
 		add_filter( 'body_class', array( $this, 'woo_extra_body_classes' ) );
+		// Handle store notice placement.
+		add_action( 'plugins_loaded', array( $this, 'handle_store_notice_placement' ), 1 );
 		// Filter product blocks grid html.
 		add_filter( 'woocommerce_blocks_product_grid_item_html', array( $this, 'custom_block_html' ), 2, 3 );
 		// Change related products columns.
@@ -779,6 +781,30 @@ class Component implements Component_Interface {
 	}
 
 	/**
+	 * Handle store notice placement.
+	 */
+	public function handle_store_notice_placement() {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return;
+		}
+		
+		// Always remove the default WooCommerce store notice from wp_footer first
+		remove_action( 'wp_footer', 'woocommerce_demo_store', 10 );
+		
+		if ( is_store_notice_showing() ) {
+			$placement = kadence()->option( 'woo_store_notice_placement' );
+			if ( 'above' === $placement ) {
+				if ( kadence()->option( 'woo_store_notice_hide_dismiss' ) ) {
+					add_filter( 'woocommerce_demo_store', array( $this, 'woocommerce_demo_store_remove_dismiss' ), 15, 2 );
+				}
+				add_action( 'kadence_before_header', 'woocommerce_demo_store', 10 );
+			} else {
+				// For other placements, add back to wp_footer
+				add_action( 'wp_footer', 'woocommerce_demo_store', 10 );
+			}
+		}
+	}
+	/**
 	 * Adds custom classes to body tab related to woocommerce.
 	 *
 	 * @param array $classes Classes for the body element.
@@ -789,13 +815,6 @@ class Component implements Component_Interface {
 		if ( is_store_notice_showing() ) {
 			$placement = kadence()->option( 'woo_store_notice_placement' );
 			$classes[] = esc_attr( 'kadence-store-notice-placement-' . $placement );
-			if ( 'above' === $placement ) {
-				if ( kadence()->option( 'woo_store_notice_hide_dismiss' ) ) {
-					add_filter( 'woocommerce_demo_store', array( $this, 'woocommerce_demo_store_remove_dismiss' ), 15, 2 );
-				}
-				remove_action( 'wp_footer', 'woocommerce_demo_store' );
-				add_action( 'kadence_before_header', 'woocommerce_demo_store' );
-			}
 		}
 		if ( is_archive() && is_tax() ) {
 			$slug = ( is_search() && ! is_post_type_archive( 'product' ) ? 'search' : get_post_type() );

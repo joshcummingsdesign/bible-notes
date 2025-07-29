@@ -25,5 +25,5 @@ interface ReinitializableBuilderInterface
      *
      * @return void This method does not return any value.
      */
-    public function reinit(array $afterBuildMethods = null, ...$buildArgs);
+    public function reinit(?array $afterBuildMethods = null, ...$buildArgs);
 }

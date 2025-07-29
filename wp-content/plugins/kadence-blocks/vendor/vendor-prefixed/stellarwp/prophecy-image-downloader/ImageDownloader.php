@@ -21,52 +21,38 @@ final class ImageDownloader
 {
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\Symfony\Contracts\HttpClient\HttpClientInterface
 	 */
-	private $client;
+	private HttpClientInterface $client;
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\Symfony\Component\Filesystem\Filesystem
 	 */
-	private $filesystem;
+	private Filesystem $filesystem;
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\Psr\Log\LoggerInterface
 	 */
-	private $logger;
+	private LoggerInterface $logger;
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\StellarWP\ProphecyMonorepo\ImageDownloader\FileNameProcessor
 	 */
-	private $file;
+	private FileNameProcessor $file;
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\StellarWP\ProphecyMonorepo\ImageDownloader\Sanitization\FileNameSanitizer
 	 */
-	private $sanitizer;
+	private FileNameSanitizer $sanitizer;
 	/**
 	 * @readonly
-	 *
-	 * @var int
 	 */
-	private $batch_size;
+	private int $batch_size;
 	/**
 	 * @readonly
-	 *
-	 * @var bool
 	 */
-	private $seo_names = true;
+	private bool $seo_names = true;
 	/**
 	 * @var string[]
 	 *
 	 * @readonly
 	 */
-	private $allowed_mime_types = [
+	private array $allowed_mime_types = [
 		'image/jpeg',
 		'image/gif',
 		'image/webp',
@@ -77,7 +63,7 @@ final class ImageDownloader
 	 *
 	 * @readonly
 	 */
-	private $allowed_hosts = [
+	private array $allowed_hosts = [
 		'images.pexels.com',
 	];
 	/**
@@ -85,14 +71,14 @@ final class ImageDownloader
 	 *
 	 * @var array<int, array<string, DownloadedImage>>
 	 */
-	private $collected = [];
+	private array $collected = [];
 
 	/**
 	 * A collection of nested exceptions.
 	 *
 	 * @var ImageDownloadException[]
 	 */
-	private $errors = [];
+	private array $errors = [];
 
 	/**
 	 * @param string[] $allowed_mime_types The image mime types we allow to download.
@@ -252,7 +238,17 @@ final class ImageDownloader
 				continue;
 			}
 
-			$this->collected[$response->key][$response->size] = new DownloadedImage($response->id, $response->width, $response->height, $save_path, $response->size, $response->alt, $response->url, $response->photographer, $response->photographer_url);
+			$this->collected[$response->key][$response->size] = new DownloadedImage(
+				$response->id,
+				$response->width,
+				$response->height,
+				$save_path,
+				$response->size,
+				$response->alt,
+				$response->url,
+				$response->photographer,
+				$response->photographer_url,
+			);
 		}
 	}
 }

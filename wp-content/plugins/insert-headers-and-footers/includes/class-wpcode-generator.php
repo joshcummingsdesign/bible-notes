@@ -51,6 +51,28 @@ class WPCode_Generator {
 		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-sidebar.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-query.php';
 		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-widget.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-base.php';
+
+		// Schema generators.
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-article.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-book.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-car.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-course.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-dataset.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-event.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-faq.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-fact-check.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-how-to.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-job-posting.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-movie.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-music.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-person.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-product.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-product-review.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-recipe.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-service.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-software.php';
+		require_once WPCODE_PLUGIN_PATH . 'includes/generator/class-wpcode-generator-schema-video.php';
 
 		$generators = array(
 			'WPCode_Generator_Admin_Bar',
@@ -66,7 +88,29 @@ class WPCode_Generator {
 			'WPCode_Generator_Taxonomy',
 			'WPCode_Generator_Widget',
 			'WPCode_Generator_Query',
+			'WPCode_Generator_Schema',
+			// Schema generators.
+			'WPCode_Generator_Schema_Article',
+			'WPCode_Generator_Schema_Book',
+			'WPCode_Generator_Schema_Car',
+			'WPCode_Generator_Schema_Course',
+			'WPCode_Generator_Schema_Dataset',
+			'WPCode_Generator_Schema_Event',
+			'WPCode_Generator_Schema_FAQ',
+			'WPCode_Generator_Schema_Fact_Check',
+			'WPCode_Generator_Schema_How_To',
+			'WPCode_Generator_Schema_Job_Posting',
+			'WPCode_Generator_Schema_Movie',
+			'WPCode_Generator_Schema_Music',
+			'WPCode_Generator_Schema_Person',
+			'WPCode_Generator_Schema_Product',
+			'WPCode_Generator_Schema_Product_Review',
+			'WPCode_Generator_Schema_Recipe',
+			'WPCode_Generator_Schema_Service',
+			'WPCode_Generator_Schema_Software',
+			'WPCode_Generator_Schema_Video',
 		);
+
 		foreach ( $generators as $generator_class ) {
 			if ( ! class_exists( $generator_class ) ) {
 				continue;
@@ -78,7 +122,7 @@ class WPCode_Generator {
 		// Sort by displayed title.
 		uasort(
 			$this->types,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				return strcmp( $a->title, $b->title );
 			}
 		);
@@ -96,6 +140,7 @@ class WPCode_Generator {
 			'core'    => __( 'Core', 'insert-headers-and-footers' ),
 			'design'  => __( 'Design', 'insert-headers-and-footers' ),
 			'query'   => __( 'Query', 'insert-headers-and-footers' ),
+			'schema'  => __( 'Schema', 'insert-headers-and-footers' ),
 		);
 		$this->categories = array();
 		foreach ( $categories as $slug => $name ) {

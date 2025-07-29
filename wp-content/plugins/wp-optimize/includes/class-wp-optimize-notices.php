@@ -138,7 +138,7 @@ class WP_Optimize_Notices extends Updraft_Notices_1_2 {
 				// translators: %1$s is a link to Black Friday sale page, %2$s is Black Friday sale discount code
 				'text' => $sale_description . '<br>' . sprintf('<a class="updraft_notice_link" href="%1$s" target="_blank">%2$s</a>', 'http://getwpo.com/blackfriday', sprintf(__('Save 20%% with code %s', 'wp-optimize'), '<b>blackfridaysale2024</b>'))  . ' ' . __('Hurry, offer ends on 2 December.', 'wp-optimize'),
 				'image' => 'notices/sale_20.png',
-				'button_link' => 'https://getwpo.com/blackfriday',
+				'button_link' => 'https://teamupdraft.com/wp-optimize/blackfriday/',
 				'button_meta' => 'collection',
 				'dismiss_time' => 'dismiss_season',
 				// 'discount_code' => 'blackfridaysale2022',
@@ -153,7 +153,7 @@ class WP_Optimize_Notices extends Updraft_Notices_1_2 {
 				// translators: %1$s is New Year sale discount code, %2$s is a link to check out page
 				'text' => $sale_description . '<br>' . sprintf(__('Save 20%% with code %1$s at %2$s.', 'wp-optimize'), '<b>newyearsale2025</b>', $checkout_html) . ' ' . __('Hurry, offer ends 28 January.', 'wp-optimize'),
 				'image' => 'notices/sale_20.png',
-				'button_link' => 'https://getwpo.com',
+				'button_link' => 'https://teamupdraft.com/wp-optimize/',
 				// 'button_meta' => 'wp-optimize',
 				'dismiss_time' => 'dismiss_season',
 				// 'discount_code' => 'newyearsale2023',
@@ -168,7 +168,7 @@ class WP_Optimize_Notices extends Updraft_Notices_1_2 {
 				// translators: %1$s is Spring sale discount code, %2$s is a link to check out page
 				'text' => $sale_description . '<br>' . sprintf(__('Save 20%% off with code %1$s at %2$s.', 'wp-optimize'), '<b>springsale2024</b>', $checkout_html) . ' ' . __('Hurry, offer ends 31 May.', 'wp-optimize'),
 				'image' => 'notices/sale_20.png',
-				'button_link' => 'https://getwpo.com',
+				'button_link' => 'https://teamupdraft.com/wp-optimize/',
 				// 'button_meta' => 'wp-optimize',
 				'dismiss_time' => 'dismiss_season',
 				// 'discount_code' => 'springsale2022',
@@ -183,7 +183,7 @@ class WP_Optimize_Notices extends Updraft_Notices_1_2 {
 				// translators: %1$s is Summer sale discount code, %2$s is a link to check out page
 				'text' => $sale_description . '<br>' . sprintf(__('Save 20%% off with code %1$s at %2$s.', 'wp-optimize'), '<b>summersale2024</b>', $checkout_html) . ' ' . __('Hurry, offer ends 31 July.', 'wp-optimize'),
 				'image' => 'notices/sale_20.png',
-				'button_link' => 'https://getwpo.com',
+				'button_link' => 'https://teamupdraft.com/wp-optimize/',
 				// 'button_meta' => 'wp-optimize',
 				'dismiss_time' => 'dismiss_season',
 				// 'discount_code' => 'summersale2022',

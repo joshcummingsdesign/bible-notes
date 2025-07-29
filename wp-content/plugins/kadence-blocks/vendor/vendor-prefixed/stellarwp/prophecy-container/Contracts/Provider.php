@@ -18,22 +18,16 @@ abstract class Provider implements Providable
 {
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\StellarWP\ProphecyMonorepo\Container\Contracts\Container
 	 */
-	protected $container;
+	protected Container $container;
 	/**
 	 * @readonly
-	 *
-	 * @var \KadenceWP\KadenceBlocks\Adbar\Dot
 	 */
-	protected $config;
+	protected Dot $config;
 	/**
 	 * Whether this service provider will be a deferred one or not.
-	 *
-	 * @var bool
 	 */
-	protected $deferred = false;
+	protected bool $deferred = false;
 
 	public function __construct(Container $container, Dot $config) {
 		/** @var Container|ContainerAdapter $container */

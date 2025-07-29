@@ -2,10 +2,10 @@
 /**
  * Plugin Name: WPCode Lite
  * Plugin URI: https://www.wpcode.com/
- * Version: 2.2.7
+ * Version: 2.2.9
  * Requires at least: 4.6
  * Requires PHP: 5.5
- * Tested up to: 6.7
+ * Tested up to: 6.8
  * Author: WPCode
  * Author URI: https://www.wpcode.com/
  * Description: Easily add code snippets in WordPress. Insert scripts to the header and footer, add PHP code snippets with conditional logic, insert ads pixel, custom content, and more.
@@ -383,8 +383,6 @@ class WPCode {
 			require_once WPCODE_PLUGIN_PATH . 'includes/admin/class-wpcode-docs.php';
 			// Notifications class.
 			require_once WPCODE_PLUGIN_PATH . 'includes/admin/class-wpcode-notifications.php';
-			// Upgrade page.
-			require_once WPCODE_PLUGIN_PATH . 'includes/admin/class-wpcode-upgrade-welcome.php';
 			// Metabox class.
 			require_once WPCODE_PLUGIN_PATH . 'includes/admin/class-wpcode-metabox-snippets.php';
 			// Metabox class.
